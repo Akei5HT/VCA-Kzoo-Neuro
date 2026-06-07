@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neuro SOAP Generator — BVNS</title>
+<style>
+:root {
+  --primary: #2c5f8a; --accent: #4a9fd4; --bg: #f5f7fa;
+  --surface: #ffffff; --border: #d1d9e0; --text: #1a2332;
+  --muted: #6b7c93; --green: #27ae60; --red: #e74c3c;
+  --orange: #e67e22; --section-bg: #eef2f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--primary); color: white; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { font-size: 1rem; font-weight: 600; }
+header span { font-size: 0.8rem; opacity: 0.7; }
+.container { max-width: 880px; margin: 24px auto; padding: 0 16px 60px; }
+
+/* Progress */
+.progress { display: flex; margin-bottom: 26px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.ps { flex: 1; padding: 9px 4px; text-align: center; font-size: 0.72rem; font-weight: 600; background: var(--surface); color: var(--muted); border-right: 1px solid var(--border); }
+.ps:last-child { border-right: none; }
+.ps.active { background: var(--primary); color: white; }
+.ps.done { background: var(--section-bg); color: var(--primary); }
+
+/* Cards */
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 18px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 10px 18px; font-weight: 600; font-size: 0.78rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; }
+.card-body { padding: 18px; }
+
+/* Fields */
+.field { margin-bottom: 13px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 5px; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 0.86rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 58px; }
+.row { display: grid; gap: 12px; }
+.r2 { grid-template-columns: 1fr 1fr; }
+.r3 { grid-template-columns: 1fr 1fr 1fr; }
+.r4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* Exam table */
+.xtable { width: 100%; border-collapse: collapse; }
+.xtable th { background: var(--section-bg); font-size: 0.76rem; padding: 7px 10px; text-align: center; color: var(--primary); font-weight: 600; border: 1px solid var(--border); }
+.xtable th:first-child { text-align: left; width: 150px; }
+.xtable td { padding: 5px 7px; border: 1px solid var(--border); font-size: 0.8rem; vertical-align: middle; }
+.xtable td:first-child { font-weight: 500; color: var(--muted); }
+.xtable select { width: 100%; padding: 5px 6px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.78rem; }
+
+/* Grade badge */
+.grade-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+.g0 { background:#d5f5e3; color:#1e8449; } .g1 { background:#fef9e7; color:#b7770d; }
+.g2 { background:#fef3cd; color:#d68910; } .g3 { background:#fdebd0; color:#ca6f1e; }
+.g4 { background:#fadbd8; color:#cb4335; } .g5 { background:#f1948a; color:#7b241c; }
+
+/* Checkboxes */
+.checks { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.ci { display: flex; align-items: center; gap: 6px; font-size: 0.84rem; cursor: pointer; }
+.ci input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+
+/* Buttons */
+.btn { padding: 9px 20px; border: none; border-radius: 7px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-secondary { background: var(--section-bg); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-success { background: var(--green); color: white; }
+.btn-danger { background: var(--red); color: white; }
+.btn-ai { background: #6c3483; color: white; }
+.btn-ai:hover { background: #5b2c6f; }
+.btn-sm { padding: 6px 13px; font-size: 0.8rem; }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+.copy-ok { color: var(--green); font-size: 0.82rem; display: none; }
+
+/* Audio */
+.audio-zone { background: #f8f9fa; border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 14px; transition: all 0.2s; }
+.audio-zone.recording { border-color: var(--red); background: #fff5f5; }
+.rec-btn { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; font-size: 1.5rem; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.rec-btn.idle { background: var(--primary); color: white; }
+.rec-btn.active { background: var(--red); color: white; animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+.rec-status { font-size: 0.82rem; color: var(--muted); margin: 8px 0 4px; }
+.audio-note { font-size: 0.74rem; color: var(--muted); margin-top: 6px; }
+
+/* AI key input */
+.api-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+.api-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 0.84rem; font-family: monospace; }
+.ai-result { background: #f0f4ff; border: 1px solid #c5d5f5; border-radius: 8px; padding: 16px; margin-top: 12px; font-size: 0.87rem; line-height: 1.7; display: none; white-space: pre-wrap; }
+
+/* Output tabs */
+.tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 18px; }
+.tab-btn { padding: 9px 20px; cursor: pointer; font-size: 0.87rem; font-weight: 600; color: var(--muted); border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.output-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; font-family: Georgia, serif; font-size: 0.92rem; line-height: 1.8; white-space: pre-wrap; min-height: 200px; max-height: 520px; overflow-y: auto; }
+
+.step-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+.step-sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 20px; }
+.hidden { display: none !important; }
+
+@media(max-width:600px){ .r2,.r3,.r4{grid-template-columns:1fr} .ps{font-size:0.62rem;padding:7px 2px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1>Neuro SOAP Generator</h1><span>Exam · Assessment · Plan · Client Communication</span></div>
+  <span>VCA Kalamazoo — BVNS</span>
+</header>
+
+<div class="container">
+
+<div class="progress">
+  <div class="ps active" id="prog-1">1 · Patient</div>
+  <div class="ps" id="prog-2">2 · Exam</div>
+  <div class="ps" id="prog-3">3 · Assessment</div>
+  <div class="ps" id="prog-4">4 · Plan</div>
+  <div class="ps" id="prog-5">5 · Output</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STEP 1 — PATIENT
+══════════════════════════════════════════════ -->
+<div id="step1">
+  <div class="step-title">Patient Signalment</div>
+  <div class="step-sub">No patient name is recorded here — signalment and clinical data only.</div>
+  <div class="card"><div class="card-body">
+    <div class="row r3" style="margin-bottom:12px">
+      <div class="field"><label>Date</label><input type="date" id="pt_date"></div>
+      <div class="field"><label>Appointment type</label>
+        <select id="pt_appt">
+          <option value="New patient">New patient</option>
+          <option value="Recheck">Recheck</option>
+          <option value="Emergency">Emergency</option>
+          <option value="Teleconsult">Teleconsult</option>
+        </select>
+      </div>
+      <div class="field"><label>Species</label>
+        <select id="pt_species">
+          <option value="">—</option>
+          <option value="Canine">Canine</option>
+          <option value="Feline">Feline</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row r4">
+      <div class="field"><label>Breed</label><input type="text" id="pt_breed" placeholder="e.g., Dachshund"></div>
+      <div class="field"><label>Age</label><input type="text" id="pt_age" placeholder="e.g., 5y"></div>
+      <div class="field"><label>Sex</label>
+        <select id="pt_sex">
+          <option value="">—</option>
+          <option value="MI">MI</option><option value="MN">MN</option>
+          <option value="FI">FI</option><option value="FS">FS</option>
+        </select>
+      </div>
+      <div class="field"><label>Weight (kg)</label><input type="text" id="pt_weight" placeholder="e.g., 12.5"></div>
+    </div>
+  </div></div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="goStep(2)">Next → Exam</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STEP 2 — EXAM
+══════════════════════════════════════════════ -->
+<div id="step2" class="hidden">
+  <div class="step-title">Neurological Examination</div>
+  <div class="step-sub">Objective findings. Blank fields are omitted from the generated note.</div>
+
+  <!-- Mentation & Posture -->
+  <div class="card">
+    <div class="card-header">Mentation & Posture</div>
+    <div class="card-body">
+      <div class="row r2">
+        <div class="field"><label>Mentation</label>
+          <select id="ex_mentation">
+            <option value="">—</option>
+            <option>Alert and responsive</option>
+            <option>Mildly depressed / quiet</option>
+            <option>Depressed</option>
+            <option>Obtunded</option>
+            <option>Stuporous</option>
+            <option>Comatose</option>
+          </select>
+        </div>
+        <div class="field"><label>Posture</label>
+          <select id="ex_posture">
+            <option value="">—</option>
+            <option>Normal</option>
+            <option>Head tilt — left</option>
+            <option>Head tilt — right</option>
+            <option>Wide-based stance</option>
+            <option>Schiff-Sherrington posture</option>
+            <option>Decerebrate rigidity</option>
+            <option>Decerebellate rigidity</option>
+            <option>Pleurothotonus</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gait & Grade -->
+  <div class="card">
+    <div class="card-header">Gait & Spinal Cord Grade</div>
+    <div class="card-body">
+      <div class="row r2" style="margin-bottom:13px">
+        <div class="field"><label>Gait</label>
+          <select id="ex_gait">
+            <option value="">—</option>
+            <option>Normal</option>
+            <option>Mild ataxia</option>
+            <option>Moderate ataxia</option>
+            <option>Severe ataxia</option>
+            <option>Ambulatory paraparesis</option>
+            <option>Ambulatory tetraparesis</option>
+            <option>Non-ambulatory paraparesis</option>
+            <option>Non-ambulatory tetraparesis</option>
+            <option>Paraplegia</option>
+            <option>Tetraplegia</option>
+            <option>Unable to assess</option>
+          </select>
+        </div>
+        <div class="field"><label>Limbs affected</label>
+          <select id="ex_limbs">
+            <option value="">—</option>
+            <option>All four limbs</option>
+            <option>Hindlimbs only</option>
+            <option>Forelimbs only</option>
+            <option>Right limbs</option>
+            <option>Left limbs</option>
+            <option>Single limb (specify in notes)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Spinal cord grade <span id="grade-badge" class="grade-badge hidden"></span></label>
+        <select id="ex_grade" onchange="updateGrade()">
+          <option value="">— select if applicable —</option>
+          <option value="0">Grade 0 — Normal neurological function</option>
+          <option value="1">Grade 1 — Pain / hyperesthesia only, normal gait</option>
+          <option value="2">Grade 2 — Ambulatory paraparesis / ataxia</option>
+          <option value="3">Grade 3 — Non-ambulatory paraparesis</option>
+          <option value="4">Grade 4 — Paraplegia, deep pain present</option>
+          <option value="5">Grade 5 — Paraplegia, deep pain absent</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Postural Reactions -->
+  <div class="card">
+    <div class="card-header">Postural Reactions</div>
+    <div class="card-body">
+      <table class="xtable">
+        <thead><tr><th>Test</th><th>LF</th><th>RF</th><th>LH</th><th>RH</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Hopping / proprioception</td>
+            <td><select id="pr_lf"><option value="">—</option><option>Normal</option><option>Delayed</option><option>Absent</option><option>NT</option></select></td>
+            <td><select id="pr_rf"><option value="">—</option><option>Normal</option><option>Delayed</option><option>Absent</option><option>NT</option></select></td>
+            <td><select id="pr_lh"><option value="">—</option><option>Normal</option><option>Delayed</option><option>Absent</option><option>NT</option></select></td>
+            <td><select id="pr_rh"><option value="">—</option><option>Normal</option><option>Delayed</option><option>Absent</option><option>NT</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Spinal Reflexes -->
+  <div class="card">
+    <div class="card-header">Spinal Reflexes</div>
+    <div class="card-body">
+      <table class="xtable" style="margin-bottom:10px">
+        <thead><tr><th>Reflex</th><th>Left</th><th>Right</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Patellar (HL)</td>
+            <td><select id="ref_pat_l"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Exaggerated</option><option>Clonus</option></select></td>
+            <td><select id="ref_pat_r"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Exaggerated</option><option>Clonus</option></select></td>
+          </tr>
+          <tr>
+            <td>Withdrawal (HL)</td>
+            <td><select id="ref_wd_hl_l"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option></select></td>
+            <td><select id="ref_wd_hl_r"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option></select></td>
+          </tr>
+          <tr>
+            <td>Withdrawal (FL)</td>
+            <td><select id="ref_wd_fl_l"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option></select></td>
+            <td><select id="ref_wd_fl_r"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option></select></td>
+          </tr>
+          <tr>
+            <td>Biceps (FL)</td>
+            <td><select id="ref_bic_l"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Exaggerated</option></select></td>
+            <td><select id="ref_bic_r"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Exaggerated</option></select></td>
+          </tr>
+          <tr>
+            <td>Triceps (FL)</td>
+            <td><select id="ref_tri_l"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Exaggerated</option></select></td>
+            <td><select id="ref_tri_r"><option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Exaggerated</option></select></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="row r2">
+        <div class="field"><label>Perineal reflex</label>
+          <select id="ref_perineal">
+            <option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option>
+          </select>
+        </div>
+        <div class="field"><label>Cutaneous trunci</label>
+          <select id="ref_ct">
+            <option value="">—</option>
+            <option>Intact bilaterally</option>
+            <option>Absent left side</option>
+            <option>Absent right side</option>
+            <option>Absent bilaterally</option>
+            <option>Cutoff at (specify in notes)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cranial Nerves -->
+  <div class="card">
+    <div class="card-header">Cranial Nerves</div>
+    <div class="card-body">
+      <div class="row r2" style="margin-bottom:12px">
+        <div class="field"><label>Overall cranial nerves</label>
+          <select id="cn_overall" onchange="toggleCNDetail()">
+            <option value="">—</option>
+            <option value="Within normal limits">Within normal limits</option>
+            <option value="Abnormal — see below">Abnormal — see below</option>
+          </select>
+        </div>
+        <div class="field"><label>Menace response</label>
+          <select id="cn_menace">
+            <option value="">—</option>
+            <option>Intact bilaterally</option>
+            <option>Absent — left eye</option>
+            <option>Absent — right eye</option>
+            <option>Absent bilaterally</option>
+            <option>Reduced — left eye</option>
+            <option>Reduced — right eye</option>
+          </select>
+        </div>
+      </div>
+      <div id="cn_detail" class="hidden">
+        <div class="row r2" style="margin-bottom:12px">
+          <div class="field"><label>PLR (II, III)</label>
+            <select id="cn_plr">
+              <option value="">—</option>
+              <option>Normal bilaterally</option>
+              <option>Miosis — left</option><option>Miosis — right</option><option>Miosis — bilateral</option>
+              <option>Mydriasis — left</option><option>Mydriasis — right</option><option>Mydriasis — bilateral</option>
+              <option>Anisocoria</option>
+            </select>
+          </div>
+          <div class="field"><label>Facial sensation (V)</label>
+            <select id="cn_v">
+              <option value="">—</option>
+              <option>Normal bilaterally</option>
+              <option>Reduced — left</option><option>Reduced — right</option><option>Absent — left</option><option>Absent — right</option>
+            </select>
+          </div>
+        </div>
+        <div class="row r2" style="margin-bottom:12px">
+          <div class="field"><label>Facial symmetry (VII)</label>
+            <select id="cn_vii">
+              <option value="">—</option>
+              <option>Normal</option>
+              <option>Paresis — left</option><option>Paresis — right</option>
+              <option>Paralysis — left</option><option>Paralysis — right</option>
+            </select>
+          </div>
+          <div class="field"><label>Vestibular / nystagmus (VIII)</label>
+            <select id="cn_viii">
+              <option value="">—</option>
+              <option>Normal</option>
+              <option>Nystagmus — horizontal</option>
+              <option>Nystagmus — vertical</option>
+              <option>Nystagmus — rotary</option>
+              <option>Positional nystagmus</option>
+            </select>
+          </div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Swallow / gag (IX, X)</label>
+            <select id="cn_ix">
+              <option value="">—</option><option>Normal</option><option>Reduced</option><option>Absent</option><option>Dysphagia present</option>
+            </select>
+          </div>
+          <div class="field"><label>Tongue / jaw tone (V, XII)</label>
+            <select id="cn_xii">
+              <option value="">—</option><option>Normal</option>
+              <option>Jaw weakness / drop jaw</option>
+              <option>Tongue paresis</option><option>Tongue atrophy</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>CN notes (optional)</label><textarea id="cn_notes" placeholder="e.g., left Horner's syndrome, strabismus..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Pain & Bladder -->
+  <div class="card">
+    <div class="card-header">Deep Pain, Spinal Palpation & Bladder</div>
+    <div class="card-body">
+      <div class="row r3" style="margin-bottom:13px">
+        <div class="field"><label>Deep pain — hindlimbs</label>
+          <select id="ex_dp_hl">
+            <option value="">—</option>
+            <option>Present bilaterally</option>
+            <option>Present — left only</option>
+            <option>Present — right only</option>
+            <option>Absent bilaterally</option>
+            <option>Absent — left</option>
+            <option>Absent — right</option>
+          </select>
+        </div>
+        <div class="field"><label>Deep pain — forelimbs</label>
+          <select id="ex_dp_fl">
+            <option value="">—</option>
+            <option>Present bilaterally</option>
+            <option>Present — left only</option>
+            <option>Present — right only</option>
+            <option>Absent bilaterally</option>
+            <option>Absent — left</option>
+            <option>Absent — right</option>
+          </select>
+        </div>
+        <div class="field"><label>Bladder</label>
+          <select id="ex_bladder">
+            <option value="">—</option>
+            <option>Normal voluntary urination</option>
+            <option>Distended — expressing manually</option>
+            <option>Distended — unable to express</option>
+            <option>Urinary incontinence</option>
+            <option>In-dwelling catheter</option>
+          </select>
+        </div>
+      </div>
+      <div class="row r2">
+        <div class="field"><label>Spinal palpation</label>
+          <select id="ex_palpation">
+            <option value="">—</option>
+            <option>No pain elicited</option>
+            <option>Cervical pain</option>
+            <option>Cervicothoracic pain</option>
+            <option>Thoracolumbar pain</option>
+            <option>Lumbosacral pain</option>
+            <option>Multiple sites — see notes</option>
+          </select>
+        </div>
+        <div class="field"><label>Muscle atrophy</label>
+          <select id="ex_atrophy">
+            <option value="">—</option>
+            <option>None</option>
+            <option>Mild — hindlimbs</option>
+            <option>Moderate — hindlimbs</option>
+            <option>Severe — hindlimbs</option>
+            <option>Mild — forelimbs</option>
+            <option>Focal (specify in notes)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Additional exam notes</label><textarea id="ex_notes" placeholder="Cutaneous trunci cutoff level, specific pain localization, other findings..."></textarea></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+    <button class="btn btn-primary" onclick="goStep(3)">Next → Assessment</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STEP 3 — ASSESSMENT
+══════════════════════════════════════════════ -->
+<div id="step3" class="hidden">
+  <div class="step-title">Assessment</div>
+  <div class="step-sub">Neuroanatomical localization, differentials, and prognosis.</div>
+
+  <div class="card">
+    <div class="card-header">Neuroanatomical Localization</div>
+    <div class="card-body">
+      <div class="row r2">
+        <div class="field"><label>Lesion localization</label>
+          <select id="as_loc">
+            <option value="">—</option>
+            <option>Forebrain (prosencephalon)</option>
+            <option>Brainstem (mesencephalon / pons / medulla)</option>
+            <option>Cerebellum</option>
+            <option>Vestibular — central</option>
+            <option>Vestibular — peripheral</option>
+            <option>C1–C5 myelopathy</option>
+            <option>C6–T2 myelopathy</option>
+            <option>T3–L3 myelopathy</option>
+            <option>L4–S3 myelopathy</option>
+            <option>Neuromuscular junction</option>
+            <option>Muscle (myopathy)</option>
+            <option>Peripheral nerve / polyneuropathy</option>
+            <option>Multifocal</option>
+            <option>Diffuse</option>
+          </select>
+        </div>
+        <div class="field"><label>Lesion character</label>
+          <select id="as_char">
+            <option value="">—</option>
+            <option>Single / focal</option>
+            <option>Multifocal</option>
+            <option>Diffuse</option>
+            <option>Progressive</option>
+            <option>Acute compressive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Differentials</div>
+    <div class="card-body">
+      <div class="field"><label>Primary / most likely differential</label>
+        <input type="text" id="as_dx1" placeholder="e.g., Intervertebral disc extrusion (Hansen Type I) — T12–L1">
+      </div>
+      <div class="field"><label>Additional differentials</label>
+        <textarea id="as_ddx" placeholder="e.g., FCE, neoplasia (primary vs metastatic), discospondylitis"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Prognosis</div>
+    <div class="card-body">
+      <div class="row r2">
+        <div class="field"><label>Prognosis</label>
+          <select id="as_prog">
+            <option value="">—</option>
+            <option>Excellent</option>
+            <option>Good</option>
+            <option>Good to guarded</option>
+            <option>Guarded</option>
+            <option>Poor to guarded</option>
+            <option>Poor</option>
+            <option>Grave</option>
+          </select>
+        </div>
+        <div class="field"><label>Prognosis qualifier / time frame</label>
+          <input type="text" id="as_prog_note" placeholder="e.g., with surgical decompression within 24–48 h">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+    <button class="btn btn-primary" onclick="goStep(4)">Next → Plan</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STEP 4 — PLAN
+══════════════════════════════════════════════ -->
+<div id="step4" class="hidden">
+  <div class="step-title">Plan & Client Communication</div>
+  <div class="step-sub">Diagnostics, treatment, and summary of client conversation.</div>
+
+  <!-- Diagnostics -->
+  <div class="card">
+    <div class="card-header">Diagnostic Plan</div>
+    <div class="card-body">
+      <div class="checks">
+        <label class="ci"><input type="checkbox" id="dx_mri_brain"> MRI — brain</label>
+        <label class="ci"><input type="checkbox" id="dx_mri_spine"> MRI — spine</label>
+        <label class="ci"><input type="checkbox" id="dx_csf"> CSF analysis</label>
+        <label class="ci"><input type="checkbox" id="dx_emg"> EMG / NCV</label>
+        <label class="ci"><input type="checkbox" id="dx_cbc"> CBC / chemistry</label>
+        <label class="ci"><input type="checkbox" id="dx_ua"> Urinalysis</label>
+        <label class="ci"><input type="checkbox" id="dx_ucc"> Urine culture</label>
+        <label class="ci"><input type="checkbox" id="dx_xr"> Thoracic radiographs</label>
+        <label class="ci"><input type="checkbox" id="dx_us"> Abdominal ultrasound</label>
+        <label class="ci"><input type="checkbox" id="dx_titer"> Infectious titers</label>
+        <label class="ci"><input type="checkbox" id="dx_ct"> CT scan</label>
+      </div>
+      <div class="field" style="margin-top:13px">
+        <label>MRI region / additional diagnostics</label>
+        <input type="text" id="dx_notes" placeholder="e.g., MRI cervical + thoracolumbar spine; ACTH stim post-MRI">
+      </div>
+    </div>
+  </div>
+
+  <!-- Treatment -->
+  <div class="card">
+    <div class="card-header">Treatment Plan</div>
+    <div class="card-body">
+      <div class="checks">
+        <label class="ci"><input type="checkbox" id="tx_surgery"> Surgical decompression</label>
+        <label class="ci"><input type="checkbox" id="tx_medical"> Medical management</label>
+        <label class="ci"><input type="checkbox" id="tx_rehab"> PT / Rehabilitation</label>
+        <label class="ci"><input type="checkbox" id="tx_pain"> Pain management</label>
+        <label class="ci"><input type="checkbox" id="tx_palliative"> Palliative / hospice</label>
+        <label class="ci"><input type="checkbox" id="tx_euth"> Euthanasia discussed</label>
+      </div>
+      <div class="field" style="margin-top:13px">
+        <label>Medications / surgical procedure / additional notes</label>
+        <textarea id="tx_notes" placeholder="e.g., Hemilaminectomy T12–L1; Gabapentin 10 mg/kg PO BID; strict cage rest × 4 weeks"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Communication + Audio -->
+  <div class="card">
+    <div class="card-header">Client Communication Summary</div>
+    <div class="card-body">
+
+      <div class="audio-zone" id="audio-zone">
+        <div id="speech-unavailable" class="hidden" style="color:var(--muted);font-size:0.84rem">
+          ⚠️ Speech recognition unavailable in this browser or on file:// protocol.<br>
+          Use the text area below to manually type or paste notes.
+        </div>
+        <div id="speech-ui">
+          <button class="rec-btn idle" id="rec-btn" onclick="toggleRecording()">🎙</button>
+          <div class="rec-status" id="rec-status">Press to record your post-consultation summary</div>
+          <div class="audio-note">Requires Chrome or Edge · Speak naturally — transcription is editable</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Transcript / conversation notes (editable)</label>
+        <textarea id="cc_transcript" rows="5" placeholder="Transcription will appear here as you speak — or type your notes manually..."></textarea>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.3px">Summarize with Claude AI (optional)</div>
+        <div class="api-row">
+          <input type="password" id="api_key" placeholder="Paste Anthropic API key — not stored after page close">
+          <button class="btn btn-ai btn-sm" onclick="summarizeWithClaude()">✨ Summarize</button>
+        </div>
+        <div id="ai-status" style="font-size:0.8rem;color:var(--muted);display:none">Processing...</div>
+        <pre class="ai-result" id="ai-result"></pre>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>Client communication summary (final — edit as needed)</label>
+        <textarea id="cc_summary" rows="5" placeholder="What was explained to owner, plan discussed, prognosis communicated, owner concerns, follow-up instructions..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goStep(3)">← Back</button>
+    <button class="btn btn-success" onclick="buildOutputs(); goStep(5)">Generate Outputs →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STEP 5 — OUTPUT
+══════════════════════════════════════════════ -->
+<div id="step5" class="hidden">
+  <div class="step-title">Generated Outputs</div>
+  <div class="step-sub">Copy the relevant section into Woofware or Obsidian.</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('soap')">SOAP for Woofware</button>
+    <button class="tab-btn" onclick="showTab('caselog')">Case Log (Obsidian)</button>
+    <button class="tab-btn" onclick="showTab('discharge')">Discharge Starter</button>
+  </div>
+
+  <div id="tab-soap" class="tab-panel active">
+    <div class="output-box" id="out-soap"></div>
+    <div class="actions">
+      <button class="btn btn-success" onclick="copyOut('out-soap','cp-soap')">Copy to Clipboard</button>
+      <span class="copy-ok" id="cp-soap">Copied!</span>
+    </div>
+  </div>
+
+  <div id="tab-caselog" class="tab-panel">
+    <div class="output-box" id="out-caselog" style="font-family:monospace;font-size:0.85rem"></div>
+    <div class="actions">
+      <button class="btn btn-success" onclick="copyOut('out-caselog','cp-caselog')">Copy Markdown</button>
+      <span class="copy-ok" id="cp-caselog">Copied!</span>
+      <button class="btn btn-secondary" onclick="downloadMd()">Download .md</button>
+    </div>
+  </div>
+
+  <div id="tab-discharge" class="tab-panel">
+    <div class="output-box" id="out-discharge"></div>
+    <div class="actions">
+      <button class="btn btn-success" onclick="copyOut('out-discharge','cp-discharge')">Copy to Clipboard</button>
+      <span class="copy-ok" id="cp-discharge">Copied!</span>
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top:24px">
+    <button class="btn btn-secondary" onclick="goStep(4)">← Back to Plan</button>
+    <button class="btn btn-secondary" onclick="startOver()">New Patient</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ── helpers ──────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const v  = id => { const e = $(id); return e ? e.value.trim() : ''; };
+const ch = id => { const e = $(id); return e ? e.checked : false; };
+
+// ── navigation ───────────────────────────────────────────────────────────────
+function goStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const s = $(`step${i}`); const p = $(`prog-${i}`);
+    if (s) s.classList.toggle('hidden', i !== n);
+    if (p) { p.classList.remove('active','done'); if (i < n) p.classList.add('done'); if (i === n) p.classList.add('active'); }
+  }
+  window.scrollTo(0, 0);
+}
+
+// ── grade badge ───────────────────────────────────────────────────────────────
+function updateGrade() {
+  const g = v('ex_grade'); const b = $('grade-badge');
+  const labels = ['Normal','Pain only','Ambulatory','Non-ambulatory','Plegia + DPP','Plegia — DPN'];
+  if (!g) { b.classList.add('hidden'); return; }
+  b.classList.remove('hidden','g0','g1','g2','g3','g4','g5');
+  b.classList.add(`g${g}`); b.textContent = `Grade ${g} — ${labels[+g]}`;
+}
+
+// ── cranial nerve detail toggle ────────────────────────────────────────────
+function toggleCNDetail() {
+  $('cn_detail').classList.toggle('hidden', v('cn_overall') !== 'Abnormal — see below');
+}
+
+// ── speech recognition ────────────────────────────────────────────────────
+let recognition = null; let isRecording = false;
+
+window.addEventListener('DOMContentLoaded', () => {
+  // set today's date
+  const d = new Date(); const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  $('pt_date').value = `${y}-${m}-${day}`;
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { $('speech-unavailable').classList.remove('hidden'); $('speech-ui').classList.add('hidden'); return; }
+  recognition = new SR();
+  recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
+  recognition.onresult = e => {
+    let txt = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) txt += e.results[i][0].transcript;
+    $('cc_transcript').value += txt;
+  };
+  recognition.onerror = e => { stopRecording(); $('rec-status').textContent = `Error: ${e.error}`; };
+  recognition.onend = () => { if (isRecording) recognition.start(); };
+});
+
+function toggleRecording() {
+  isRecording ? stopRecording() : startRecording();
+}
+function startRecording() {
+  if (!recognition) return;
+  isRecording = true;
+  $('rec-btn').className = 'rec-btn active'; $('rec-btn').textContent = '⏹';
+  $('rec-status').textContent = 'Recording… speak now';
+  $('audio-zone').classList.add('recording');
+  recognition.start();
+}
+function stopRecording() {
+  if (!recognition) return;
+  isRecording = false;
+  recognition.stop();
+  $('rec-btn').className = 'rec-btn idle'; $('rec-btn').textContent = '🎙';
+  $('rec-status').textContent = 'Recording stopped — review and edit transcript above';
+  $('audio-zone').classList.remove('recording');
+}
+
+// ── Claude API summarization ──────────────────────────────────────────────
+async function summarizeWithClaude() {
+  const key = v('api_key');
+  const transcript = v('cc_transcript');
+  if (!key) { alert('Please paste your Anthropic API key.'); return; }
+  if (!transcript) { alert('No transcript to summarize — record or type notes first.'); return; }
+
+  $('ai-status').style.display = 'block';
+  $('ai-status').textContent = 'Summarizing…';
+  $('ai-result').style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        messages: [{ role: 'user', content:
+`You are extracting a structured communication summary from a veterinary neurologist's post-consultation conversation notes. Extract ONLY what was explicitly discussed. Be concise and clinical.
+
+Format your response under exactly these five headings with bullet points:
+
+Diagnosis explained to owner:
+Plan discussed:
+Prognosis communicated:
+Owner questions / concerns:
+Follow-up instructions:
+
+If a topic was not discussed, write "Not discussed" for that heading.
+
+Transcript:
+${transcript}` }]
+      })
+    });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || res.status); }
+    const data = await res.json();
+    const summary = data.content[0].text;
+    $('ai-result').textContent = summary;
+    $('ai-result').style.display = 'block';
+    $('cc_summary').value = summary;
+    $('ai-status').textContent = 'Done — summary copied to field below.';
+  } catch(e) {
+    $('ai-status').textContent = `Error: ${e.message}`;
+  }
+}
+
+// ── output builders ───────────────────────────────────────────────────────
+function line(label, val) { return val ? `${label}: ${val}\n` : ''; }
+
+function buildOutputs() {
+  const grade = v('ex_grade');
+  const gradeLabels = ['Normal','Pain / hyperesthesia only, normal gait',
+    'Ambulatory paraparesis / ataxia','Non-ambulatory paraparesis',
+    'Paraplegia — deep pain present','Paraplegia — deep pain absent'];
+
+  // ── SOAP O/A/P ────────────────────────────────────────────────────
+  let soap = 'OBJECTIVE:\n';
+  soap += line('Mentation', v('ex_mentation'));
+  soap += line('Posture', v('ex_posture'));
+  soap += line('Gait', v('ex_gait'));
+  if (v('ex_limbs')) soap += line('Limbs affected', v('ex_limbs'));
+  if (grade) soap += `Spinal cord grade: ${grade}/5 — ${gradeLabels[+grade]}\n`;
+
+  const pr = [['LF',v('pr_lf')],['RF',v('pr_rf')],['LH',v('pr_lh')],['RH',v('pr_rh')]].filter(x=>x[1]).map(x=>`${x[0]}: ${x[1]}`).join(' | ');
+  if (pr) soap += `Postural reactions: ${pr}\n`;
+
+  soap += '\nSpinal reflexes:\n';
+  const refs = [
+    ['Patellar',v('ref_pat_l'),v('ref_pat_r')],
+    ['Withdrawal HL',v('ref_wd_hl_l'),v('ref_wd_hl_r')],
+    ['Withdrawal FL',v('ref_wd_fl_l'),v('ref_wd_fl_r')],
+    ['Biceps',v('ref_bic_l'),v('ref_bic_r')],
+    ['Triceps',v('ref_tri_l'),v('ref_tri_r')],
+  ];
+  refs.forEach(([name,l,r]) => { if(l||r) soap += `  ${name}: L ${l||'—'} | R ${r||'—'}\n`; });
+  if (v('ref_perineal')) soap += `  Perineal: ${v('ref_perineal')}\n`;
+  if (v('ref_ct')) soap += `  Cutaneous trunci: ${v('ref_ct')}\n`;
+
+  soap += line('\nCranial nerves', v('cn_overall') === 'Within normal limits' ? 'Within normal limits' : '');
+  if (v('cn_overall') === 'Abnormal — see below') {
+    soap += 'Cranial nerves:\n';
+    if (v('cn_menace')) soap += `  Menace: ${v('cn_menace')}\n`;
+    if (v('cn_plr')) soap += `  PLR: ${v('cn_plr')}\n`;
+    if (v('cn_v')) soap += `  CN V (facial sensation): ${v('cn_v')}\n`;
+    if (v('cn_vii')) soap += `  CN VII (facial symmetry): ${v('cn_vii')}\n`;
+    if (v('cn_viii')) soap += `  CN VIII (vestibular): ${v('cn_viii')}\n`;
+    if (v('cn_ix')) soap += `  CN IX/X (swallow/gag): ${v('cn_ix')}\n`;
+    if (v('cn_xii')) soap += `  CN V/XII (jaw/tongue): ${v('cn_xii')}\n`;
+  } else if (v('cn_menace')) {
+    soap += line('Menace response', v('cn_menace'));
+  }
+  if (v('cn_notes')) soap += `  Notes: ${v('cn_notes')}\n`;
+  soap += line('Deep pain (HL)', v('ex_dp_hl'));
+  soap += line('Deep pain (FL)', v('ex_dp_fl'));
+  soap += line('Bladder', v('ex_bladder'));
+  soap += line('Spinal palpation', v('ex_palpation'));
+  soap += line('Muscle atrophy', v('ex_atrophy'));
+  if (v('ex_notes')) soap += `Additional findings: ${v('ex_notes')}\n`;
+
+  soap += '\nASSESSMENT:\n';
+  soap += line('Neuroanatomical localization', v('as_loc'));
+  if (v('as_char')) soap += line('Lesion character', v('as_char'));
+  soap += line('Primary differential', v('as_dx1'));
+  if (v('as_ddx')) soap += `Additional differentials: ${v('as_ddx')}\n`;
+  let prog = v('as_prog'); if (v('as_prog_note')) prog += ` (${v('as_prog_note')})`;
+  soap += line('Prognosis', prog);
+
+  soap += '\nPLAN:\n';
+  const dxItems = [
+    [ch('dx_mri_brain'),'MRI — brain'],[ch('dx_mri_spine'),'MRI — spine'],
+    [ch('dx_csf'),'CSF analysis'],[ch('dx_emg'),'EMG / NCV'],
+    [ch('dx_cbc'),'CBC / chemistry'],[ch('dx_ua'),'Urinalysis'],
+    [ch('dx_ucc'),'Urine culture'],[ch('dx_xr'),'Thoracic radiographs'],
+    [ch('dx_us'),'Abdominal ultrasound'],[ch('dx_titer'),'Infectious titers'],
+    [ch('dx_ct'),'CT scan']
+  ].filter(x=>x[0]).map(x=>x[1]);
+  if (dxItems.length) soap += `Diagnostics: ${dxItems.join(', ')}\n`;
+  if (v('dx_notes')) soap += `  ${v('dx_notes')}\n`;
+
+  const txItems = [
+    [ch('tx_surgery'),'Surgical decompression'],[ch('tx_medical'),'Medical management'],
+    [ch('tx_rehab'),'PT / Rehabilitation'],[ch('tx_pain'),'Pain management'],
+    [ch('tx_palliative'),'Palliative care'],[ch('tx_euth'),'Euthanasia discussed']
+  ].filter(x=>x[0]).map(x=>x[1]);
+  if (txItems.length) soap += `Treatment: ${txItems.join(', ')}\n`;
+  if (v('tx_notes')) soap += `  ${v('tx_notes')}\n`;
+
+  const cc = v('cc_summary') || v('cc_transcript');
+  if (cc) soap += `\nClient communication:\n${cc}\n`;
+
+  $('out-soap').textContent = soap;
+
+  // ── Case log markdown ──────────────────────────────────────────────
+  const dateVal = v('pt_date') || new Date().toISOString().slice(0,10);
+  let md = `---\n`;
+  md += `date: ${dateVal}\n`;
+  md += `appt_type: ${v('pt_appt')}\n`;
+  if (v('pt_species')) md += `species: ${v('pt_species')}\n`;
+  if (v('pt_breed')) md += `breed: ${v('pt_breed')}\n`;
+  if (v('pt_age')) md += `age: ${v('pt_age')}\n`;
+  if (v('pt_sex')) md += `sex: ${v('pt_sex')}\n`;
+  if (v('as_loc')) md += `localization: "${v('as_loc')}"\n`;
+  if (v('as_dx1')) md += `diagnosis: "${v('as_dx1')}"\n`;
+  if (grade) md += `grade: ${grade}\n`;
+  if (v('as_prog')) md += `prognosis: ${v('as_prog')}\n`;
+  const txTag = ch('tx_surgery') ? 'surgical' : ch('tx_medical') ? 'medical' : ch('tx_rehab') ? 'rehab' : '';
+  const locTag = v('as_loc') ? v('as_loc').toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-') : '';
+  md += `tags: [case-log${locTag ? ', '+locTag : ''}${txTag ? ', '+txTag : ''}]\n`;
+  md += `---\n\n`;
+  md += `**Localization:** ${v('as_loc') || '—'}\n`;
+  md += `**Diagnosis:** ${v('as_dx1') || '—'}\n`;
+  if (grade) md += `**Grade:** ${grade}/5 — ${gradeLabels[+grade]}\n`;
+  md += `**Prognosis:** ${v('as_prog') || '—'}${v('as_prog_note') ? ' — ' + v('as_prog_note') : ''}\n\n`;
+
+  const keyExam = [v('ex_gait'), v('ex_dp_hl') ? `HL deep pain: ${v('ex_dp_hl')}` : '', v('ex_bladder'), v('ex_palpation')].filter(Boolean);
+  if (keyExam.length) md += `**Key findings:** ${keyExam.join('; ')}\n\n`;
+
+  if (dxItems.length) md += `**Diagnostics:** ${dxItems.join(', ')}\n`;
+  if (txItems.length) md += `**Treatment:** ${txItems.join(', ')}\n`;
+  if (v('tx_notes')) md += `**Rx / procedure:** ${v('tx_notes')}\n`;
+  if (v('as_ddx')) md += `\n**DDx:** ${v('as_ddx')}\n`;
+
+  $('out-caselog').textContent = md;
+
+  // ── Discharge summary starter ──────────────────────────────────────
+  const species = v('pt_species') || 'your pet';
+  const breed = v('pt_breed') || '';
+  const sig = [breed, v('pt_age'), v('pt_sex')].filter(Boolean).join(', ');
+
+  let ds = `DISCHARGE INSTRUCTIONS\n${'─'.repeat(40)}\n\n`;
+  ds += `Patient: ${species}${sig ? ' (' + sig + ')' : ''}\n`;
+  ds += `Date: ${dateVal}\n\n`;
+  ds += `DIAGNOSIS:\n${v('as_dx1') || '[diagnosis]'}\n\n`;
+  ds += `NEUROANATOMICAL LOCALIZATION:\n${v('as_loc') || '[localization]'}\n\n`;
+  if (grade) ds += `NEUROLOGICAL GRADE AT TIME OF DISCHARGE:\nGrade ${grade}/5 — ${gradeLabels[+grade]}\n\n`;
+  ds += `PROGNOSIS:\n${v('as_prog') || '[prognosis]'}${v('as_prog_note') ? ' — ' + v('as_prog_note') : ''}\n\n`;
+  if (txItems.length) ds += `TREATMENT:\n${txItems.join('\n')}\n\n`;
+  if (v('tx_notes')) ds += `MEDICATIONS / PROCEDURES:\n${v('tx_notes')}\n\n`;
+  ds += `HOME CARE INSTRUCTIONS:\n[To be completed]\n\n`;
+  ds += `FOLLOW-UP:\n[To be completed]\n\n`;
+  ds += `SIGNS TO WATCH FOR / RETURN TO CLINIC IF:\n`;
+  ds += `• Sudden worsening of neurological status\n`;
+  ds += `• Inability to urinate or significant change in bladder function\n`;
+  ds += `• Excessive pain or vocalization\n`;
+  ds += `• Any other concerns\n\n`;
+  ds += `Please do not hesitate to contact us with any questions.\n`;
+  ds += `VCA Kalamazoo — Neurology Service\n`;
+
+  $('out-discharge').textContent = ds;
+}
+
+// ── tab switching ─────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  $(`tab-${name}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── copy & download ───────────────────────────────────────────────────────
+function copyOut(boxId, okId) {
+  const text = $(boxId).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const ok = $(okId); ok.style.display = 'inline';
+    setTimeout(() => ok.style.display = 'none', 2000);
+  });
+}
+
+function downloadMd() {
+  const text = $('out-caselog').textContent;
+  const date = v('pt_date') || new Date().toISOString().slice(0,10);
+  const breed = (v('pt_breed') || 'case').replace(/\s+/g,'-').toLowerCase();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type:'text/markdown'}));
+  a.download = `${date}-${breed}.md`;
+  a.click();
+}
+
+function startOver() {
+  if (confirm('Start a new patient? All current data will be cleared.')) location.reload();
+}
+</script>
+</body>
+</html>

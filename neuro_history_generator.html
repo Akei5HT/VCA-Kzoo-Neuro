@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neurology History Generator — BVNS</title>
+<style>
+:root {
+  --primary: #2c5f8a;
+  --accent: #4a9fd4;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --border: #d1d9e0;
+  --text: #1a2332;
+  --muted: #6b7c93;
+  --green: #27ae60;
+  --section-bg: #eef2f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--primary); color: white; padding: 14px 24px; }
+header h1 { font-size: 1rem; font-weight: 600; }
+header span { font-size: 0.8rem; opacity: 0.7; }
+.container { max-width: 820px; margin: 28px auto; padding: 0 16px; }
+.step-title { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.step-sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 20px; }
+
+/* Complaint grid */
+.complaint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.complaint-btn { background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; text-align: left; transition: all 0.15s; width: 100%; }
+.complaint-btn:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(74,159,212,0.15); }
+.complaint-btn .label { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+.complaint-btn .sub { font-size: 0.78rem; color: var(--muted); }
+
+/* Form cards */
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 12px 18px; font-weight: 600; font-size: 0.82rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; }
+.card-body { padding: 18px; }
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 0.82rem; font-weight: 500; margin-bottom: 5px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 0.88rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 64px; }
+.row { display: grid; gap: 12px; }
+.row-2 { grid-template-columns: 1fr 1fr; }
+.row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.row-5 { grid-template-columns: 2fr 1fr 1fr 1fr 1fr; }
+
+/* Buttons */
+.btn { padding: 9px 18px; border: none; border-radius: 7px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-secondary { background: var(--section-bg); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-success { background: var(--green); color: white; }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+.copy-ok { color: var(--green); font-size: 0.82rem; display: none; }
+
+/* Output */
+.output-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px; font-family: Georgia, serif; font-size: 0.96rem; line-height: 1.75; white-space: pre-wrap; }
+
+@media (max-width: 580px) {
+  .complaint-grid, .row-2, .row-3, .row-5 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Neurology History Generator</h1>
+  <span>VCA Kalamazoo</span>
+</header>
+<div class="container">
+
+<!-- STEP 1 -->
+<div id="step1">
+  <div class="step-title">Select Presenting Complaint</div>
+  <div class="step-sub">Choose the primary reason for the appointment.</div>
+  <div class="complaint-grid">
+    <button class="complaint-btn" onclick="go('seizure')">
+      <div class="label">Seizure</div>
+      <div class="sub">Characterization, frequency, postictal behavior, medication response</div>
+    </button>
+    <button class="complaint-btn" onclick="go('brain')">
+      <div class="label">Brain / Vestibular</div>
+      <div class="sub">Altered mentation, head tilt, circling, facial nerve signs, vision</div>
+    </button>
+    <button class="complaint-btn" onclick="go('spine')">
+      <div class="label">Spine</div>
+      <div class="sub">Neck/back pain, limb weakness, ataxia, paresis/paralysis</div>
+    </button>
+    <button class="complaint-btn" onclick="go('neuromuscular')">
+      <div class="label">Neuromuscular</div>
+      <div class="sub">Fatigue, collapse, dysphagia, regurgitation, muscle atrophy</div>
+    </button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2" style="display:none">
+  <div class="step-title" id="formTitle">History Form</div>
+  <div class="step-sub">Fill in what is known. Blank fields are omitted from the note.</div>
+
+  <!-- Patient -->
+  <div class="card">
+    <div class="card-header">Patient Information</div>
+    <div class="card-body">
+      <div class="row row-2" style="margin-bottom:12px">
+        <div class="field"><label>Animal Name</label><input type="text" id="pt_name" placeholder="Buddy"></div>
+        <div class="field"><label>Owner Last Name</label><input type="text" id="owner_last" placeholder="Smith"></div>
+      </div>
+      <div class="row row-2" style="margin-bottom:12px">
+        <div class="field"><label>Referring Veterinarian</label><input type="text" id="ref_vet" placeholder="Dr. Johnson"></div>
+        <div class="field"><label>Referring Clinic</label><input type="text" id="ref_clinic" placeholder="Kalamazoo Animal Hospital"></div>
+      </div>
+      <div class="row" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <div class="field"><label>Species</label>
+          <select id="pt_species">
+            <option value="">—</option>
+            <option value="canine">Canine</option>
+            <option value="feline">Feline</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Breed</label><input type="text" id="pt_breed" placeholder="Labrador"></div>
+        <div class="field"><label>Age</label><input type="text" id="pt_age" placeholder="5y"></div>
+        <div class="field"><label>Sex</label>
+          <select id="pt_sex">
+            <option value="">—</option>
+            <option value="MI">MI</option>
+            <option value="MN">MN</option>
+            <option value="FI">FI</option>
+            <option value="FS">FS</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- General -->
+  <div class="card">
+    <div class="card-header">General — Every New Appointment</div>
+    <div class="card-body">
+      <div class="row row-2">
+        <div class="field"><label>When did the problem start?</label><input type="text" id="gen_onset_when" placeholder="e.g., 3 months ago, January 2026"></div>
+        <div class="field"><label>Onset character</label>
+          <select id="gen_onset_type">
+            <option value="">— unknown —</option>
+            <option value="peracute">Peracute</option>
+            <option value="acute">Acute / sudden</option>
+            <option value="subacute">Subacute</option>
+            <option value="gradual">Gradual / progressive</option>
+          </select>
+        </div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Clinical course</label>
+          <select id="gen_course">
+            <option value="">— unknown —</option>
+            <option value="progressive">Progressive (worsening)</option>
+            <option value="improving">Improving</option>
+            <option value="static">Static / plateau</option>
+            <option value="episodic">Episodic / waxing and waning</option>
+          </select>
+        </div>
+        <div class="field"><label>Lateralization</label>
+          <select id="gen_lat">
+            <option value="">— unknown —</option>
+            <option value="right">Right-sided</option>
+            <option value="left">Left-sided</option>
+            <option value="none">Not lateralized</option>
+          </select>
+        </div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Previous diagnostic tests performed?</label>
+          <select id="gen_diag_yn">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field"><label>When were tests performed?</label><input type="text" id="gen_diag_when" placeholder="e.g., 2 weeks ago, March 2025"></div>
+      </div>
+      <div class="field" id="gen_diag_detail_wrap" style="display:none">
+        <label>Type of diagnostic tests and results</label>
+        <textarea id="gen_diag_detail" placeholder="e.g., MRI brain — unremarkable; CSF tap — normal; bloodwork — mild elevation in ALT"></textarea>
+      </div>
+      <div class="field"><label>Medications previously tried and response</label><textarea id="gen_meds_tried" placeholder="e.g., Phenobarbital — partially effective; Keppra — no response"></textarea></div>
+      <div class="row row-2">
+        <div class="field"><label>Current medications and doses</label><textarea id="gen_meds_current" placeholder="e.g., Phenobarbital 2.5 mg/kg PO BID, Keppra 20 mg/kg PO TID"></textarea></div>
+        <div class="field"><label>Last dose given</label><input type="text" id="gen_last_dose" placeholder="e.g., this morning at 7 AM"></div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>How long has owner had the patient?</label><input type="text" id="gen_owner_dur" placeholder="e.g., 3 years, since puppyhood"></div>
+        <div class="field"><label>Where was the patient acquired?</label><input type="text" id="gen_acquired" placeholder="e.g., breeder, shelter, rescue"></div>
+      </div>
+      <div class="field"><label>Other known medical conditions</label><input type="text" id="gen_comorbid" placeholder="e.g., hypothyroidism — or 'none'"></div>
+      <div class="row row-2">
+        <div class="field"><label>Recent travel?</label>
+          <select id="gen_travel">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field"><label>Travel destination (if yes)</label><input type="text" id="gen_travel_dest" placeholder="e.g., Florida, camping in Virginia"></div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Eating and drinking?</label>
+          <select id="gen_eating">
+            <option value="">— unknown —</option>
+            <option value="normal">Normal</option>
+            <option value="decreased">Decreased</option>
+            <option value="not_eating">Not eating</option>
+            <option value="not_drinking">Not drinking</option>
+            <option value="neither">Not eating or drinking</option>
+          </select>
+        </div>
+        <div class="field"><label>Weight changes?</label>
+          <select id="gen_weight">
+            <option value="">— unknown —</option>
+            <option value="stable">Stable</option>
+            <option value="loss">Weight loss</option>
+            <option value="gain">Weight gain</option>
+          </select>
+        </div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Coughing, sneezing, vomiting, or diarrhea?</label>
+          <select id="gen_gi">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field"><label>GI/respiratory detail (if yes)</label><input type="text" id="gen_gi_detail" placeholder="e.g., intermittent vomiting × 2 weeks"></div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Vaccinations current (including Rabies)?</label>
+          <select id="gen_vacc">
+            <option value="">— unknown —</option>
+            <option value="yes">Yes — current</option>
+            <option value="no">No — overdue</option>
+            <option value="partial">Partially current</option>
+          </select>
+        </div>
+        <div class="field"><label>Seen at other facilities?</label>
+          <select id="gen_facilities">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div class="row row-2">
+        <div class="field"><label>Facilities / records requested from</label><input type="text" id="gen_facilities_detail" placeholder="e.g., VCA Rockville, VRCC"></div>
+        <div class="field"><label>Did the patient eat this morning?</label>
+          <select id="gen_ate">
+            <option value="">— unknown —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No — fasted</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complaint-specific -->
+  <div id="complaint-section"></div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="generateNote()">Generate Note</button>
+    <button class="btn btn-secondary" onclick="show('step1');hide('step2')">&#8592; Change Complaint</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div id="step3" style="display:none">
+  <div class="step-title">Generated History Note</div>
+  <div class="step-sub">Review, copy, and paste into your record.</div>
+  <div class="output-box" id="output"></div>
+  <div class="actions" style="margin-top:14px">
+    <button class="btn btn-success" onclick="copyNote()">Copy to Clipboard</button>
+    <span class="copy-ok" id="copy-ok">Copied!</span>
+    <button class="btn btn-secondary" onclick="show('step2');hide('step3')">&#8592; Edit</button>
+    <button class="btn btn-secondary" onclick="show('step1');hide('step3')">New Patient</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+let complaint = null;
+
+const complaintLabels = { seizure:'Seizure', brain:'Brain / Vestibular', spine:'Spine', neuromuscular:'Neuromuscular' };
+
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function v(id){ const e=document.getElementById(id); return e ? e.value.trim() : ''; }
+
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('gen_diag_yn').addEventListener('change', function(){
+    document.getElementById('gen_diag_detail_wrap').style.display = this.value==='yes' ? 'block' : 'none';
+  });
+});
+
+function go(c){
+  complaint = c;
+  document.getElementById('formTitle').textContent = `History Form — ${complaintLabels[c]}`;
+  document.getElementById('complaint-section').innerHTML = buildComplaintSection(c);
+  attachListeners(c);
+  hide('step1'); show('step2');
+}
+
+function buildComplaintSection(c){
+  const sections = {
+    seizure: `
+      <div class="card">
+      <div class="card-header">Seizure — Specific Questions</div>
+      <div class="card-body">
+        <div class="row row-2">
+          <div class="field"><label>First event</label><input type="text" id="sz_first" placeholder="e.g., 6 months ago, March 2025"></div>
+          <div class="field"><label>Most recent event</label><input type="text" id="sz_last" placeholder="e.g., yesterday, 2 weeks ago"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Cluster seizures or status epilepticus?</label>
+            <select id="sz_cluster">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="cluster">Yes — cluster seizures</option>
+              <option value="se">Yes — status epilepticus</option>
+              <option value="both">Yes — both</option>
+            </select>
+          </div>
+          <div class="field"><label>Event frequency (before / after meds)</label><input type="text" id="sz_freq" placeholder="e.g., 2/month before; none since starting PB"></div>
+        </div>
+        <div class="field"><label>Description of the event</label><textarea id="sz_desc" placeholder="e.g., falls to right, paddling, rigid, extends neck — lasts ~2 minutes"></textarea></div>
+        <div class="row row-2">
+          <div class="field"><label>Responsive to touch/sound during event?</label>
+            <select id="sz_resp">
+              <option value="">— unknown —</option>
+              <option value="yes">Yes — responsive</option>
+              <option value="no">No — unresponsive</option>
+            </select>
+          </div>
+          <div class="field"><label>Ictal autonomic signs?</label>
+            <select id="sz_auto">
+              <option value="">— unknown —</option>
+              <option value="no">None</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="sz_auto_d_wrap" style="display:none"><label>Describe ictal signs</label><input type="text" id="sz_auto_d" placeholder="e.g., urination, hypersalivation, jaw chomping"></div>
+        <div class="row row-2">
+          <div class="field"><label>What was patient doing when event started?</label><input type="text" id="sz_activity" placeholder="e.g., sleeping, at rest, playing"></div>
+          <div class="field"><label>Time of day events typically occur</label><input type="text" id="sz_time" placeholder="e.g., early morning, overnight"></div>
+        </div>
+        <div class="field"><label>Postictal behavior and time to return to baseline</label><textarea id="sz_postictal" placeholder="e.g., circling, apparent blindness, hungry/thirsty — back to normal in ~20 min"></textarea></div>
+        <div class="row row-2">
+          <div class="field"><label>Medication side effects?</label>
+            <select id="sz_sefx">
+              <option value="">— unknown —</option>
+              <option value="no">None</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Side effect details</label><input type="text" id="sz_sefx_d" placeholder="e.g., sedation, PU/PD, polyphagia"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Known toxin exposure?</label>
+            <select id="sz_toxin">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Toxin details</label><input type="text" id="sz_toxin_d" placeholder="e.g., marijuana, xylitol, metaldehyde"></div>
+        </div>
+        <div class="field"><label>Interictal behavioral / personality changes?</label>
+          <select id="sz_beh">
+            <option value="">— unknown —</option>
+            <option value="no">None</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field" id="sz_beh_d_wrap" style="display:none"><label>Describe behavioral changes</label><textarea id="sz_beh_d" placeholder="e.g., increased aggression, head pressing, nighttime restlessness, circling, staring into space"></textarea></div>
+      </div></div>`,
+
+    brain: `
+      <div class="card">
+      <div class="card-header">Brain / Vestibular — Specific Questions</div>
+      <div class="card-body">
+        <div class="field"><label>Behavioral / personality changes?</label>
+          <select id="br_beh">
+            <option value="">— unknown —</option>
+            <option value="no">None</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field" id="br_beh_d_wrap" style="display:none"><label>Describe changes</label><textarea id="br_beh_d" placeholder="e.g., aggression, head pressing, wandering, getting stuck in corners, not recognizing owner"></textarea></div>
+        <div class="row row-2">
+          <div class="field"><label>Head tilt / head turn?</label>
+            <select id="br_tilt">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="right">Yes — right</option>
+              <option value="left">Yes — left</option>
+            </select>
+          </div>
+          <div class="field"><label>Circling?</label>
+            <select id="br_circle">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="rt">Yes — tight, right</option>
+              <option value="rw">Yes — wide, right</option>
+              <option value="lt">Yes — tight, left</option>
+              <option value="lw">Yes — wide, left</option>
+            </select>
+          </div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Muscle atrophy of the head?</label>
+            <select id="br_atrophy">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="right">Yes — right</option>
+              <option value="left">Yes — left</option>
+              <option value="bilateral">Yes — bilateral</option>
+            </select>
+          </div>
+          <div class="field"><label>Ataxia / gait abnormality?</label>
+            <select id="br_ataxia">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="general">Yes — general ataxia</option>
+              <option value="fall_r">Yes — falling/leaning right</option>
+              <option value="fall_l">Yes — falling/leaning left</option>
+              <option value="wall">Yes — hugging wall</option>
+              <option value="sway">Yes — swaying</option>
+            </select>
+          </div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Facial drooping, drooling, or inability to blink?</label>
+            <select id="br_facial">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Facial signs — detail / side</label><input type="text" id="br_facial_d" placeholder="e.g., right-sided facial drop, unable to blink"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Abnormal eye movements (nystagmus)?</label>
+            <select id="br_nyst">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Mentation</label>
+            <select id="br_ment">
+              <option value="">— unknown —</option>
+              <option value="normal">Alert and appropriate</option>
+              <option value="dull">Dull / depressed</option>
+              <option value="obtunded">Obtunded</option>
+              <option value="confused">Confused / disoriented</option>
+            </select>
+          </div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Tremors?</label>
+            <select id="br_tremor">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Known toxin exposure?</label>
+            <select id="br_toxin">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="br_toxin_d_wrap" style="display:none"><label>Toxin details</label><input type="text" id="br_toxin_d" placeholder="e.g., metronidazole toxicity, marijuana"></div>
+        <div class="row row-2">
+          <div class="field"><label>Vision changes (bumping into things, missing jumps)?</label>
+            <select id="br_vision">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Vision detail</label><input type="text" id="br_vision_d" placeholder="e.g., bumping into right-sided objects, missing jumps"></div>
+        </div>
+        <div class="field"><label>Seizures?</label>
+          <select id="br_sz">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div></div>`,
+
+    spine: `
+      <div class="card">
+      <div class="card-header">Spine — Specific Questions</div>
+      <div class="card-body">
+        <div class="field"><label>Which limb(s) are affected?</label><input type="text" id="sp_limbs" placeholder="e.g., pelvic limbs bilaterally, right thoracic limb"></div>
+        <div class="row row-2">
+          <div class="field"><label>Ambulatory status</label>
+            <select id="sp_ambu">
+              <option value="">— unknown —</option>
+              <option value="yes">Ambulatory</option>
+              <option value="weak">Ambulatory but weak / ataxic</option>
+              <option value="no">Non-ambulatory</option>
+            </select>
+          </div>
+          <div class="field"><label>When / how quickly did status change?</label><input type="text" id="sp_ambu_tl" placeholder="e.g., acute 2 days ago, progressive over 3 weeks"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Pain present?</label>
+            <select id="sp_pain">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Perceived pain location</label><input type="text" id="sp_pain_loc" placeholder="e.g., lower back, neck, lumbar"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Proprioceptive deficits (knuckling, crossing)?</label>
+            <select id="sp_prop">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Proprioception detail</label><input type="text" id="sp_prop_d" placeholder="e.g., paw flipped over, crossing of pelvic limbs"></div>
+        </div>
+        <div class="field"><label>Asymmetry?</label>
+          <select id="sp_asym">
+            <option value="">— unknown —</option>
+            <option value="sym">Symmetric</option>
+            <option value="right">Right side worse</option>
+            <option value="left">Left side worse</option>
+          </select>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Stopped doing activities (stairs, jumping, exercise)?</label>
+            <select id="sp_act">
+              <option value="">— unknown —</option>
+              <option value="no">No change</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Activity change detail</label><input type="text" id="sp_act_d" placeholder="e.g., stopped stairs 2 weeks ago, no longer jumps on couch"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Fecal or urinary incontinence?</label>
+            <select id="sp_incont">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="urinary">Urinary only</option>
+              <option value="fecal">Fecal only</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+          <div class="field"><label>Last urination / dribbling?</label><input type="text" id="sp_void" placeholder="e.g., 4 hours ago, dribbling noted"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Tail movement?</label>
+            <select id="sp_tail">
+              <option value="">— unknown —</option>
+              <option value="normal">Normal</option>
+              <option value="reduced">Reduced</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+          <div class="field"><label>Vocalizing in pain?</label>
+            <select id="sp_vocal">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="spont">Yes — spontaneously</option>
+              <option value="move">Yes — with movement</option>
+              <option value="both">Yes — both</option>
+            </select>
+          </div>
+        </div>
+        <div class="row row-3">
+          <div class="field"><label>Slow to sit or rise?</label>
+            <select id="sp_rise">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Dragging feet / tripping?</label>
+            <select id="sp_drag">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Holding a limb off the ground?</label>
+            <select id="sp_limb_up">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="sp_limb_up_d_wrap" style="display:none"><label>Which limb?</label><input type="text" id="sp_limb_up_d" placeholder="e.g., right thoracic limb"></div>
+        <div class="field"><label>Abnormal posture?</label>
+          <select id="sp_posture">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field" id="sp_posture_d_wrap" style="display:none"><label>Describe posture</label><input type="text" id="sp_posture_d" placeholder="e.g., kyphosis, wide-based stance, low head carriage"></div>
+      </div></div>`,
+
+    neuromuscular: `
+      <div class="card">
+      <div class="card-header">Neuromuscular — Specific Questions</div>
+      <div class="card-body">
+        <div class="row row-2">
+          <div class="field"><label>Exercise intolerance / fatigues easily?</label>
+            <select id="nm_fatigue">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="rest">Yes — resolves with rest</option>
+              <option value="norest">Yes — does not resolve with rest</option>
+            </select>
+          </div>
+          <div class="field"><label>Abnormal gait character</label>
+            <select id="nm_gait">
+              <option value="">— unknown —</option>
+              <option value="normal">Normal</option>
+              <option value="stiff">Stiff</option>
+              <option value="short">Short-strided</option>
+              <option value="scuff">Scuffing</option>
+              <option value="other">Other / unspecified</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Drooling, gagging, regurgitation, or vomiting (especially post-prandial)?</label>
+          <select id="nm_dysph">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field" id="nm_dysph_d_wrap" style="display:none"><label>Describe signs</label><textarea id="nm_dysph_d" placeholder="e.g., regurgitation ~10 min after eating, change in bark (softer/hoarse), hypersalivation"></textarea></div>
+        <div class="row row-2">
+          <div class="field"><label>Difficulty prehending food or hacking after water?</label>
+            <select id="nm_preh">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+          <div class="field"><label>Detail</label><input type="text" id="nm_preh_d" placeholder="e.g., drops food, coughs after drinking"></div>
+        </div>
+        <div class="row row-2">
+          <div class="field"><label>Muscle atrophy?</label>
+            <select id="nm_atrophy">
+              <option value="">— unknown —</option>
+              <option value="no">No</option>
+              <option value="generalized">Yes — generalized</option>
+              <option value="focal">Yes — focal</option>
+            </select>
+          </div>
+          <div class="field"><label>Atrophy distribution</label><input type="text" id="nm_atrophy_d" placeholder="e.g., temporal muscles, pelvic limbs"></div>
+        </div>
+        <div class="field"><label>Collapsing episodes?</label>
+          <select id="nm_collapse">
+            <option value="">— unknown —</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="field" id="nm_collapse_d_wrap" style="display:none"><label>Collapse frequency and duration</label><input type="text" id="nm_collapse_d" placeholder="e.g., 2–3×/week, episodes lasting ~2 min"></div>
+      </div></div>`
+  };
+  return sections[c] || '';
+}
+
+function attachListeners(c){
+  const pairs = {
+    seizure: [['sz_auto','yes','sz_auto_d_wrap'],['sz_beh','yes','sz_beh_d_wrap']],
+    brain:   [['br_beh','yes','br_beh_d_wrap'],['br_toxin','yes','br_toxin_d_wrap']],
+    spine:   [['sp_limb_up','yes','sp_limb_up_d_wrap'],['sp_posture','yes','sp_posture_d_wrap']],
+    neuromuscular: [['nm_dysph','yes','nm_dysph_d_wrap'],['nm_collapse','yes','nm_collapse_d_wrap']]
+  };
+  (pairs[c]||[]).forEach(([id, val, target])=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', function(){
+      const t = document.getElementById(target);
+      if(t) t.style.display = this.value===val ? 'block' : 'none';
+    });
+  });
+}
+
+function generateNote(){
+  const name = v('pt_name') || 'The patient';
+  const Cap = name.charAt(0).toUpperCase() + name.slice(1);
+  const ownerLast = v('owner_last');
+  const parts = [v('pt_age'), v('pt_sex'), v('pt_breed'), v('pt_species')].filter(Boolean);
+  const desc = parts.length ? `${Cap} is a ${parts.join(' ')}` : Cap;
+
+  const general = [];
+  const specific = [];
+
+  // Opening
+  const ownerStr = ownerLast ? ` (owner: ${ownerLast})` : '';
+  general.push(`${desc}${ownerStr} presenting for evaluation of ${complaintLabels[complaint].toLowerCase()}.`);
+  const refVet = v('ref_vet'), refClinic = v('ref_clinic');
+  if(refVet || refClinic){
+    let ref = 'Referred by';
+    if(refVet) ref += ` ${refVet}`;
+    if(refClinic) ref += ` at ${refClinic}`;
+    general.push(ref + '.');
+  }
+
+  // Onset
+  const ow = v('gen_onset_when'), ot = v('gen_onset_type');
+  if(ow || ot){
+    const typeMap = {peracute:'peracute',acute:'acute',subacute:'subacute',gradual:'gradual'};
+    let s = 'The problem began';
+    if(ow) s += ` ${ow}`;
+    if(ot) s += ` with ${typeMap[ot]||ot} onset`;
+    general.push(s + '.');
+  }
+
+  const courseMap = {
+    progressive:'The clinical signs have been progressive.',
+    improving:'The clinical signs have been improving.',
+    static:'The clinical signs have been static since onset.',
+    episodic:'The clinical course has been episodic, with waxing and waning signs.'
+  };
+  if(v('gen_course')) general.push(courseMap[v('gen_course')]||'');
+
+  const latMap = {right:'The problem appears right-lateralized.',left:'The problem appears left-lateralized.',none:'No lateralization is apparent.'};
+  if(v('gen_lat')) general.push(latMap[v('gen_lat')]||'');
+
+  if(v('gen_diag_yn')==='no') general.push('No prior diagnostic testing has been performed.');
+  else if(v('gen_diag_yn')==='yes'){
+    let s = 'Previous diagnostic testing';
+    if(v('gen_diag_when')) s += ` (${v('gen_diag_when')})`;
+    s += ` included ${v('gen_diag_detail')||'unspecified tests'}`;
+    general.push(s + '.');
+  }
+
+  if(v('gen_meds_tried')) general.push(`Previously trialed medications include ${v('gen_meds_tried')}.`);
+  if(v('gen_meds_current')){
+    let s = `${Cap} is currently receiving ${v('gen_meds_current')}`;
+    if(v('gen_last_dose')) s += `, with the last dose given ${v('gen_last_dose')}`;
+    general.push(s+'.');
+  } else if(v('gen_last_dose')){
+    general.push(`The last dose of medication was given ${v('gen_last_dose')}.`);
+  }
+
+  if(v('gen_owner_dur')||v('gen_acquired')){
+    let s = `The owner has had ${name} for ${v('gen_owner_dur')||'an unspecified duration'}`;
+    if(v('gen_acquired')) s += `, acquired from ${v('gen_acquired')}`;
+    general.push(s+'.');
+  }
+
+  if(v('gen_comorbid')){
+    const c = v('gen_comorbid').toLowerCase();
+    if(c==='none'||c==='no'||c==='n/a') general.push('No other known medical conditions are reported.');
+    else general.push(`Known comorbidities include ${v('gen_comorbid')}.`);
+  }
+
+  if(v('gen_travel')==='no') general.push('No recent travel is reported.');
+  else if(v('gen_travel')==='yes') general.push(`${Cap} has traveled recently${v('gen_travel_dest') ? ' to '+v('gen_travel_dest') : ''}.`);
+
+  const eatMap = {
+    normal:`${Cap} is eating and drinking normally.`,
+    decreased:'The owner reports decreased appetite or water intake.',
+    not_eating:`The owner reports that ${name} is not eating.`,
+    not_drinking:`The owner reports that ${name} is not drinking.`,
+    neither:`The owner reports that ${name} is not eating or drinking.`
+  };
+  if(v('gen_eating')) general.push(eatMap[v('gen_eating')]||'');
+
+  const wtMap = {stable:'Body weight has been stable.',loss:'The owner has noted weight loss.',gain:'The owner has noted weight gain.'};
+  if(v('gen_weight')) general.push(wtMap[v('gen_weight')]||'');
+
+  if(v('gen_gi')==='no') general.push('No coughing, sneezing, vomiting, or diarrhea is reported.');
+  else if(v('gen_gi')==='yes') general.push(`The owner reports ${v('gen_gi_detail')||'coughing, sneezing, vomiting, or diarrhea'}.`);
+
+  const vaccMap = {yes:'Vaccinations are reported to be current, including Rabies.',no:'Vaccinations are reported to be overdue.',partial:'Vaccinations are partially current.'};
+  if(v('gen_vacc')) general.push(vaccMap[v('gen_vacc')]||'');
+
+  if(v('gen_facilities')==='no') general.push(`${Cap} has not been seen at other facilities.`);
+  else if(v('gen_facilities')==='yes') general.push(`${Cap} has been seen at other facilities${v('gen_facilities_detail') ? '; records requested from '+v('gen_facilities_detail') : ''}.`);
+
+  if(v('gen_ate')==='yes') general.push(`${Cap} ate this morning prior to the appointment.`);
+  else if(v('gen_ate')==='no') general.push(`${Cap} was fasted this morning.`);
+
+  // --- Complaint-specific ---
+  if(complaint==='seizure'){
+    const first=v('sz_first'), last=v('sz_last');
+    if(first||last){ let s=`The first seizure event occurred ${first||'at an unknown date'}`; if(last) s+=`, with the most recent event ${last}`; specific.push(s+'.'); }
+    const clMap = {no:'There is no history of cluster seizures or status epilepticus.',cluster:'The owner reports cluster seizure activity.',se:'The owner reports at least one episode of status epilepticus.',both:'The owner reports both cluster seizures and status epilepticus.'};
+    if(v('sz_cluster')) specific.push(clMap[v('sz_cluster')]||'');
+    if(v('sz_freq')) specific.push(`Event frequency has been described as ${v('sz_freq')}.`);
+    if(v('sz_desc')) specific.push(`Episodes are described as follows: ${v('sz_desc')}.`);
+    if(v('sz_resp')==='yes') specific.push(`During events, ${name} remains responsive to touch and sound.`);
+    else if(v('sz_resp')==='no') specific.push(`During events, ${name} is unresponsive to touch and sound.`);
+    if(v('sz_auto')==='no') specific.push('No ictal autonomic signs are reported.');
+    else if(v('sz_auto')==='yes') specific.push(`Ictal signs noted include ${v('sz_auto_d')||'autonomic activity (details unspecified)'}.`);
+    if(v('sz_activity')||v('sz_time')){ let s='Events tend to occur'; if(v('sz_activity')) s+=` while ${name} is ${v('sz_activity')}`; if(v('sz_time')) s+=`, typically ${v('sz_time')}`; specific.push(s+'.'); }
+    if(v('sz_postictal')) specific.push(`Post-ictally, ${name} ${v('sz_postictal')}.`);
+    if(v('sz_sefx')==='no') specific.push('No medication side effects are reported.');
+    else if(v('sz_sefx')==='yes') specific.push(`The owner reports medication side effects including ${v('sz_sefx_d')||'unspecified effects'}.`);
+    if(v('sz_toxin')==='no') specific.push('No known toxin exposure is reported.');
+    else if(v('sz_toxin')==='yes') specific.push(`Toxin exposure is reported${v('sz_toxin_d') ? ' ('+v('sz_toxin_d')+')' : ''}.`);
+    if(v('sz_beh')==='no') specific.push('No interictal behavioral changes are reported.');
+    else if(v('sz_beh')==='yes') specific.push(`The owner reports interictal behavioral changes, including ${v('sz_beh_d')||'unspecified changes'}.`);
+  }
+
+  else if(complaint==='brain'){
+    if(v('br_beh')==='no') specific.push('No behavioral or personality changes are reported.');
+    else if(v('br_beh')==='yes') specific.push(`The owner reports behavioral changes including ${v('br_beh_d')||'unspecified changes'}.`);
+    const tiltMap = {no:'No head tilt is reported.',right:'A right-sided head tilt is reported.',left:'A left-sided head tilt is reported.'};
+    if(v('br_tilt')) specific.push(tiltMap[v('br_tilt')]||'');
+    const circMap = {no:'No circling is reported.',rt:`${Cap} circles tightly to the right.`,rw:`${Cap} circles widely to the right.`,lt:`${Cap} circles tightly to the left.`,lw:`${Cap} circles widely to the left.`};
+    if(v('br_circle')) specific.push(circMap[v('br_circle')]||'');
+    const atMap = {no:'No head muscle atrophy is noted.',right:'Right-sided head muscle atrophy is reported.',left:'Left-sided head muscle atrophy is reported.',bilateral:'Bilateral head muscle atrophy is reported.'};
+    if(v('br_atrophy')) specific.push(atMap[v('br_atrophy')]||'');
+    const axMap = {no:'No gait abnormality is reported.',general:`${Cap} is ataxic.`,fall_r:`${Cap} falls or leans to the right.`,fall_l:`${Cap} falls or leans to the left.`,wall:`${Cap} hugs the wall when walking.`,sway:`${Cap} sways when walking.`};
+    if(v('br_ataxia')) specific.push(axMap[v('br_ataxia')]||'');
+    if(v('br_facial')==='no') specific.push('No facial nerve signs are reported.');
+    else if(v('br_facial')==='yes') specific.push(`Facial nerve signs are reported${v('br_facial_d') ? ': '+v('br_facial_d') : ''}.`);
+    if(v('br_nyst')==='no') specific.push('No abnormal eye movements are reported.');
+    else if(v('br_nyst')==='yes') specific.push('Abnormal eye movements are reported by the owner.');
+    const mentMap = {normal:`${Cap} is reported to be alert and interactive at home.`,dull:`The owner reports that ${name} appears dull or depressed.`,obtunded:`The owner reports that ${name} appears obtunded.`,confused:`The owner reports that ${name} appears confused or disoriented.`};
+    if(v('br_ment')) specific.push(mentMap[v('br_ment')]||'');
+    if(v('br_tremor')==='no') specific.push('No tremors are reported.');
+    else if(v('br_tremor')==='yes') specific.push('Tremors are reported by the owner.');
+    if(v('br_toxin')==='no') specific.push('No known toxin exposure is reported.');
+    else if(v('br_toxin')==='yes') specific.push(`Toxin exposure is reported${v('br_toxin_d') ? ' ('+v('br_toxin_d')+')' : ''}.`);
+    if(v('br_vision')==='no') specific.push('No visual deficits are reported.');
+    else if(v('br_vision')==='yes') specific.push(`The owner reports ${v('br_vision_d')||'apparent visual deficits'}.`);
+    if(v('br_sz')==='no') specific.push('No seizure activity is reported.');
+    else if(v('br_sz')==='yes') specific.push('Seizure activity is also reported.');
+  }
+
+  else if(complaint==='spine'){
+    if(v('sp_limbs')) specific.push(`The affected limb(s) include ${v('sp_limbs')}.`);
+    if(v('sp_ambu')==='yes') specific.push(`${Cap} is currently ambulatory.`);
+    else if(v('sp_ambu')==='weak'){ let s=`${Cap} is weakly ambulatory`; if(v('sp_ambu_tl')) s+=`, with decline noted ${v('sp_ambu_tl')}`; specific.push(s+'.'); }
+    else if(v('sp_ambu')==='no'){ let s=`${Cap} is non-ambulatory`; if(v('sp_ambu_tl')) s+=`; loss of ambulation occurred ${v('sp_ambu_tl')}`; specific.push(s+'.'); }
+    if(v('sp_pain')==='no') specific.push(`${Cap} does not appear painful.`);
+    else if(v('sp_pain')==='yes') specific.push(`${Cap} appears painful${v('sp_pain_loc') ? ', with pain perceived in the '+v('sp_pain_loc')+' region' : ''}.`);
+    if(v('sp_prop')==='no') specific.push('No proprioceptive deficits are reported.');
+    else if(v('sp_prop')==='yes') specific.push(`Proprioceptive deficits are noted${v('sp_prop_d') ? ', including '+v('sp_prop_d') : ''}.`);
+    const asymMap = {sym:'Deficits are reported to be symmetric.',right:'The right side is more severely affected.',left:'The left side is more severely affected.'};
+    if(v('sp_asym')) specific.push(asymMap[v('sp_asym')]||'');
+    if(v('sp_act')==='no') specific.push('No change in activity level is reported.');
+    else if(v('sp_act')==='yes') specific.push(`The owner reports that ${name} has stopped ${v('sp_act_d')||'certain activities'}.`);
+    if(v('sp_incont')==='no') specific.push('No fecal or urinary incontinence is reported.');
+    else if(v('sp_incont')==='urinary') specific.push(`Urinary incontinence is present.${v('sp_void') ? ' Last urination: '+v('sp_void')+'.' : ''}`);
+    else if(v('sp_incont')==='fecal') specific.push('Fecal incontinence is present.');
+    else if(v('sp_incont')==='both') specific.push(`Both fecal and urinary incontinence are present.${v('sp_void') ? ' Last urination: '+v('sp_void')+'.' : ''}`);
+    else if(v('sp_void')) specific.push(`Last urination: ${v('sp_void')}.`);
+    const tailMap = {normal:'Tail movement is reported to be normal.',reduced:'Tail movement is reduced.',absent:'Tail movement is absent.'};
+    if(v('sp_tail')) specific.push(tailMap[v('sp_tail')]||'');
+    const vocalMap = {no:`${Cap} does not vocalize in pain spontaneously or with movement.`,spont:`${Cap} vocalizes in pain spontaneously.`,move:`${Cap} vocalizes in pain with certain movements.`,both:`${Cap} vocalizes in pain both spontaneously and with movement.`};
+    if(v('sp_vocal')) specific.push(vocalMap[v('sp_vocal')]||'');
+    if(v('sp_rise')==='no') specific.push(`${Cap} is not slow to sit or rise.`);
+    else if(v('sp_rise')==='yes') specific.push(`${Cap} is slow to sit and rise.`);
+    if(v('sp_drag')==='no') specific.push('No dragging of the feet or tripping is reported.');
+    else if(v('sp_drag')==='yes') specific.push(`The owner reports that ${name} drags its feet or trips.`);
+    if(v('sp_limb_up')==='no') specific.push('No limb is held off the ground.');
+    else if(v('sp_limb_up')==='yes') specific.push(`${Cap} holds${v('sp_limb_up_d') ? ' the '+v('sp_limb_up_d') : ' a limb'} off the ground.`);
+    if(v('sp_posture')==='no') specific.push('No abnormal posture is reported.');
+    else if(v('sp_posture')==='yes') specific.push(`Abnormal posture is reported${v('sp_posture_d') ? ', described as '+v('sp_posture_d') : ''}.`);
+  }
+
+  else if(complaint==='neuromuscular'){
+    const fatMap = {no:'No exercise intolerance is reported.',rest:'The owner reports exercise intolerance that resolves with rest.',norest:'The owner reports exercise intolerance that does not resolve with rest.'};
+    if(v('nm_fatigue')) specific.push(fatMap[v('nm_fatigue')]||'');
+    if(v('nm_dysph')==='no') specific.push('No drooling, gagging, regurgitation, or vomiting is reported.');
+    else if(v('nm_dysph')==='yes') specific.push(`The owner reports ${v('nm_dysph_d')||'pharyngeal/esophageal signs including drooling, gagging, or regurgitation'}.`);
+    if(v('nm_preh')==='no') specific.push('No difficulty prehending food or hacking after water is reported.');
+    else if(v('nm_preh')==='yes') specific.push(`Difficulty prehending food or hacking after drinking is reported${v('nm_preh_d') ? ': '+v('nm_preh_d') : ''}.`);
+    const atMap = {no:'No muscle atrophy is noted.',generalized:`Generalized muscle atrophy is noted${v('nm_atrophy_d') ? ', particularly involving the '+v('nm_atrophy_d') : ''}.`,focal:`Focal muscle atrophy is noted${v('nm_atrophy_d') ? ' in the '+v('nm_atrophy_d') : ''}.`};
+    if(v('nm_atrophy')) specific.push(atMap[v('nm_atrophy')]||'');
+    const gaitMap = {normal:'Gait appears normal at home.',stiff:'A stiff gait is reported.',short:'A short-strided gait is reported.',scuff:'Scuffing of the feet is reported.',other:'An abnormal gait is reported.'};
+    if(v('nm_gait')) specific.push(gaitMap[v('nm_gait')]||'');
+    if(v('nm_collapse')==='no') specific.push('No collapsing episodes are reported.');
+    else if(v('nm_collapse')==='yes') specific.push(`Collapsing episodes are reported${v('nm_collapse_d') ? ', occurring '+v('nm_collapse_d') : ''}.`);
+  }
+
+  // Assemble paragraphs
+  const para1 = general.filter(Boolean).join(' ');
+  const para2 = specific.filter(Boolean).join(' ');
+  const note = para2 ? para1 + '\n\n' + para2 : para1;
+
+  document.getElementById('output').textContent = note;
+  hide('step2'); show('step3');
+}
+
+function copyNote(){
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const el = document.getElementById('copy-ok');
+    el.style.display = 'inline';
+    setTimeout(()=>el.style.display='none', 2000);
+  });
+}
+</script>
+</body>
+</html>

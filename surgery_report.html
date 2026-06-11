@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surgery Report Generator — VCA Kzoo Neuro</title>
+<style>
+:root {
+  --primary: #2c5f8a;
+  --accent: #4a9fd4;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --border: #d1d9e0;
+  --text: #1a2332;
+  --muted: #6b7c93;
+  --green: #27ae60;
+  --section-bg: #eef2f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--primary); color: white; padding: 14px 24px; }
+header h1 { font-size: 1rem; font-weight: 600; }
+header span { font-size: 0.8rem; opacity: 0.7; }
+.container { max-width: 820px; margin: 28px auto; padding: 0 16px 60px; }
+.step { display: none; }
+.step.active { display: block; }
+.step-title { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.step-sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 20px; }
+
+.surgery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sx-btn { background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; text-align: left; transition: all 0.15s; width: 100%; }
+.sx-btn:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(74,159,212,0.15); }
+.sx-btn .label { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+.sx-btn .sub { font-size: 0.78rem; color: var(--muted); }
+
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 12px 18px; font-weight: 600; font-size: 0.82rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; }
+.card-body { padding: 18px; }
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 0.82rem; font-weight: 500; margin-bottom: 5px; color: var(--text); }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 0.88rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+.row { display: grid; gap: 12px; }
+.row-2 { grid-template-columns: 1fr 1fr; }
+.row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.mt { margin-top: 14px; }
+
+.toggle-group { display: flex; gap: 8px; }
+.toggle-btn { flex: 1; padding: 8px 6px; border: 1.5px solid var(--border); border-radius: 7px; cursor: pointer; text-align: center; font-size: 0.83rem; font-weight: 500; background: var(--surface); color: var(--muted); transition: all 0.12s; }
+.toggle-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
+.toggle-btn:hover:not(.active) { border-color: var(--accent); color: var(--primary); }
+
+.btn { padding: 9px 18px; border: none; border-radius: 7px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-secondary { background: var(--section-bg); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-success { background: var(--green); color: white; }
+.btn-success:hover { background: #229954; }
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.copy-ok { color: var(--green); font-size: 0.82rem; display: none; font-weight: 600; }
+
+.output-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 28px 32px; font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.93rem; line-height: 1.85; white-space: pre-wrap;
+  min-height: 400px; outline: none;
+}
+.output-box:focus { border-color: var(--accent); }
+
+.check-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.check-item { display: flex; align-items: center; gap: 5px; font-size: 0.84rem; cursor: pointer; }
+.check-item input[type=checkbox] { width: auto; cursor: pointer; }
+.hint { font-size: 0.76rem; color: var(--muted); margin-top: 4px; }
+
+@media print {
+  header, .actions, #step1, #step-hemi, #step-vslot, #step-dlam, #step-crani { display: none !important; }
+  #step-output { display: block !important; }
+  .step-title, .step-sub { display: none; }
+  .output-box { border: none; padding: 0; font-size: 11pt; line-height: 1.7; }
+  body { background: white; }
+}
+@media (max-width: 580px) {
+  .surgery-grid, .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Surgery Report Generator</h1>
+  <span>VCA Kalamazoo Neurology</span>
+</header>
+<div class="container">
+
+<!-- STEP 1 -->
+<div id="step1" class="step active">
+  <div class="step-title">Select Procedure</div>
+  <div class="step-sub">Choose the surgery type to begin building the operative report.</div>
+  <div class="surgery-grid">
+    <button class="sx-btn" onclick="selectSurgery('hemi')">
+      <div class="label">Hemilaminectomy</div>
+      <div class="sub">Thoracolumbar / lumbar IVDD — unilateral dorsal approach</div>
+    </button>
+    <button class="sx-btn" onclick="selectSurgery('vslot')">
+      <div class="label">Ventral Slot</div>
+      <div class="sub">Cervical IVDD decompression — ventral midline or paramedial</div>
+    </button>
+    <button class="sx-btn" onclick="selectSurgery('dlam')">
+      <div class="label">Dorsal Laminectomy</div>
+      <div class="sub">Cervicothoracic decompression or intradural mass removal</div>
+    </button>
+    <button class="sx-btn" onclick="selectSurgery('crani')">
+      <div class="label">Craniectomy</div>
+      <div class="sub">Foramen magnum decompression or lateral rostrotentorial</div>
+    </button>
+  </div>
+</div>
+
+<!-- STEP: HEMILAMINECTOMY -->
+<div id="step-hemi" class="step">
+  <div class="card">
+    <div class="card-header">Patient &amp; Procedure</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Patient Name</label>
+          <input type="text" id="hemi-patient" placeholder="e.g. Max (Labrador)">
+        </div>
+        <div class="field">
+          <label>Date of Surgery</label>
+          <input type="date" id="hemi-date">
+        </div>
+        <div class="field">
+          <label>Surgeon</label>
+          <input type="text" id="hemi-surgeon" value="SC">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Assistant (optional)</label>
+          <input type="text" id="hemi-assistant" placeholder="leave blank if none">
+        </div>
+        <div class="field">
+          <label>Procedure Variant</label>
+          <select id="hemi-type" onchange="updateHemiType()">
+            <option value="lumbar-pin">Lumbar — marker pin (L-region)</option>
+            <option value="tl-nopin">Thoracolumbar — no pin (T/L junction)</option>
+            <option value="high-thoracic">High Thoracic (T4–T10)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Approach</div>
+    <div class="card-body">
+      <div class="row row-2">
+        <div class="field">
+          <label>Side</label>
+          <div class="toggle-group" id="hemi-side-group">
+            <button class="toggle-btn active" onclick="toggleSide(this,'hemi-side-group','Left')">Left</button>
+            <button class="toggle-btn" onclick="toggleSide(this,'hemi-side-group','Right')">Right</button>
+          </div>
+          <input type="hidden" id="hemi-side" value="Left">
+        </div>
+        <div class="field">
+          <label>Primary Disc Space</label>
+          <select id="hemi-disc" onchange="autoFillHemiLevels()">
+            <option value="T13-L1">T13-L1</option>
+            <option value="L1-2">L1-2</option>
+            <option value="L2-3">L2-3</option>
+            <option value="L3-4" selected>L3-4</option>
+            <option value="L4-5">L4-5</option>
+            <option value="L5-6">L5-6</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="hemi-pin-fields" class="row row-3 mt">
+        <div class="field">
+          <label>Marker Pin Level</label>
+          <input type="text" id="hemi-pin-level" value="L4-5">
+        </div>
+        <div class="field">
+          <label>Spinous Process Clamped</label>
+          <input type="text" id="hemi-clamp" value="L4">
+        </div>
+        <div class="field">
+          <label>Foraminotomy</label>
+          <div class="toggle-group" id="hemi-foram-group">
+            <button class="toggle-btn active" onclick="toggleForam(this,'yes')">Yes</button>
+            <button class="toggle-btn" onclick="toggleForam(this,'no')">No</button>
+          </div>
+          <input type="hidden" id="hemi-foram" value="yes">
+        </div>
+      </div>
+
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Incision Length (cm)</label>
+          <input type="number" id="hemi-incision-cm" value="15" min="5" max="30">
+        </div>
+        <div class="field">
+          <label>Incision Over (vertebral span)</label>
+          <input type="text" id="hemi-incision-over" value="L1 to L6">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Epaxial Muscles Elevated From</label>
+          <input type="text" id="hemi-epaxial" value="L2, L3, L4, and L5 spinous processes">
+        </div>
+        <div class="field">
+          <label>Articular Facets Incised</label>
+          <input type="text" id="hemi-facets-incised" value="L2-3, L3-4, L4-5">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Articular Facet Removed</label>
+          <input type="text" id="hemi-facet-removed" value="L3-L4">
+        </div>
+        <div id="hemi-tl-landmarks-field" style="display:none" class="field">
+          <label>Landmark Identification</label>
+          <input type="text" id="hemi-tl-landmarks" value="T13 was identified by visualizing the last rib, and L1 by visualizing the first transverse process">
+        </div>
+        <div id="hemi-ht-lam-field" style="display:none" class="field">
+          <label>Laminectomy Levels</label>
+          <input type="text" id="hemi-ht-lam" placeholder="e.g. T7 to T9">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Closure</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Fascia Suture</label>
+          <select id="hemi-fascia-suture">
+            <option value="2-0 PDS" selected>2-0 PDS</option>
+            <option value="0 PDS">0 PDS</option>
+            <option value="3-0 PDS">3-0 PDS</option>
+            <option value="3-0 vicryl">3-0 vicryl</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>SubQ Suture</label>
+          <select id="hemi-subq-suture">
+            <option value="2-0 vicryl" selected>2-0 vicryl</option>
+            <option value="3-0 vicryl">3-0 vicryl</option>
+            <option value="0 vicryl">0 vicryl</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Skin Closure</label>
+          <select id="hemi-skin-suture">
+            <option value="3-0 Ethilon in a Ford Interlocking pattern" selected>3-0 Ethilon — Ford Interlocking</option>
+            <option value="2-0 Ethilon in a Ford Interlocking pattern">2-0 Ethilon — Ford Interlocking</option>
+            <option value="2-0 Ethilon in a Ford Interlocking and cruciate pattern">2-0 Ethilon — Ford Interlocking + cruciate</option>
+            <option value="3-0 vicryl in an intradermal pattern and skin glue">3-0 vicryl intradermal + skin glue</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Intraoperative Findings</div>
+    <div class="card-body">
+      <div class="field">
+        <textarea id="hemi-findings" rows="7"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+    <button class="btn btn-primary" onclick="generateHemi()">Generate Report</button>
+  </div>
+</div>
+
+<!-- STEP: VENTRAL SLOT -->
+<div id="step-vslot" class="step">
+  <div class="card">
+    <div class="card-header">Patient &amp; Procedure</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Patient Name</label>
+          <input type="text" id="vs-patient" placeholder="e.g. Buddy (Dachshund)">
+        </div>
+        <div class="field">
+          <label>Date of Surgery</label>
+          <input type="date" id="vs-date">
+        </div>
+        <div class="field">
+          <label>Surgeon</label>
+          <input type="text" id="vs-surgeon" value="SC">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Assistant</label>
+          <input type="text" id="vs-assistant" placeholder="name or leave blank">
+        </div>
+        <div class="field">
+          <label>Approach</label>
+          <div class="toggle-group" id="vs-approach-group">
+            <button class="toggle-btn active" onclick="toggleBtn(this,'vs-approach-group','standard')">Standard Midline</button>
+            <button class="toggle-btn" onclick="toggleBtn(this,'vs-approach-group','paramedial')">Paramedial</button>
+          </div>
+          <input type="hidden" id="vs-approach" value="standard">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Disc Space &amp; Decompression</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Primary Disc Space</label>
+          <select id="vs-disc" onchange="updateVSlotFenestrations()">
+            <option value="C2-3">C2-3</option>
+            <option value="C3-4">C3-4</option>
+            <option value="C4-5" selected>C4-5</option>
+            <option value="C5-6">C5-6</option>
+            <option value="C6-7">C6-7</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Slot Length (mm)</label>
+          <input type="number" id="vs-slot-length" placeholder="e.g. 8" min="3" max="15">
+        </div>
+        <div class="field">
+          <label>Slot Width (mm)</label>
+          <input type="number" id="vs-slot-width" placeholder="e.g. 5" min="2" max="12">
+        </div>
+      </div>
+      <div class="field mt">
+        <label>Fenestrations (adjacent levels)</label>
+        <div class="check-group" id="vs-fenestrations">
+          <label class="check-item"><input type="checkbox" value="C2-3"> C2-3</label>
+          <label class="check-item"><input type="checkbox" value="C3-4"> C3-4</label>
+          <label class="check-item"><input type="checkbox" value="C4-5"> C4-5</label>
+          <label class="check-item"><input type="checkbox" value="C5-6"> C5-6</label>
+          <label class="check-item"><input type="checkbox" value="C6-7"> C6-7</label>
+        </div>
+        <div class="hint">Do not check the primary decompression level above.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Intraoperative Findings</div>
+    <div class="card-body">
+      <div class="field">
+        <textarea id="vs-findings" rows="6">Upon entering the spinal canal, old hemorrhage and calcified disc nucleus material were easily removed using suction and a small sterile loop. The spinal cord was then visible flush with the ventral aspect of the spinal canal, and a dental curette was passed around the perimeter of the slot window without encountering any adhesions or masses of disc material. The surgical site was flushed several times with sterile saline.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+    <button class="btn btn-primary" onclick="generateVSlot()">Generate Report</button>
+  </div>
+</div>
+
+<!-- STEP: DORSAL LAMINECTOMY -->
+<div id="step-dlam" class="step">
+  <div class="card">
+    <div class="card-header">Patient &amp; Procedure</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Patient Name</label>
+          <input type="text" id="dl-patient" placeholder="e.g. Rex (Doberman)">
+        </div>
+        <div class="field">
+          <label>Date of Surgery</label>
+          <input type="date" id="dl-date">
+        </div>
+        <div class="field">
+          <label>Surgeon</label>
+          <input type="text" id="dl-surgeon" value="SC">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Assistant</label>
+          <input type="text" id="dl-assistant" placeholder="name or leave blank">
+        </div>
+        <div class="field">
+          <label>Side Rotation</label>
+          <select id="dl-side-pref">
+            <option value="none">None — bilateral symmetric</option>
+            <option value="right">Slight right rotation (right-sided lesion)</option>
+            <option value="left">Slight left rotation (left-sided lesion)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Approach</div>
+    <div class="card-body">
+      <div class="row row-2">
+        <div class="field">
+          <label>Incision From</label>
+          <input type="text" id="dl-from" placeholder="e.g. C6 or the mid-cervical area">
+        </div>
+        <div class="field">
+          <label>Incision To</label>
+          <input type="text" id="dl-to" placeholder="e.g. T3 or the mid-thoracic area">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Laminectomy Level(s)</label>
+          <input type="text" id="dl-lam-levels" placeholder="e.g. T8 or T7-T9">
+        </div>
+        <div class="field">
+          <label>Marker Pin Level (if used)</label>
+          <input type="text" id="dl-pin" placeholder="e.g. T4-T5 or leave blank">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Spinous Process(es) Removed</label>
+          <input type="text" id="dl-spinous" placeholder="e.g. T8 or leave blank">
+        </div>
+        <div class="field">
+          <label>Durotomy</label>
+          <div class="toggle-group" id="dl-duro-group">
+            <button class="toggle-btn" onclick="toggleBtn(this,'dl-duro-group','yes')">Yes</button>
+            <button class="toggle-btn active" onclick="toggleBtn(this,'dl-duro-group','no')">No</button>
+          </div>
+          <input type="hidden" id="dl-duro" value="no">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Closure</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Fascia Suture</label>
+          <select id="dl-fascia-suture">
+            <option value="3-0 vicryl" selected>3-0 vicryl</option>
+            <option value="2-0 vicryl">2-0 vicryl</option>
+            <option value="0 PDS">0 PDS</option>
+            <option value="3-0 PDS">3-0 PDS</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>SubQ Suture</label>
+          <select id="dl-subq-suture">
+            <option value="3-0 vicryl" selected>3-0 vicryl</option>
+            <option value="2-0 vicryl">2-0 vicryl</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Skin Closure</label>
+          <select id="dl-skin-suture">
+            <option value="3-0 vicryl in an intradermal pattern and skin glue" selected>3-0 vicryl intradermal + skin glue</option>
+            <option value="3-0 Ethilon in a Ford Interlocking pattern">3-0 Ethilon — Ford Interlocking</option>
+            <option value="3-0 Ethilon in a cruciate pattern">3-0 Ethilon — cruciate</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Intraoperative Findings</div>
+    <div class="card-body">
+      <div class="field">
+        <textarea id="dl-findings" rows="7">After removing the periosteal layer, the pathology was identified. [DESCRIBE FINDINGS — tumor, disc material, vascular malformation, etc.] The surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+    <button class="btn btn-primary" onclick="generateDLam()">Generate Report</button>
+  </div>
+</div>
+
+<!-- STEP: CRANIECTOMY -->
+<div id="step-crani" class="step">
+  <div class="card">
+    <div class="card-header">Patient &amp; Procedure</div>
+    <div class="card-body">
+      <div class="row row-3">
+        <div class="field">
+          <label>Patient Name</label>
+          <input type="text" id="cr-patient" placeholder="e.g. Bella (Cavalier)">
+        </div>
+        <div class="field">
+          <label>Date of Surgery</label>
+          <input type="date" id="cr-date">
+        </div>
+        <div class="field">
+          <label>Surgeon</label>
+          <input type="text" id="cr-surgeon" value="SC">
+        </div>
+      </div>
+      <div class="row row-2 mt">
+        <div class="field">
+          <label>Assistant</label>
+          <input type="text" id="cr-assistant" placeholder="name or leave blank">
+        </div>
+        <div class="field">
+          <label>Approach</label>
+          <div class="toggle-group" id="cr-approach-group">
+            <button class="toggle-btn active" onclick="toggleCraniApproach(this,'fmd')">FMD</button>
+            <button class="toggle-btn" onclick="toggleCraniApproach(this,'lateral')">Lateral Rostrotentorial</button>
+          </div>
+          <input type="hidden" id="cr-approach" value="fmd">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="cr-lateral-fields" style="display:none">
+    <div class="card-header">Lateral Approach Details</div>
+    <div class="card-body">
+      <div class="row row-2">
+        <div class="field">
+          <label>Operative Side</label>
+          <div class="toggle-group" id="cr-side-group">
+            <button class="toggle-btn active" onclick="toggleBtn(this,'cr-side-group','right')">Right</button>
+            <button class="toggle-btn" onclick="toggleBtn(this,'cr-side-group','left')">Left</button>
+          </div>
+          <input type="hidden" id="cr-side" value="right">
+        </div>
+        <div class="field">
+          <label>Craniectomy Window Size</label>
+          <input type="text" id="cr-window" value="1.5cm x 2cm">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Intraoperative Findings</div>
+    <div class="card-body">
+      <div class="field">
+        <textarea id="cr-findings" rows="7">The occipital bone was of normal thickness. Upon opening the craniectomy window, the dorsal aspect of the cerebellum was visualized. [DESCRIBE FINDINGS]. Bleeding was controlled with gelfoam, bone wax, and bipolar cautery. The surgical site was copiously lavaged with lactated ringer solution throughout the procedure. A thin piece of gelfoam was placed to cover the defect.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+    <button class="btn btn-primary" onclick="generateCrani()">Generate Report</button>
+  </div>
+</div>
+
+<!-- STEP: OUTPUT -->
+<div id="step-output" class="step">
+  <div class="step-title">Operative Report</div>
+  <div class="step-sub">Click to edit inline, then copy to medical records.</div>
+  <div class="output-box" id="output-text" contenteditable="true" spellcheck="true"></div>
+  <div class="actions" style="margin-top:16px">
+    <button class="btn btn-success" onclick="copyReport()">Copy to Clipboard</button>
+    <button class="btn btn-secondary" onclick="goBack2()">← Edit</button>
+    <button class="btn btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn btn-secondary" onclick="newReport()">New Report</button>
+    <span class="copy-ok" id="copy-ok">Copied!</span>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+let currentSurgery = '';
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function selectSurgery(type) {
+  currentSurgery = type;
+  setTodayDate();
+  showStep('step-' + type);
+  if (type === 'hemi') { updateHemiType(); }
+  if (type === 'vslot') { updateVSlotFenestrations(); }
+}
+
+function goBack()  { showStep('step1'); }
+function goBack2() { showStep('step-' + currentSurgery); }
+function newReport() { showStep('step1'); }
+
+function setTodayDate() {
+  const today = new Date().toISOString().split('T')[0];
+  ['hemi-date','vs-date','dl-date','cr-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.value) el.value = today;
+  });
+}
+
+// ── Toggle helpers ───────────────────────────────────────────────────────────
+function toggleBtn(btn, groupId, value) {
+  document.querySelectorAll('#' + groupId + ' .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const hiddenId = groupId.replace(/-group$/, '');
+  const el = document.getElementById(hiddenId);
+  if (el) el.value = value;
+}
+
+function toggleSide(btn, groupId, value) {
+  toggleBtn(btn, groupId, value);
+  if (groupId === 'hemi-side-group') updateHemiFindings();
+}
+
+function toggleForam(btn, value) {
+  toggleBtn(btn, 'hemi-foram-group', value);
+  updateHemiFindings();
+}
+
+function toggleCraniApproach(btn, value) {
+  toggleBtn(btn, 'cr-approach-group', value);
+  const lateralCard = document.getElementById('cr-lateral-fields');
+  lateralCard.style.display = value === 'lateral' ? 'block' : 'none';
+  const findingsEl = document.getElementById('cr-findings');
+  if (value === 'fmd') {
+    findingsEl.value = 'The occipital bone was of normal thickness. Upon opening the craniectomy window, the dorsal aspect of the cerebellum was visualized. [DESCRIBE FINDINGS]. Bleeding was controlled with gelfoam, bone wax, and bipolar cautery. The surgical site was copiously lavaged with lactated ringer solution throughout the procedure. A thin piece of gelfoam was placed to cover the defect.';
+  } else {
+    findingsEl.value = 'Tumor was visible from the surface. There was normal brain tissue visible at the margins of the craniectomy window. [DESCRIBE MASS CHARACTERISTICS AND REMOVAL]. The originally compressed normal brain tissue expanded gradually during the debulking process. Chilled saline and small amounts of gel foam were used to control bleeding.';
+  }
+}
+
+// ── Hemi auto-fill ───────────────────────────────────────────────────────────
+const LEVELS = {
+  'T11-12': { pin:'T12-13', clamp:'T12', icm:15, iover:'T9 to L1',  epax:'T10, T11, T12, and T13 spinous processes', fi:'T10-11, T11-12, T12-13', fr:'T11-T12', npi:'T9-L1',  npe:'T10, T11, T12, T13'     },
+  'T12-13': { pin:'T13-L1', clamp:'T13', icm:15, iover:'T10 to L1', epax:'T11, T12, T13, and L1 spinous processes',  fi:'T11-12, T12-13, T13-L1', fr:'T12-T13', npi:'T10-L2', npe:'T11, T12, T13, L1'     },
+  'T13-L1': { pin:'L1-2',   clamp:'L1',  icm:15, iover:'T11 to L3', epax:'T12, T13, L1, and L2 spinous processes',  fi:'T12-13, T13-L1, L1-2',   fr:'T13-L1',  npi:'T11-L3', npe:'T11, T12, T13, L1, L2' },
+  'L1-2':   { pin:'L2-3',   clamp:'L2',  icm:15, iover:'T13 to L4', epax:'T13, L1, L2, and L3 spinous processes',   fi:'T13-L1, L1-2, L2-3',     fr:'L1-L2',   npi:'T13-L4', npe:'T13, L1, L2, L3'       },
+  'L2-3':   { pin:'L3-4',   clamp:'L3',  icm:15, iover:'L1 to L5',  epax:'L1, L2, L3, and L4 spinous processes',    fi:'L1-2, L2-3, L3-4',       fr:'L2-L3',   npi:'L1-L5',  npe:'L1, L2, L3, L4'         },
+  'L3-4':   { pin:'L4-5',   clamp:'L4',  icm:15, iover:'L1 to L6',  epax:'L2, L3, L4, and L5 spinous processes',    fi:'L2-3, L3-4, L4-5',       fr:'L3-L4',   npi:'L1-L6',  npe:'L2, L3, L4, L5'         },
+  'L4-5':   { pin:'L5-6',   clamp:'L5',  icm:15, iover:'L2 to L7',  epax:'L3, L4, L5, and L6 spinous processes',    fi:'L3-4, L4-5, L5-6',       fr:'L4-L5',   npi:'L2-L7',  npe:'L3, L4, L5, L6'         },
+  'L5-6':   { pin:'L6-7',   clamp:'L6',  icm:12, iover:'L3 to L7',  epax:'L4, L5, L6, and L7 spinous processes',    fi:'L4-5, L5-6, L6-7',       fr:'L5-L6',   npi:'L3-L7',  npe:'L4, L5, L6, L7'         },
+};
+
+function autoFillHemiLevels() {
+  const disc = document.getElementById('hemi-disc').value;
+  const type = document.getElementById('hemi-type').value;
+  const lv = LEVELS[disc];
+  if (!lv) { updateHemiFindings(); return; }
+
+  if (type === 'lumbar-pin') {
+    document.getElementById('hemi-pin-level').value = lv.pin;
+    document.getElementById('hemi-clamp').value     = lv.clamp;
+    document.getElementById('hemi-incision-cm').value   = lv.icm;
+    document.getElementById('hemi-incision-over').value = lv.iover;
+    document.getElementById('hemi-epaxial').value        = lv.epax;
+    document.getElementById('hemi-facets-incised').value = lv.fi;
+    document.getElementById('hemi-facet-removed').value  = lv.fr;
+  } else if (type === 'tl-nopin') {
+    document.getElementById('hemi-incision-cm').value   = 8;
+    document.getElementById('hemi-incision-over').value = lv.npi;
+    document.getElementById('hemi-epaxial').value        = lv.npe;
+    document.getElementById('hemi-facets-incised').value = lv.fr;
+    document.getElementById('hemi-facet-removed').value  = lv.fr;
+  }
+  updateHemiFindings();
+}
+
+function updateHemiType() {
+  const type  = document.getElementById('hemi-type').value;
+  const pinF  = document.getElementById('hemi-pin-fields');
+  const tlF   = document.getElementById('hemi-tl-landmarks-field');
+  const htF   = document.getElementById('hemi-ht-lam-field');
+  const disc  = document.getElementById('hemi-disc');
+  const fascia= document.getElementById('hemi-fascia-suture');
+
+  pinF.style.display = 'none';
+  tlF.style.display  = 'none';
+  htF.style.display  = 'none';
+
+  if (type === 'lumbar-pin') {
+    pinF.style.display = 'grid';
+    disc.innerHTML = ['T13-L1','L1-2','L2-3','L3-4','L4-5','L5-6'].map((v,i) =>
+      `<option value="${v}"${v==='L3-4'?' selected':''}>${v}</option>`).join('');
+    fascia.value = '2-0 PDS';
+  } else if (type === 'tl-nopin') {
+    tlF.style.display = 'block';
+    disc.innerHTML = ['T11-12','T12-13','T13-L1','L1-2','L2-3'].map((v,i) =>
+      `<option value="${v}"${v==='T13-L1'?' selected':''}>${v}</option>`).join('');
+    fascia.value = '0 PDS';
+  } else if (type === 'high-thoracic') {
+    htF.style.display = 'block';
+    disc.innerHTML = ['T4-5','T5-6','T6-7','T7-8','T8-9','T9-10'].map((v,i) =>
+      `<option value="${v}"${v==='T7-8'?' selected':''}>${v}</option>`).join('');
+    document.getElementById('hemi-incision-cm').value    = 20;
+    document.getElementById('hemi-incision-over').value  = 'T4 to T12';
+    document.getElementById('hemi-epaxial').value         = 'T4 to T11 spinous processes';
+    document.getElementById('hemi-facets-incised').value  = '';
+    document.getElementById('hemi-facet-removed').value   = '';
+    fascia.value = '0 PDS';
+  }
+  autoFillHemiLevels();
+}
+
+function updateHemiFindings() {
+  const type  = document.getElementById('hemi-type').value;
+  const disc  = document.getElementById('hemi-disc').value;
+  const foram = document.getElementById('hemi-foram').value;
+  let txt = '';
+
+  if (type === 'lumbar-pin') {
+    if (foram === 'yes') {
+      txt = `Spinal cord was bulging out and was replaced dorsally after the laminectomy defect was created. Nerve roots and venous sinus could be visualized. Epidural fat was removed by suction. Disc material was removed with suction and small sterile loop from the ventral aspect of spinal cord. Moderate sinus bleeding was addressed by the placement of Gelfoam underneath the cord. The ${disc} disc space was fenestrated with a #11 blade from a dorsal approach. The cord was initially noted to be elevated but returned to normal position following removal of disc material. The surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.`;
+    } else {
+      txt = `Spinal cord was elevated by the disc material. Disc material was removed with suction and small sterile loop from the ventral aspect of spinal cord. The cord was initially noted to be elevated but returned to normal position following removal of disc material. The surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.`;
+    }
+  } else if (type === 'tl-nopin') {
+    txt = `A large amount of acute grainy disc material was present once the laminectomy defect was created. Spinal cord was elevated by the disc material. Disc material was removed with suction and small sterile loop from the ventral aspect of spinal cord. The cord was initially noted to be elevated but returned to normal position following removal of disc material. The surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.`;
+  } else if (type === 'high-thoracic') {
+    txt = `Once the laminectomy defect was created, a house curette was used to carefully palpate along the spinal cord. [DESCRIBE FINDINGS — disc material, hemorrhage, mass]. The surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.`;
+  }
+  document.getElementById('hemi-findings').value = txt;
+}
+
+function updateVSlotFenestrations() {
+  const disc = document.getElementById('vs-disc').value;
+  document.querySelectorAll('#vs-fenestrations input[type=checkbox]').forEach(cb => {
+    const item = cb.closest('label');
+    if (cb.value === disc) {
+      cb.checked = false;
+      item.style.opacity = '0.35';
+      item.title = 'Primary decompression level';
+    } else {
+      item.style.opacity = '1';
+      item.title = '';
+    }
+  });
+}
+
+// ── Date formatter ───────────────────────────────────────────────────────────
+function fmtDate(raw) {
+  if (!raw) return '[DATE]';
+  const [y, m, d] = raw.split('-');
+  const mo = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${mo[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+// ── Report generators ────────────────────────────────────────────────────────
+function generateHemi() {
+  const patient  = v('hemi-patient') || '[PATIENT]';
+  const date     = fmtDate(v('hemi-date'));
+  const surgeon  = v('hemi-surgeon') || 'SC';
+  const asst     = v('hemi-assistant');
+  const type     = v('hemi-type');
+  const side     = v('hemi-side');
+  const sideLo   = side.toLowerCase();
+  const disc     = v('hemi-disc');
+  const foram    = v('hemi-foram');
+  const iCm      = v('hemi-incision-cm');
+  const iOver    = v('hemi-incision-over');
+  const epax     = v('hemi-epaxial');
+  const facetsI  = v('hemi-facets-incised');
+  const facetR   = v('hemi-facet-removed');
+  const fascia   = v('hemi-fascia-suture');
+  const subq     = v('hemi-subq-suture');
+  const skin     = v('hemi-skin-suture');
+  const findings = v('hemi-findings');
+  const asstLine = asst ? ` and assisted by ${asst}` : '';
+  const foramTxt = foram === 'yes' ? ' and foraminotomy' : '';
+
+  const hdr = `OPERATIVE REPORT\nPatient: ${patient}\nDate: ${date}\nSurgeon: ${surgeon}${asstLine}\n`;
+
+  let body = '';
+
+  if (type === 'lumbar-pin') {
+    const pin   = v('hemi-pin-level');
+    const clamp = v('hemi-clamp');
+    const foramSentence = foram === 'yes'
+      ? ' A House curette and rongeur were used to enlarge the hemilaminectomy window to perform a foraminotomy.'
+      : '';
+
+    body = `
+Surgery performed: ${side} hemilaminectomy${foramTxt} performed by ${surgeon}${asstLine} on ${date}
+
+Patient position: The patient was in sternal recumbency with the ${sideLo} side slightly rotated facing up.
+
+Approach: A spinal needle was aseptically placed in the interspinous ligament of ${pin} and confirmed with radiographs prior to surgery. A ${iCm} cm dorsal midline skin incision was made with #15 blade over ${iOver}, hemostasis was achieved with bipolar electrocautery. 3-0 vicryl and paper drape were used to sub-drape and cover the skin surface. Metzenbaum scissors were used to carry over the midline incision through the subcutaneous fat. Mosquito hemostats were used to clamp the ${clamp} dorsal spinous process. The marker pin was then removed. The thick lumbodorsal fascia was exposed. A #15 blade was used to make a small incision on the fascia. Mayo scissors were used to extend the fascia incision. The epaxial muscles were elevated from the ${epax} using freer periosteal elevators down to the depth of the lamina. The tendinous attachment of the multifidus muscle along the caudolateral aspect of each spinous process was released with Mayo scissors. The insertion of the epaxial muscles onto the ${sideLo} articular facets of ${facetsI} were incised using sharp dissection with bipolar electrocautery and Mayo scissors. With the articular facets exposed, Gelpi retractors were placed at the most cranial and caudal portions of the elevated muscles. The ${sideLo} ${facetR} articular facet was removed using rongeurs. A high speed burr was used to create the laminectomy defect including the cranial and caudal extent of the ${disc} disc space; the accessory process was removed. Various sizes of drill bits were used to create a laminectomy window. Once the inner cortical layer was visualized, careful drilling with intermittent assessment of inner cortical thickness was performed. House curette and nerve hook were used to dissect to the inner periosteum.${foramSentence}
+
+Findings: ${findings}
+
+Closure fascia: ${fascia} in a simple interrupted pattern
+Closure subcutaneous layer: ${subq} in a simple continuous pattern with deep bites to the underlying fascia every other throw
+Closure skin: The skin was opposed with ${skin}`;
+
+  } else if (type === 'tl-nopin') {
+    const landmarks = v('hemi-tl-landmarks');
+    const lmTxt = landmarks ? `\n\n${landmarks}. ` : '';
+
+    body = `
+Surgery performed: ${side} ${disc} hemilaminectomy performed by ${surgeon}${asstLine} on ${date}
+
+Patient position: The patient was in sternal recumbency with the ${sideLo} side slightly rotated facing up.
+
+Approach: A ${iCm} cm dorsal midline skin incision was made with #15 blade over ${iOver}, hemostasis was achieved with bipolar electrocautery. 3-0 vicryl and paper drape were used to sub-drape and cover the skin surface. Metzenbaum scissors were used to carry over the midline incision through the subcutaneous fat. A new #15 blade was used to carefully incise along the ${sideLo} aspect of the dorsal spinous processes. The epaxial muscles were elevated from the ${epax} using freer periosteal elevators down to the depth of the lamina. The tendinous attachment of the multifidus muscle along the caudolateral aspect of each spinous process was released with Mayo scissors.${lmTxt} Gelpi retractors were used to retract the muscles and improve visualization. The ${sideLo} articular facets of ${facetR} were removed using rongeurs. A high speed burr was used to create the hemilaminectomy window. A House curette was used to trim the sharp edges of the window. Once the inner cortical layer was visualized, careful drilling with intermittent assessment of inner cortical thickness was performed. House curette and nerve hook were used to dissect to the inner periosteum.
+
+Findings: ${findings}
+
+Closure fascia: ${fascia} in a simple interrupted pattern
+Closure subcutaneous layer: ${subq} in a simple continuous pattern with deep bites to the underlying fascia every other throw
+Closure skin: The skin was opposed with ${skin}`;
+
+  } else if (type === 'high-thoracic') {
+    const htLam = v('hemi-ht-lam') || disc;
+
+    body = `
+Surgery performed: ${side} ${disc} hemilaminectomy performed by ${surgeon}${asstLine} on ${date}
+
+Patient position: The patient was in sternal recumbency with the ${sideLo} side slightly rotated facing up.
+
+Approach: A spinal needle was aseptically placed in the interspinous ligament and confirmed with radiographs prior to surgery. A ~${iCm} cm dorsal midline skin incision was made with #10 blade over ${iOver}. Hemostasis was achieved with bipolar electrocautery. 3-0 vicryl and paper drape were used to sub-drape and cover the skin surface. An incision was made in the tendinous raphe toward the ${sideLo} side. The trapezius, splenius, serratus dorsalis, and longissimus thoracis et lumborum muscles were separated from the midline by a combination of sharp and blunt dissection. The dorsal spinous processes came into view. The long spinal muscles and the multifidus muscles were elevated from the ${epax} deep down to the level of the lamina. The tendinous attachments and the muscles were released with Mayo scissors. The insertion of the epaxial muscles onto the ${sideLo} articular facets was incised using sharp dissection with bipolar electrocautery and Mayo scissors. Gelpi retractors were placed at the most cranial and caudal portions of the elevated muscles. A high speed burr was used to create a laminectomy defect at ${htLam}. Moderate sinus bleeding was addressed by the placement of small pieces of Vetspon. A House curette was used to trim the sharp edges of the window.
+
+Findings: ${findings}
+
+Closure deep fascia: ${fascia} in a simple interrupted pattern
+Closure superficial fascia: ${fascia} in a simple continuous pattern
+Closure deep and superficial subcutaneous layer: ${subq} in a simple continuous pattern with deep bites to the underlying fascia every other throw
+Closure skin: The skin was opposed with ${skin}`;
+  }
+
+  showOutput(hdr + body);
+}
+
+function generateVSlot() {
+  const patient  = v('vs-patient') || '[PATIENT]';
+  const date     = fmtDate(v('vs-date'));
+  const surgeon  = v('vs-surgeon') || 'SC';
+  const asst     = v('vs-assistant');
+  const approach = v('vs-approach');
+  const disc     = v('vs-disc');
+  const slotLen  = v('vs-slot-length');
+  const slotWid  = v('vs-slot-width');
+  const findings = v('vs-findings');
+  const asstLine = asst ? ` and assisted by ${asst}` : '';
+  const [cranV, caudV] = disc.split('-');
+  const slotDims = (slotLen && slotWid)
+    ? `${slotLen} mm in length and ${slotWid} mm in width`
+    : '[__ mm in length and __ mm in width]';
+
+  const fens = [];
+  document.querySelectorAll('#vs-fenestrations input:checked').forEach(cb => {
+    if (cb.value !== disc) fens.push(cb.value);
+  });
+  const fenBlock = fens.length
+    ? `\nFor fenestration, a defect was created in the longus colli at ${fens.join(', ')} with Metzenbaum scissors, and Mayo scissors were used to remove the tendinous attachments to the ventral disc annulus. The ventral portion of the annulus was incised with a #11 blade and removed with rongeurs. The disc nucleus material was scooped out using a house curette.`
+    : '';
+
+  const approachTxt = approach === 'standard'
+    ? `A midline skin incision was made with #15 blade from the larynx to the manubrium of the sternum. The sternocephalicus and sternohyoideus muscles were identified and carefully divided on the midline. Under the sternohyoideus muscles, the trachea was palpated and identified. Finger and scissor dissection were used to retract the trachea, recurrent laryngeal nerve, esophagus, and left carotid sheath toward the left side of the patient.`
+    : `A midline incision was made with #10 blade from the larynx to the manubrium of the sternum. The sternocephalicus and sternohyoideus muscles were identified. The right sternocephalicus muscle was separated from the right sternohyoideus muscle. The sternohyoideus muscles were then retracted to the left side of the patient with the trachea, esophagus, and carotid sheath.`;
+
+  const hdr = `OPERATIVE REPORT\nPatient: ${patient}\nDate: ${date}\nSurgeon: ${surgeon}${asstLine}\n`;
+
+  const body = `
+Procedure performed: ${disc} ventral slot decompression performed by ${surgeon}${asstLine} on ${date}
+Patient positioning: supine recumbency
+
+Approach: ${approachTxt} The large transverse processes of C6 vertebra and the ventral process of C1 were palpated and used as landmarks to identify the ${disc} disc space. The tendinous insertions of the longus colli muscles attached to ${cranV} and ${caudV} ventral tubercles were transected with Mayo scissors, and right angle Gelpi retractors were placed in the longus colli defect for visualization. Hemostasis was achieved with bipolar electrocautery. Freer periosteal elevators were used to elevate the longus colli muscle cranial and caudal to the ventral tubercle and disc space. Rongeurs were used to remove the ventral tubercle, and the ventral aspect of the disc capsule was incised with a #11 blade and removed with rongeurs and house curettes.
+
+Details: The slot window was created using an air drill. The slot window was ${slotDims} (less than 1/3 of the length and width of the cranial vertebral body). Intermittent sterile saline lavage was performed accompanied with the drilling process. The outer cortex and cancellous bone were identified based on differences in color and consistency. The inner cortex bone was recognized and carefully removed with bone curettes. Medullary bone bleeds were controlled with bone wax.
+
+Findings: ${findings}
+${fenBlock}
+
+Closure muscle: The longus colli and sternohyoideus muscles were brought into apposition using 3-0 vicryl in a cruciate and then simple continuous pattern, respectively. Closure SubQ: 3-0 vicryl in a simple continuous pattern. Closure skin: 3-0 nylon in a Ford interlocking pattern.`;
+
+  showOutput(hdr + body);
+}
+
+function generateDLam() {
+  const patient  = v('dl-patient') || '[PATIENT]';
+  const date     = fmtDate(v('dl-date'));
+  const surgeon  = v('dl-surgeon') || 'SC';
+  const asst     = v('dl-assistant');
+  const sidePref = v('dl-side-pref');
+  const from     = v('dl-from')   || '[FROM]';
+  const to       = v('dl-to')     || '[TO]';
+  const lamLvls  = v('dl-lam-levels') || '[LEVELS]';
+  const pin      = v('dl-pin');
+  const spinous  = v('dl-spinous');
+  const duro     = v('dl-duro');
+  const fascia   = v('dl-fascia-suture');
+  const subq     = v('dl-subq-suture');
+  const skin     = v('dl-skin-suture');
+  const findings = v('dl-findings');
+  const asstLine = asst ? ` and assisted by ${asst}` : '';
+
+  const sideTxt = sidePref === 'none' ? '' :
+    ` For a unilateral lesion, slight axial rotation of the patient so the ${sidePref} affected side is more dorsally positioned.`;
+
+  const pinTxt = pin
+    ? `Spinal needles were aseptically placed in the interspinous ligaments and confirmed with radiographs prior to surgery. `
+    : '';
+
+  const spinousTxt = spinous
+    ? `The ${spinous} spinous process was removed with rongeurs. `
+    : '';
+
+  const duroTxt = duro === 'yes'
+    ? `\n\nDurotomy was performed using a #11 blade and iris scissors. Suction was used to remove the epidural fat and expose the intradural contents. [DESCRIBE INTRADURAL FINDINGS AND PROCEDURE]. The surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.\n\nNew gloves and uncontaminated instruments were used to close the surgical site.`
+    : `\n\nThe surgical site was copiously lavaged with saline. A thin piece of gel-foam was used to cover the laminectomy defect.`;
+
+  const hdr = `OPERATIVE REPORT\nPatient: ${patient}\nDate: ${date}\nSurgeon: ${surgeon}${asstLine}\n`;
+
+  const body = `
+Surgery performed: Dorsal laminectomy performed by ${surgeon}${asstLine} on ${date}
+
+Patient position: The patient was secured on the surgical table in sternal recumbency with elbows adducted (thoracic limbs in extension; crossing of the thoracic limbs at the level of the carpi facilitates abduction of the scapulae to maximize exposure).${sideTxt}
+
+Approach: ${pinTxt}A dorsal midline skin incision was made from ${from} to ${to}. The subcutaneous fat and fascia were incised using blunt/sharp dissection with Metzenbaum scissors. A #15 blade was used to make a continuous scalloped incision bilaterally around the spinous processes into the superficial and deep external fasciae. The supraspinous ligament was recognized and preserved. The trapezius and rhomboideus muscles were retracted using Gelpi retractors. The splenius muscle cranially and the serratus dorsalis muscle caudally were incised very close to the spinous processes at the level of the medium tendinous raphe. Periosteal elevators were used to elevate the epaxial muscles from their attachment to the spinous processes and vertebral laminae. Gelpi retractors were used to retract the epaxial muscles.
+
+${spinousTxt}A laminectomy was performed at ${lamLvls} using a high speed surgical air drill. Once the inner cortical layer was visualized, small rongeurs were used to enlarge the laminectomy window.
+
+Findings: ${findings}${duroTxt}
+
+Closure fascia: ${fascia} in a simple continuous pattern
+Closure subcutaneous layer: ${subq} in a simple continuous pattern
+Closure skin: The skin was opposed with ${skin}`;
+
+  showOutput(hdr + body);
+}
+
+function generateCrani() {
+  const patient  = v('cr-patient') || '[PATIENT]';
+  const date     = fmtDate(v('cr-date'));
+  const surgeon  = v('cr-surgeon') || 'SC';
+  const asst     = v('cr-assistant');
+  const approach = v('cr-approach');
+  const findings = v('cr-findings');
+  const asstLine = asst ? ` and assisted by ${asst}` : '';
+
+  const hdr = `OPERATIVE REPORT\nPatient: ${patient}\nDate: ${date}\nSurgeon: ${surgeon}${asstLine}\n`;
+
+  let body = '';
+
+  if (approach === 'fmd') {
+    body = `
+Surgery performed: Foramen magnum decompression (suboccipital craniectomy) performed by ${surgeon}${asstLine} on ${date}
+
+Patient position: The patient was placed in sternal recumbency on the surgery table with the head flexed ventrally. The head was secured in a head frame and reinforced with tape. The site was clipped and prepped over the dorsal aspect of the head and cervical area from the bregma to the 3rd cervical vertebra.
+
+Approach: A midline incision was made with a #10 blade from 1–2 cm rostral of the occipital protuberance to the caudal aspect of the spinous process of C2. Hemostasis was achieved with bipolar cautery. The subcutaneous tissues and fat were incised along the midline. The cervicoscutularis muscle and cervicoauricularis superficialis muscle were incised. The deeper cervical muscles (splenius capitis and the rhomboideus muscles) were exposed and dissected. The dissection continued along the midline through the biventer cervicis muscles and rectus capitis dorsalis. The nuchal ligament was palpated as it attached to C2. The occipital protuberance was exposed. A freer periosteal elevator was used to elevate the musculature from the occipital bone, the dorsal arch of C1, and the spinous process of C2.
+
+Gelpi retractors were placed at the cranial and caudal aspects of the exposure. A Hall high-speed drill, Kerrison rongeurs, and house curette were used to create the craniectomy window dorsal to the occipital protuberance, lateral to the nuchal line, and ventral to the foramen magnum. Lambert rongeurs were used to assist in the removal of the bony window.
+
+Findings: ${findings}
+
+Closure: 3-0 PDS was used to close the deep and superficial muscle layers (total 3 layers of muscle apposed) with a simple continuous pattern. The subcutaneous layer and intradermal layer were closed with 3-0 PDS in a simple continuous pattern. The skin was closed with 3-0 Ethilon in a Ford interlocking pattern.`;
+
+  } else {
+    const side   = v('cr-side');
+    const oppSide= side === 'right' ? 'left' : 'right';
+    const window = v('cr-window') || '1.5cm x 2cm';
+
+    body = `
+Surgery performed: Lateral rostrotentorial craniectomy performed by ${surgeon}${asstLine} on ${date}
+
+Patient position: The patient was positioned in sternal recumbency slightly rotated to the ${oppSide} with the ${side} side up for better exposure. The patient was draped and Duraprep and Tegaderm were applied to the surgical field.
+
+Approach: A #10 blade was used to make a curvilinear incision on the ${side} side from the lateral canthus to the dorsal midline, and then to the ear base. Metzenbaum scissors were used to separate the subcutaneous layer. The temporalis muscle was incised in a horseshoe fashion. A freer elevator was used to elevate the temporalis muscle from the skull. Gelpi retractors were placed at the cranial and caudal aspects of the exposure. A high speed drill was used to create a ${window} craniectomy window in the parietal bone.
+
+Findings: ${findings}
+
+Closure: Chilled saline and small amounts of gel foam were used to control bleeding. A small piece of SIS was used to cover the brain defect and was tucked under the edges of the bone. Lactated ringer solution was used to lavage the craniectomy site throughout the procedure. 1 mm holes were made by high power drill at each end of the bone flap and cranial and caudal to the craniectomy window. 5-0 PDS was used to reposition the bone flap and secure it in place. Bone wax was used to fill the gap between the bone flap and the skull. 3-0 PDS was used to appose the temporal muscle in a cruciate pattern. The subcutaneous and intradermal layers were closed with 3-0 PDS in a simple continuous pattern. The skin was closed with 3-0 Ethilon in a cruciate pattern.`;
+  }
+
+  showOutput(hdr + body);
+}
+
+// ── Output ───────────────────────────────────────────────────────────────────
+function showOutput(text) {
+  document.getElementById('output-text').innerText = text.trim();
+  showStep('step-output');
+}
+
+function copyReport() {
+  const text = document.getElementById('output-text').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const ok = document.getElementById('copy-ok');
+    ok.style.display = 'inline';
+    setTimeout(() => ok.style.display = 'none', 2200);
+  }).catch(() => {
+    const range = document.createRange();
+    range.selectNodeContents(document.getElementById('output-text'));
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    const ok = document.getElementById('copy-ok');
+    ok.style.display = 'inline';
+    setTimeout(() => ok.style.display = 'none', 2200);
+  });
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+setTodayDate();
+updateHemiFindings();
+</script>
+</body>
+</html>

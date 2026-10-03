@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRI Protocol Planner</title>
+<style>
+:root{--p:#2c5f8a;--ac:#e8f0f8;--bg:#f4f6f9;--sf:#fff;--bd:#ccd5e0;--tx:#1a2634;--mu:#6b7a8d;--sel:#d4edda;--selb:#3d9a5a;--warn:#c0392b;--wbg:#fdecea;--amb:#8a5a00;--abg:#fff6dd;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:var(--tx);background:var(--bg);}
+header{background:var(--p);color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5;}
+header h1{font-size:.95rem;font-weight:700;}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;}
+.pbtn{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:13px;}
+.pbtn:hover{background:rgba(255,255,255,.3);}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:6px;margin:8px 14px;padding:10px 12px;}
+.cardtitle{font-size:.82rem;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;}
+.cardtitle .r{margin-left:auto;font-size:12px;text-transform:none;letter-spacing:0;color:var(--mu);font-weight:600;}
+.setup{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;}
+.fg label{display:block;font-size:.68rem;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:2px;}
+.fg input,.fg select{width:100%;padding:5px 7px;border:1px solid var(--bd);border-radius:4px;font-size:14px;background:#fff;color:var(--tx);}
+.fg .hint{font-size:11px;color:var(--mu);margin-top:2px;min-height:14px;}
+.fg.w2{grid-column:span 2;}
+.seg{display:flex;border:1px solid var(--bd);border-radius:4px;overflow:hidden;}
+.seg button{flex:1;padding:5px 6px;border:none;background:#fff;font-size:13px;cursor:pointer;color:var(--tx);}
+.seg button+button{border-left:1px solid var(--bd);}
+.seg button.on{background:var(--p);color:#fff;font-weight:700;}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:4px;cursor:pointer;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 14px;}
+.grid2 .card{margin:0;}
+.coil{border:1px solid var(--bd);border-radius:6px;padding:7px 9px;margin-bottom:6px;cursor:pointer;}
+.coil.on{border:2px solid var(--p);background:var(--ac);padding:6px 8px;}
+.coil .nm{font-weight:700;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.coil .pf{font-family:Consolas,monospace;font-size:12px;color:var(--p);margin-top:2px;}
+.coil .why{font-size:12px;color:var(--mu);margin-top:2px;}
+.tag{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:9px;background:var(--sel);color:#24653a;}
+.tag.alt{background:#eef1f5;color:var(--mu);}
+.tag.bad{background:var(--wbg);color:var(--warn);}
+.tag.ok{background:var(--sel);color:#24653a;}
+ul.li{list-style:none;}
+ul.li li{padding:3px 0 3px 18px;position:relative;line-height:1.4;}
+ul.li li::before{content:"\2022";position:absolute;left:5px;color:var(--p);font-weight:700;}
+ul.li li b{color:var(--p);}
+.kit{font-size:10.5px;font-weight:700;color:#6a4ca0;background:#f1ebfa;border-radius:8px;padding:0 6px;margin-left:4px;white-space:nowrap;}
+.alert{background:var(--wbg);color:var(--warn);border:1px solid #f5c6c0;border-radius:4px;padding:5px 8px;font-size:12.5px;margin-top:6px;}
+.amber{background:var(--abg);color:var(--amb);border:1px solid #ecd9a3;border-radius:4px;padding:5px 8px;font-size:12.5px;margin-top:6px;}
+table.seq{width:100%;border-collapse:collapse;font-size:13px;}
+table.seq th{background:var(--ac);color:var(--p);text-align:left;font-size:.68rem;text-transform:uppercase;padding:4px 6px;border:1px solid var(--bd);}
+table.seq td{padding:3px 6px;border:1px solid var(--bd);}
+table.seq td.t{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+table.seq td.c{font-family:Consolas,monospace;font-size:11.5px;color:var(--mu);}
+table.seq tr.off td{color:#9aa6b4;}
+table.seq tr.off td.c{color:#b5bfcb;}
+table.seq tr.div td{background:#fff3cd;color:#7a5a00;font-weight:700;font-size:12px;}
+table.seq tr.grp td{background:#f0f3f7;font-weight:700;color:var(--p);font-size:12px;}
+.legend{font-size:11.5px;color:var(--mu);margin-top:6px;line-height:1.5;}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.ph{border:1px solid var(--bd);border-radius:6px;overflow:hidden;background:#f7f9fb;position:relative;}
+.ph img{width:100%;height:190px;object-fit:contain;background:#eef1f5;display:block;cursor:zoom-in;}
+.ph .cap{font-size:12px;padding:4px 7px;display:flex;gap:6px;align-items:center;}
+.ph .cap span{flex:1;}
+.ph .src{font-size:10px;font-weight:700;border-radius:8px;padding:0 6px;background:#eef1f5;color:var(--mu);}
+.ph .src.mine{background:#e3f1e7;color:#24653a;}
+.ph .x{background:none;border:none;color:var(--warn);cursor:pointer;font-size:15px;line-height:1;}
+.ph.hidden img{opacity:.25;}
+.upl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--mu);}
+#zoom{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:20;align-items:center;justify-content:center;cursor:zoom-out;}
+#zoom img{max-width:94vw;max-height:92vh;}
+#paste-box{display:none;}
+#paste-box textarea{width:100%;height:44px;font-size:12px;margin:6px 0;border:1px solid var(--bd);border-radius:4px;padding:4px;}
+.btn{background:var(--p);color:#fff;border:none;border-radius:4px;padding:5px 12px;font-size:13px;cursor:pointer;}
+.btn.ghost{background:#fff;color:var(--mu);border:1px solid var(--bd);}
+.prhd{display:none;}
+@media (max-width:760px){.grid2{grid-template-columns:1fr;margin:0 8px;}.card{margin:8px;}.grid2 .card{margin:0 0 8px;}.fg.w2{grid-column:auto;}}
+@media print{
+  @page{size:letter portrait;margin:8mm;}
+  body{background:#fff;font-size:10.5px;}
+  header,.no-print{display:none!important;}
+  .prhd{display:block;font-size:13px;font-weight:700;color:var(--p);border-bottom:2px solid var(--p);padding-bottom:3px;margin-bottom:4px;}
+  .card{margin:4px 0;padding:5px 7px;break-inside:avoid;}
+  .grid2{margin:0;gap:4px;}
+  .coil:not(.on){display:none;}
+  table.seq{font-size:9.5px;} table.seq tr.off{display:none;}
+  .ph img{height:120px;cursor:default;} .ph.hidden,.ph .x,.upl{display:none!important;}
+  .fg input,.fg select{border:none;border-bottom:1px solid #999;border-radius:0;padding:1px 2px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#9829;&nbsp;VCA Neuro &mdash; MRI Protocol Planner <span style="font-weight:400;opacity:.8">(Avanto 1.5T)</span></h1>
+  <div class="hbtns">
+    <button class="pbtn" onclick="togglePaste()">&#128203;&nbsp;Paste Info</button>
+    <button class="pbtn" onclick="window.print()">&#128438;&nbsp;Print / PDF</button>
+  </div>
+</header>
+<div class="prhd">MRI Protocol Plan &mdash; VCA Kalamazoo, Siemens Avanto 1.5T</div>
+
+<div class="card no-print" id="paste-box">
+  <div class="cardtitle">Paste Info &larr; MRI Anesthesia Sheet</div>
+  <div style="font-size:12px;color:var(--mu)">On the MRI anesthesia sheet click &ldquo;Copy Info &rarr; Surgery/ICU&rdquo;, then paste here.</div>
+  <textarea id="paste-in" placeholder="Paste here (Cmd/Ctrl+V)…"></textarea>
+  <button class="btn" onclick="applyPaste()">Apply</button> <button class="btn ghost" onclick="togglePaste()">Cancel</button>
+  <span id="paste-st" style="font-size:12px;margin-left:6px"></span>
+</div>
+
+<div class="card">
+  <div class="cardtitle">Patient &amp; Study</div>
+  <div class="setup">
+    <div class="fg"><label>Patient</label><input id="pt-name" placeholder="Last, First"></div>
+    <div class="fg"><label>Species</label><div class="seg" id="sp"><button class="on" data-v="dog">Dog</button><button data-v="cat">Cat</button></div></div>
+    <div class="fg"><label>Weight (kg)</label><input type="number" id="wt" min="0" step="0.1" placeholder="e.g. 11.4"><div class="hint" id="wt-hint"></div></div>
+    <div class="fg"><label>Breed</label><input id="breed" list="breeds" placeholder="type or pick"><div class="hint" id="breed-hint"></div></div>
+    <div class="fg"><label>Skull type</label>
+      <select id="skull"><option value="auto">Auto (from breed)</option><option value="meso">Mesaticephalic</option><option value="brachy">Brachycephalic</option><option value="dolicho">Dolichocephalic</option></select></div>
+    <div class="fg w2"><label>Scan region</label>
+      <select id="region">
+        <optgroup label="Neuro">
+          <option value="brain">Brain</option>
+          <option value="brainc">Brain + cervical spine</option>
+          <option value="csp">Cervical spine</option>
+          <option value="tl">Thoracolumbar spine</option>
+          <option value="bp">Brachial plexus</option>
+        </optgroup>
+        <optgroup label="MSK">
+          <option value="shoulder">Shoulder</option>
+          <option value="scapula">Scapula</option>
+          <option value="pelvis">Pelvis</option>
+          <option value="hip">Hip</option>
+          <option value="longbone">Long bone</option>
+          <option value="stifle">Stifle / carpus / hock</option>
+        </optgroup>
+      </select></div>
+    <div class="fg"><label>Contrast</label><div class="seg" id="gd"><button class="on" data-v="yes">Yes</button><button data-v="no">No</button></div></div>
+    <div class="fg"><label>Head W &times; H (mm) <span style="text-transform:none;font-weight:400">optional</span></label>
+      <div style="display:flex;gap:4px"><input type="number" id="hw" placeholder="width"><input type="number" id="hh" placeholder="height"></div>
+      <div class="hint">widest skull; mandible &rarr; top of skull</div></div>
+    <div class="fg"><label>Spine length</label>
+      <label class="chk"><input type="checkbox" id="short"> Short-spined / chondrodystrophic</label></div>
+  </div>
+  <datalist id="breeds"></datalist>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="cardtitle">Coil &amp; Protocol <span class="r" id="band"></span></div>
+    <div id="coils"></div>
+    <div id="coil-notes"></div>
+  </div>
+  <div class="card">
+    <div class="cardtitle">Patient Position</div>
+    <ul class="li" id="pos"></ul>
+  </div>
+</div>
+
+<div class="grid2" style="margin-top:8px">
+  <div class="card">
+    <div class="cardtitle">Positioning Aids &amp; Monitoring <span class="r"><span class="kit">3D kit</span> = printed MRI kit</span></div>
+    <ul class="li" id="aids"></ul>
+  </div>
+  <div class="card">
+    <div class="cardtitle">Planning Notes</div>
+    <ul class="li" id="plan"></ul>
+  </div>
+</div>
+
+<div class="card" style="margin-top:8px">
+  <div class="cardtitle">Positioning Reference <span class="r" id="ph-key"></span></div>
+  <div class="photos" id="photos"></div>
+  <div class="upl no-print">
+    <label class="btn" style="cursor:pointer">&#128247; Upload / replace photo<input type="file" id="ph-file" accept="image/*" multiple style="display:none"></label>
+    <label class="chk" style="margin:0"><input type="checkbox" id="ph-hide"> Hide built-in photos for this view</label>
+    <span>Uploads are saved on this computer only. To make a photo the default for every computer, send it to Claude to add to the site.</span>
+  </div>
+</div>
+<div id="zoom" onclick="this.style.display='none'"><img alt=""></div>
+
+<div class="card" style="margin-top:8px">
+  <div class="cardtitle">Sequences <span class="r" id="seq-time"></span></div>
+  <table class="seq" id="seq"></table>
+  <div class="legend">Coil codes: <b>KN</b> 8-ch knee (Invivo) &middot; <b>EX</b> CP extremity &middot; <b>FS</b> CP Flex Small &middot; <b>HE</b> Head Matrix &middot; <b>NE</b> Neck Matrix &middot; <b>SP</b> Spine Matrix &middot; <b>BO</b> Body Matrix &middot; <b>FL</b> flex coil. Unticked rows are optional and are left off the printout. Times are from the protocol printout (pre-change); check the console for current times.</div>
+  <div id="gd-box"></div>
+</div>
+
+<script>
+const PROTOCOLS={"BRAIN\\SMALL - SMALL FLEX":[["AX LOC BRAIN","0:12","FS"],["3PL LOC BRAIN","0:42","FS"],["SAG T2 BRAIN","2:10","FS"],["TRV T2 BRAIN","5:00","FS"],["TRV FLAIR BRAIN","4:32","FS"],["TRV T1 BRAIN","3:14","FS"],["TRV DWI BRAIN","1:21","FS"],["TRV MEDIC BRAIN","0:44","FS"],["TRV T1 POST BRAIN","3:14","FS"],["SAG T1 POST BRAIN","2:19","FS"],["DOR T1 POST BRAIN","3:12","FS"],["SAG 3D T1 MPRAGE POST BRAIN","3:03","FS"],["TRV 3DTOF COW BRAIN","6:39","FS"],["DOR STIR ORBITS","2:23","FS"]],"BRAIN\\SMALL - EXTREMITY":[["AX LOC BRAIN","0:12","EX"],["3PL LOC BRAIN","0:42","EX"],["SAG T2 BRAIN","2:37","EX"],["TRV T2 BRAIN","5:11","EX"],["TRV FLAIR BRAIN","5:26","EX"],["TRV T1 BRAIN","3:14","EX"],["TRV DWI BRAIN","1:21","EX"],["TRV MEDIC BRAIN","0:44","EX"],["TRV T1 POST BRAIN","3:14","EX"],["SAG T1 POST BRAIN","3:45","EX"],["DOR T1 POST BRAIN","2:08","EX"],["SAG 3D T1 MPRAGE POST BRAIN","3:03","EX"],["TRV 3DTOF COW BRAIN","6:39","FS"],["DOR STIR ORBITS","2:23","EX"]],"BRAIN\\SMALL - 8CH KNEE":[["AX LOC BRAIN","0:12","KN"],["localizer_sag+cor+tra","0:52","KN"],["SAG T2 BRAIN","2:37","KN"],["TRV T2 BRAIN","5:11","KN"],["TRV FLAIR BRAIN","5:26","KN"],["TRV T1 BRAIN","3:14","KN"],["TRV DWI BRAIN","1:21","KN"],["TRV MEDIC BRAIN","0:44","KN"],["TRV T1 POST BRAIN","3:14","KN"],["SAG T1 POST BRAIN","3:45","KN"],["DOR T1 POST BRAIN","2:08","KN"],["SAG 3D T1 MPRAGE POST BRAIN","3:03","KN"],["TRV 3DTOF COW BRAIN","6:39","FS"],["DOR STIR ORBITS","2:23","KN"]],"BRAIN\\MEDIUM - EXTREMITY":[["3PL LOC BRAIN","0:22","EX"],["SAG T2 BRAIN","3:59","EX"],["TRV T2 BRAIN","3:23","EX"],["TRV FLAIR BRAIN","5:04","EX"],["TRV T1 BRAIN","4:51","EX"],["TRV DWI BRAIN","2:19","EX"],["TRV MEDIC BRAIN","6:43","EX"],["TRV T1 POST BRAIN","4:51","EX"],["SAG T1 POST BRAIN","2:20","EX"],["DOR T1 FAT SAT POST BRAIN","3:52","EX"],["SAG 3D T1 MPRAGE POST BRAIN","7:12","EX"],["TRV 3DTOF COW BRAIN","7:31","EX"],["DOR STIR ORBITS","2:23","EX"]],"BRAIN\\MEDIUM - 8CH EXTREMITY":[["localizer_sag+cor+tra","0:52","KN"],["SAG T2 BRAIN","3:59","KN"],["TRV T2 BRAIN","3:23","KN"],["TRV FLAIR BRAIN","5:04","KN"],["TRV T1 BRAIN","4:51","KN"],["TRV DWI BRAIN","2:19","KN"],["TRV MEDIC BRAIN","6:43","KN"],["TRV T1 POST BRAIN","4:51","KN"],["SAG T1 POST BRAIN","2:20","KN"],["DOR T1 FAT SAT POST BRAIN","3:52","KN"],["SAG 3D T1 MPRAGE POST BRAIN","7:12","KN"],["TRV 3DTOF COW BRAIN","7:31","KN"],["DOR STIR ORBITS","2:23","KN"]],"BRAIN\\LARGE - EXTREMITY":[["3PL LOC BRAIN","0:22","EX"],["SAG T2 BRAIN","3:22","EX"],["TRV T2 BRAIN","4:32","EX"],["TRV FLAIR BRAIN","5:04","EX"],["TRV T1 BRAIN","4:51","EX"],["TRV DWI BRAIN","1:47","EX"],["TRV MEDIC BRAIN","6:49","EX"],["TRV T1 POST BRAIN","4:51","EX"],["SAG T1 POST BRAIN","1:39","EX"],["DOR T1 POST BRAIN","4:06","EX"],["SAG 3D T1 MPRAGE POST BRAIN","6:23","EX"],["TRV 3DTOF COW BRAIN","9:58","EX"],["DOR STIR ORBITS","2:23","EX"]],"BRAIN\\SMALL - HEAD FIRST SUPINE":[["AX LOC BRAIN","0:12","HE2,4;NE1,2;SP1"],["3PL LOC","1:22","HE2,4;NE1,2;SP1,2"],["SAG T2 BRAIN","2:37","HE2,4;NE1,2;SP1,2"],["TRV T2 BRAIN","5:11","HE2,4;NE1,2;SP1,2"],["TRV FLAIR BRAIN","5:26","HE2,4;NE1,2;SP1,2"],["TRV T1 BRAIN","3:14","HE2,4;NE1,2;SP1,2"],["TRV DWI BRAIN","1:21","HE2,4;NE1,2;SP1,2"],["TRV MEDIC BRAIN","0:44","HE2,4;NE1,2;SP1,2"],["TRV T1 POST BRAIN","3:14","HE2,4;NE1,2;SP1,2"],["SAG T1 POST BRAIN","3:45","HE2,4;NE1,2;SP1,2"],["DOR T1 POST BRAIN","2:08","HE2,4;NE1,2;SP1,2"],["SAG 3D T1 MPRAGE POST BRAIN","3:03","HE2,4;NE1,2;SP1,2"],["TRV 3DTOF COW BRAIN","6:39","HE4;NE1,2;SP1,2"],["DOR STIR ORBITS","2:23","HE1-4;NE2"]],"BRAIN\\MEDIUM - HEAD FIRST SUPINE":[["3PL LOC","1:22","HE4;NE1,2;SP1"],["SAG T2 BRAIN","4:13","HE4;NE1,2"],["TRV T2 BRAIN","5:46","HE4"],["TRV FLAIR BRAIN","6:24","HE4"],["TRV T1 BRAIN","4:03","HE4"],["TRV DWI BRAIN","2:02","HE4"],["TRV MEDIC BRAIN","6:43","HE4"],["TRV T1 POST BRAIN","4:51","HE4"],["SAG T1 POST BRAIN","2:20","HE4;NE1,2"],["DOR T1 FAT SAT POST BRAIN","6:55","HE2,4;NE2"],["DOR STIR ORBITS","2:23","HE1-4;NE2"]],"BRAIN\\LARGE - HEAD FIRST SUPINE":[["3PL LOC","1:22","HE2,4;NE1,2;SP1,2"],["SAG T2 BRAIN","3:22","HE2,4;NE1,2;SP1,2"],["TRV T2 BRAIN","4:32","HE2,4;NE1,2;SP1,2"],["TRV FLAIR BRAIN","5:04","HE2,4;NE1,2;SP1,2"],["TRV T1 BRAIN","4:51","HE2,4;NE1,2;SP1,2"],["TRV DWI BRAIN","1:47","HE2,4;NE1,2;SP1,2"],["TRV MEDIC BRAIN","6:49","HE2,4;NE1,2;SP1,2"],["TRV T1 POST BRAIN","4:51","HE2,4;NE1,2;SP1,2"],["SAG T1 POST BRAIN","1:39","HE2,4;NE1,2;SP1,2"],["DOR T1 POST BRAIN","4:06","HE2,4;NE1,2;SP1"],["SAG 3D T1 MPRAGE POST BRAIN","6:23","HE2,4;NE1,2;SP1,2"],["TRV 3DTOF COW BRAIN","9:58","HE2,4;NE1,2;SP1,2"],["DOR STIR ORBITS","2:23","HE1-4;NE2"]],"VERTEBRAL COLUMN\\SMALL - CSP":[["AX LOC CSP","0:09","HE4;NE1,2;SP1,2"],["3PL LOC CSP","0:32","HE4;NE1,2;SP1"],["COR T2 CSP","0:48","HE4;NE1,2;SP1"],["SAG T2 CSP","2:22","HE4;NE1,2;SP1"],["SAG T2 MYELO CSP","2:36","HE4;NE1,2;SP1"],["SAG T1 CSP","4:02","HE4;NE1,2;SP1"],["TRV T2 CSP","5:32","HE4;NE1,2;SP1"],["TRV T1 CSP","6:13","HE4;NE1,2;SP1"],["TRV T1 CSP POST","5:18","HE4;NE1,2;SP1"],["SAG T1 CSP POST","4:02","HE4;NE1,2;SP1"],["SAG STIR CSP","4:49","HE4;NE1,2;SP1"],["COR STIR CSP","3:50","HE4;NE1,2;SP1"],["SAG T1 CSP FS POST","4:03","HE4;NE1,2;SP1"],["TRV T1 CSP FS POST","6:46","HE4;NE1,2;SP1"],["TRV T2 GRE MEDIC CSP","7:19","HE4;NE1,2;SP1"]],"VERTEBRAL COLUMN\\MEDIUM - CSP":[["AX LOC CSP","0:16","HE4;NE1,2;SP1,2"],["3PL LOC CSP","0:32","HE4;NE1,2;SP1-3"],["COR T2 CSP","0:48","HE4;NE1,2;SP1"],["SAG T2 CSP","4:24","HE4;NE1,2;SP1"],["SAG T2 MYELO CSP","2:46","HE4;NE1,2;SP1"],["SAG T1 CSP","3:21","HE4;NE1,2;SP1"],["TRV T2 CSP","8:24","NE1,2;SP1,2"],["TRV T1 CSP","7:43","NE1,2;SP1,2"],["TRV T1 CSP POST","7:43","NE1,2;SP1,2"],["SAG T1 CSP POST","2:10","HE4;NE1,2;SP1"],["SAG STIR CSP","3:00","HE4;NE1,2;SP1"],["COR STIR CSP","2:25","HE4;NE1,2;SP1"],["SAG T1 CSP FS POST","2:43","HE4;NE1,2;SP1"],["TRV T2 CSP THIN","3:43","NE1,2;SP1"],["TRV T1 CSP FS POST","9:18","HE4;NE1,2"],["TRV T2 GRE MEDIC CSP","6:33","HE4;NE1,2"]],"VERTEBRAL COLUMN\\LARGE - CSP":[["AX LOC CSP","0:09","BO1,2;HE4;NE1,2;SP1-3"],["3PL LOC CSP","0:32","BO1,2;HE4;NE1,2;SP1-3"],["COR T2 CSP","0:48","HE3,4;NE1,2;SP1"],["SAG T2 CSP","2:21","SP3-5"],["SAG T2 MYELO CSP","2:20","SP3-5"],["SAG T1 CSP","2:26","SP3-5"],["TRV T2 CSP","2:50","BO1;SP3,4"],["TRV T1 CSP","2:28","BO1;SP3,4"],["SAG T1 CSP POST","2:26","SP3-5"],["TRV T1 CSP POST","2:28","BO1;SP3,4"],["SAG STIR CSP","2:50","SP3-5"],["COR STIR CSP","4:30","NE1,2;SP1-3"],["T1 SAG CSP FS POST","3:11","BO1,2;SP3-5"],["T1 TRV CSP FS POST","2:59","BO1;SP3,4"],["T2 SAG MYELO HASTE CSP 3mm","0:41","SP3-5"],["MEDIC TRV CSP","1:38","BO1;SP3,4"],["COR STIR","4:30","NE1,2;SP1-3"]],"VERTEBRAL COLUMN\\SMALL - TL":[["3PL LOC","0:32","NE2;SP1-4"],["COR T2 TSE","2:12","SP5-7"],["SAG T2 TSE","3:51","SP5,6"],["SAG T2 MYELO","3:01","SP5,6"],["TRV T2","3:55","SP6"],["SAG STIR","4:49","SP5,6"],["TRV T1 PRE","5:15","SP6"],["SAG T1 POST","3:52","SP5,6"],["TRV T1 POST","5:15","SP6"],["SAG T1 FS POST","3:53","SP5,6"],["TRV T1 FS POST","5:32","SP6"],["SAG T1","3:52","SP5,6"]],"VERTEBRAL COLUMN\\SM-MED TL":[["3PL LOC","0:19","SP2-5"],["COR T2 TSE","1:40","SP5-7"],["SAG T2 TSE","2:30","SP2-5"],["SAG T2 MYELO","1:32","SP2-5"],["TRV T2 SMALLER FOV","6:00","SP3"],["TRV T2 LARGER FOV","6:22","SP2,3"],["SAG STIR","3:23","SP2-5"],["SAG T1 TSE","3:04","SP2-5"],["TRV T1 SMALLER FOV","6:41","SP3"],["TRV T1 LARGER FOV","7:31","SP2,3"]],"VERTEBRAL COLUMN\\MEDIUM - TL":[["3PL LOC","0:19","SP2-5"],["COR T2 TSE","1:08","SP2-5"],["SAG T2 TSE","1:54","SP2-5"],["SAG MYELO","2:57","SP2-5"],["TRV T2","6:09","SP2,3"],["SAG STIR","3:06","SP2-5"],["SAG T1 TSE","1:14","SP2-5"],["TRV T1","5:39","SP2,3"],["SAG T1 POST","1:14","SP2-5"],["TRV T1 POST","5:39","SP2,3"],["SAG T1 FS POST","1:14","SP2-5"],["TRV PD","6:54","SP2,3"],["SAG PD Siemens","2:44","SP2-5"]],"VERTEBRAL COLUMN\\LARGE - TL":[["3PL LOC LSP","0:19","SP4-7"],["3PL LOC TSP","0:32","SP1-4"],["COR T2 TSE","0:55","SP4-7"],["SAG T2 TSE","1:18","SP4-7"],["SAG MYELO","1:41","SP4-7"],["TRV T2","4:11","SP2,3"],["TRV T1","4:10","SP2,3"],["SAG T1 TSE  POST","1:47","SP2-5"],["TRV T1  POST","2:38","SP5,6"],["SAG T1 TSE POST","1:38","SP4-7"],["TRV T1 POST","4:10","SP2,3"],["SAG STIR","1:34","SP4-7"],["SAG T1 TSE","1:14","SP4-7"]],"BRACHIAL PLEXUS\\MEDIUM":[["3PL LOC","0:32","NE1,2;SP1,2"],["COR STIR","4:30","BO1,2;NE1,2;SP1,2"],["SAG T2 CSP ONLY","1:53","BO1,2;NE1,2;SP1,2"],["SAG T2 TSE BRACHIAL PLEXUS","1:53","BO1,2;NE1,2;SP1,2"],["TRV T2 TSE","2:22","BO1,2;NE1,2;SP1,2"],["TRV T1 TSE","2:12","BO1,2;NE1,2;SP1,2"],["TRV T1 TSE FS","5:25","BO1,2;NE1,2;SP1,2"],["TRV STIR","6:13","BO1,2;NE1,2;SP1,2"],["SAG T1 TSE","2:10","BO1,2;NE1,2;SP1,2"]],"BRACHIAL PLEXUS\\LARGE":[["3PL LOC","0:32","BO1,2;NE1,2;SP1,2"],["COR STIR","5:54","BO1,2;HE3,4;SP1,2"],["SAG T2 CSP ONLY","1:58","NE1,2;SP1,2"],["SAG T2 TSE BRACHIAL PLEXUS","6:02","HE3,4;SP1,2"],["TRV T2 TSE","2:14","BO1,2;NE1,2;SP1"],["TRV T1 TSE","2:40","BO1,2;NE1,2;SP1"],["TRV T1 TSE FS","3:15","BO1,2;NE1,2;SP1"],["TRV STIR","4:18","BO1,2;NE1,2;SP1"],["SAG T1 TSE","2:00","HE3,4;SP1,2"]],"MSK\\SHOULDER":[["3PL LOC","0:58","BO1,2;SP2-4"],["TRV T2","6:22","SP2,3"],["TRV T1","6:41","SP2,3"],["TRV PD FS","4:56","SP2,3"],["SAG T2","5:35","SP2,3"],["SAG T1","4:18","SP2,3"],["SAG STIR","8:06","SP2,3"],["TRV STIR","10:08","SP2,3"],["COR STIR","13:29","SP2,3"],["COR T1","4:28","SP2,3"],["TRV T1 FS POST","7:28","SP2,3"],["SAG T1 FS POST","5:05","SP2,3"],["COR T1 FS POST","6:16","SP2,3"],["COR PD FS","5:07","SP2,3"],["SAG PD FS","4:02","SP2,3"]],"MSK\\SCAPULA":[["3PL LOC","0:58","BO1,2;SP2-4"],["TRV T1","6:41","SP2,3"],["TRV STIR","10:08","SP2,3"],["SAG T2","5:35","SP2,3"],["SAG T1","4:18","SP2,3"],["SAG STIR","8:06","SP2,3"],["COR STIR","13:29","SP2,3"],["COR T1","4:28","SP2,3"],["TRV T1 FS POST","7:28","SP2,3"],["SAG T1 FS POST","5:05","SP2,3"],["COR T1 FS POST","6:16","SP2,3"],["TRV T2","6:22","SP2,3"]],"MSK\\PELVIS":[["localizer","0:18","SP4-6"],["COR STIR","3:26","BO1,2;SP4,5"],["COR T1","1:41","BO1,2;SP4,5"],["TRV T1","2:20","BO1,2;SP4,5"],["TRV STIR","2:25","BO1,2;SP4,5"],["TRV T1 FS","3:21","BO1,2;SP4,5"],["COR T1 FS","2:43","BO1,2;SP4,5"],["TRV T2","3:07","BO1,2;SP4,5"]],"MSK\\HIP":[["localizer","0:16","BO1,2;SP4,5"],["COR STIR PELVIS","2:48","BO1,2;SP4,5"],["TRV T2 FS","4:34","BO1,2;SP4-6"],["TRV T1","5:10","BO1,2;SP4-6"],["COR T2 FS","1:45","BO1,2;SP4-6"],["COR T1","4:13","BO1,2;SP4-6"],["TRV PD FS","4:36","BO1,2;SP4,5"],["SAG PD FS","5:17","BO1,2;SP4,5"]],"MSK\\LONG BONE":[["localizer","0:23","SP1-3"],["COR STIR","2:19","SP1-3"],["COR T1","2:17","SP1-3"],["SAG T1","3:28","SP1-3"],["SAG STIR","3:03","SP1-3"],["TRV T1","2:19","SP3,4"],["TRV T2 FS","1:44","SP3,4"],["TRV T1 FS PRE","3:15","SP3,4"],["TRV T1 FS POST","3:15","SP3,4"],["COR T1 FS POST","1:44","SP1-3"]],"MSK\\STIFLE/CARPUS/HOCK":[["localizer_tra","0:05","FL"],["localizer_sag+cor+tra","0:15","FL"],["TRV T1","3:55","FL"],["TRV T2 FS","2:17","FL"],["TRV PD FS","5:20","FL"],["COR T1","3:19","FL"],["COR T2 FS","1:20","FL"],["COR PD FS","2:25","FL"],["SAG STIR","4:53","FL"],["SAG PD FS","4:06","FL"],["COR T2 3D","2:54","FL"],["TRV T1 FS","9:03","FL"],["TRV T1 FS POST","9:03","FL"],["COR T1 FS POST","4:56","FL"],["SAG T1","3:28","FL"],["SAG T1 FS","4:20","FL"],["SAG T1 FS 3D","4:48","FL"],["TRV STIR","10:58","FL"],["COR STIR","5:44","FL"],["COR PD/T2","5:12","FL"]]};
+
+// ── Reference data (training slides + MRI accessory kit) ──
+var BREEDS={
+  brachy:['Pug','French Bulldog','English Bulldog','Boston Terrier','Shih Tzu','Pekingese','Lhasa Apso','Boxer','Cavalier King Charles Spaniel','Brussels Griffon','Japanese Chin','Bullmastiff','Dogue de Bordeaux','Persian','Himalayan','Exotic Shorthair','British Shorthair'],
+  dolicho:['Greyhound','Whippet','Italian Greyhound','Borzoi','Saluki','Afghan Hound','Collie','Shetland Sheepdog','Doberman Pinscher','Bull Terrier','Siamese','Oriental Shorthair'],
+  meso:['Labrador Retriever','Golden Retriever','German Shepherd','Beagle','Border Collie','Australian Shepherd','Poodle','Miniature Schnauzer','Yorkshire Terrier','Chihuahua','Maltese','Jack Russell Terrier','Cocker Spaniel','Husky','Rottweiler','Domestic Shorthair','Domestic Longhair','Maine Coon']
+};
+var SHORT_SPINE=['Dachshund','Corgi','Pembroke Welsh Corgi','Cardigan Welsh Corgi','Basset Hound','French Bulldog','English Bulldog','Pug','Shih Tzu','Lhasa Apso','Pekingese','Beagle','Cocker Spaniel','Boston Terrier','Bichon Frise'];
+// Inner opening of each coil (training-slide notes, mm) and the head-cradle insert sizes (W × H of head, mm)
+var COILS={
+  KN:{name:'8-ch knee (Invivo)',w:165,h:140,cradle:'knee8',post:'et_post (120 mm)'},
+  EX:{name:'CP extremity',w:190,h:200,cradle:'cp',post:'et_post_200 (200 mm)'},
+  FS:{name:'CP Flex Small',w:null,h:null},
+  HN:{name:'Head/Neck Matrix',w:247,h:267,cradle:'headneck',post:'et_post_200 (200 mm)'},
+  SP:{name:'Spine Matrix (CTL)'},
+  HNSP:{name:'Head/Neck + Spine Matrix'},
+  BOSP:{name:'Body Matrix + Spine Matrix'},
+  FL:{name:'Flex coil (FL)'}
+};
+var INSERT_HEAD={XS:[30,35],S:[38,45],M:[48,65],L:[58,85],XL:[70,105]};
+
+function gel(id){return document.getElementById(id);}
+function seg(id){var b=document.querySelector('#'+id+' button.on');return b?b.dataset.v:'';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function lb(kg){return Math.round(kg*2.2046);}
+function kit(s){return s+' <span class="kit">3D kit</span>';}
+
+var state={coilIdx:0, seqOff:{}};
+
+function skullType(){
+  var v=gel('skull').value; if(v!=='auto') return v;
+  var b=gel('breed').value.trim().toLowerCase(); if(!b) return 'meso';
+  for(var k in BREEDS) if(BREEDS[k].some(function(x){return x.toLowerCase()===b;})) return k;
+  if(/bull|pug|shih|peke|pekingese|persian|boxer|boston|lhasa|griffon|cavalier/.test(b)) return 'brachy';
+  if(/grey|whippet|borzoi|saluki|afghan|collie|sheltie|doberman|siamese/.test(b)) return 'dolicho';
+  return 'meso';
+}
+function sizeBand(w){return w<=11.34?'SMALL':(w<=22.68?'MEDIUM':'LARGE');}
+
+// ── Coil choices per region ──
+function coilOptions(r,w,cat,skull){
+  var band=sizeBand(w), o=[];
+  function add(coil,folder,why,extra){o.push(Object.assign({coil:coil,folders:[].concat(folder),why:why},extra||{}));}
+  if(r==='brain'){
+    if(cat||w<=11.34){
+      add('KN','BRAIN\\SMALL - 8CH KNEE','Cats & small dogs (slide coil chart). Prone, brain-only.');
+      if(cat||w<4) add('FS','BRAIN\\SMALL - SMALL FLEX','Tiny patients that are too small for the knee coil.');
+      add('HN','BRAIN\\SMALL - HEAD FIRST SUPINE','Most-used coil; supine set-up (also lets you add the spine).');
+      add('EX','BRAIN\\SMALL - EXTREMITY','If the head is too wide or tall for the knee coil (e.g. brachycephalic).');
+    } else if(w<=18){
+      add('KN','BRAIN\\MEDIUM - 8CH EXTREMITY','Small–medium dogs if the head fits (slide coil chart).');
+      add('EX','BRAIN\\MEDIUM - EXTREMITY','Medium–large dogs, or when the head is too big for the knee coil.');
+      add('HN','BRAIN\\MEDIUM - HEAD FIRST SUPINE','Most-used coil; supine set-up.');
+    } else if(w<=22.68){
+      add('EX','BRAIN\\MEDIUM - EXTREMITY','Medium–large dogs (slide coil chart).');
+      add('HN','BRAIN\\MEDIUM - HEAD FIRST SUPINE','Most-used coil; supine set-up.');
+    } else {
+      add('EX','BRAIN\\LARGE - EXTREMITY','Large dogs: CP extremity (slide coil chart).');
+      add('HN','BRAIN\\LARGE - HEAD FIRST SUPINE','Large dogs: Head/Neck is the slide alternative; supine set-up.');
+    }
+    if(skull==='brachy'&&o[0].coil==='KN'){ // wide head: put CP extremity / H/N ahead of the knee coil
+      o.sort(function(a,b){return (a.coil==='KN')-(b.coil==='KN');});
+    }
+  }
+  else if(r==='brainc'){
+    var bf=cat||w<=11.34?'SMALL':(w<=22.68?'MEDIUM':'LARGE');
+    add('HNSP',['BRAIN\\'+bf+' - HEAD FIRST SUPINE','VERTEBRAL COLUMN\\'+band+' - CSP'],'Only the Head/Neck Matrix runs with the spine coil, so brain + spine is always Head/Neck, supine.');
+  }
+  else if(r==='csp'){
+    add('HNSP','VERTEBRAL COLUMN\\'+band+' - CSP','Head/Neck + Spine Matrix'+(band==='LARGE'?' (+ Body Matrix on the localizers/axials)':'')+'.');
+  }
+  else if(r==='tl'){
+    var short=gel('short').checked, tb=band;
+    if(short&&tb==='MEDIUM') tb='SMALL'; else if(short&&tb==='LARGE') tb='MEDIUM';
+    var map={SMALL:'VERTEBRAL COLUMN\\SMALL - TL',MEDIUM:'VERTEBRAL COLUMN\\MEDIUM - TL',LARGE:'VERTEBRAL COLUMN\\LARGE - TL'};
+    add('SP',map[tb],'Spine Matrix only.'+(short&&tb!==band?' One size down for a short spine (slide: e.g. 30 lb French Bulldog → small protocol).':''));
+    if(w>=8&&w<=16) add('SP','VERTEBRAL COLUMN\\SM-MED TL','Small–medium option for patients between sizes (smaller/larger FOV axials).');
+  }
+  else if(r==='bp'){
+    var bb=band==='LARGE'?'LARGE':'MEDIUM';
+    add('BOSP','BRACHIAL PLEXUS\\'+bb,'Body Matrix + Neck + Spine Matrix.'+(band==='SMALL'?' No small protocol: use MEDIUM and shrink the FOV (sag ~26 cm, axial ~14 cm).':''));
+  }
+  else if(r==='shoulder') add('BOSP','MSK\\SHOULDER','Spine Matrix (CTL) under the shoulder; Body Matrix for the localizer.');
+  else if(r==='scapula') add('BOSP','MSK\\SCAPULA','Spine Matrix (CTL); Body Matrix for the localizer.');
+  else if(r==='pelvis') add('BOSP','MSK\\PELVIS','Body Matrix over the pelvis + Spine Matrix.');
+  else if(r==='hip') add('BOSP','MSK\\HIP','Body Matrix over the hips + Spine Matrix.');
+  else if(r==='longbone') add('SP','MSK\\LONG BONE','Spine Matrix.');
+  else if(r==='stifle') add('FL','MSK\\STIFLE/CARPUS/HOCK','Flex coil wrapped around the joint.');
+  return o;
+}
+
+function insertSize(coil,w,cat){
+  if(coil==='KN') return cat||w<4?'XS':(w<=8?'S':'M');
+  if(coil==='EX') return w<=25?'M':'L';
+  if(coil==='HN'||coil==='HNSP') return cat||w<=8?'S':(w<=18?'M':(w<=32?'L':'XL'));
+  return null;
+}
+function fitCheck(coil){
+  var hw=parseFloat(gel('hw').value), hh=parseFloat(gel('hh').value), c=COILS[coil==='HNSP'?'HN':coil];
+  if(!(hw>0&&hh>0)||!c||!c.w) return '';
+  // allow ~15 mm (width) and ~25 mm (height: shell + chin rest + foam) for the cradle
+  var okW=hw+15<=c.w, okH=hh+25<=c.h;
+  return okW&&okH?'<span class="tag ok">head fits</span>':'<span class="tag bad">head '+(!okW?'too wide':'too tall')+' ('+c.w+'×'+c.h+' mm opening)</span>';
+}
+
+function render(){
+  var w=parseFloat(gel('wt').value)||0, cat=seg('sp')==='cat', r=gel('region').value, skull=skullType();
+  gel('wt-hint').textContent=w?lb(w)+' lb • '+sizeBand(w).toLowerCase()+' band':'Small ≤25 lb • Medium 25–50 • Large >50';
+  var b=gel('breed').value.trim(), sh=SHORT_SPINE.some(function(x){return x.toLowerCase()===b.toLowerCase();});
+  if(gel('short').dataset.auto!=='0') gel('short').checked=sh;
+  gel('breed-hint').textContent=b?({brachy:'brachycephalic',dolicho:'dolichocephalic',meso:'mesaticephalic'}[skull]+(sh?' • short spine':'')):'';
+  gel('band').textContent=w?sizeBand(w)+' ('+w+' kg)':'enter weight';
+
+  var opts=w?coilOptions(r,w,cat,skull):[];
+  if(state.coilIdx>=opts.length) state.coilIdx=0;
+  gel('coils').innerHTML=opts.length?opts.map(function(o,i){
+    return '<div class="coil'+(i===state.coilIdx?' on':'')+'" data-i="'+i+'"><div class="nm">'+COILS[o.coil].name+
+      ' <span class="tag'+(i?' alt':'')+'">'+(i?'alternative':'recommended')+'</span>'+fitCheck(o.coil)+'</div>'+
+      o.folders.map(function(f){return '<div class="pf">'+esc(f.replace(/\\/g,' › '))+'</div>';}).join('')+
+      '<div class="why">'+o.why+'</div></div>';}).join(''):'<div style="color:var(--mu)">Enter the weight to see coil and protocol suggestions.</div>';
+  document.querySelectorAll('.coil').forEach(function(el){el.onclick=function(){state.coilIdx=+el.dataset.i;state.seqOff={};render();};});
+  var o=opts[state.coilIdx];
+
+  var notes=[];
+  if(w&&r!=='brain'&&r!=='brainc'&&cat) notes.push('Cats use the SMALL protocol; check FOV.');
+  if(w&&(r==='csp')&&w<=6) notes.push('≤ 6 kg: the C-spine slides also show the CP extremity coil (copper pegs mark the coil ends). There is no extremity C-spine protocol in the tree, so the coil selection must be changed by hand.');
+  if(w&&Math.abs(w-11.34)<1.5||w&&Math.abs(w-22.68)<2) notes.push('Close to a size cut-off: pick the protocol that fits the body (not just the weight); thick-bodied patients need a larger axial FOV.');
+  gel('coil-notes').innerHTML=notes.map(function(n){return '<div class="amber">'+n+'</div>';}).join('');
+
+  renderPos(o,r,w,cat,skull);
+  renderPhotos(photoKey(r,o,w));
+  renderSeq(o,r);
+  renderGd(w);
+}
+
+function li(arr){return arr.filter(Boolean).map(function(x){return '<li>'+x+'</li>';}).join('');}
+
+function renderPos(o,r,w,cat,skull){
+  var pos=[],aids=[],plan=[];
+  if(!o){gel('pos').innerHTML=gel('aids').innerHTML=gel('plan').innerHTML='';return;}
+  var prone=(r==='brain'&&o.coil!=='HN');
+  var supine=(o.coil==='HN'||o.coil==='HNSP'||r==='tl'||r==='csp'||r==='brainc'||(r==='bp'));
+  var lateral=(r==='shoulder'||r==='scapula');
+  pos.push('<b>Head first</b> into the magnet (always).');
+  if(prone) pos.push('<b>Prone / sternal</b> (brain only). Head straight, brain in the centre of the coil.');
+  else if(lateral) pos.push('<b>Lateral recumbency, affected side down</b>; head in the cervical part of the CTL coil.');
+  else if(supine) pos.push('<b>Supine / dorsal recumbency</b>; whole body straight.');
+  else pos.push('Position per the MSK training slides for this region.');
+  if(r==='brain'||r==='brainc') pos.push('Brain centred in the coil; head straight (not rotated).');
+  if(r==='csp'||r==='brainc') pos.push('Entrance of the ear canal at the <b>5 cm mark</b> (start of spine element 1) ≈ cerebellum.');
+  if(r==='tl') pos.push('<b>Last set of nipples / cranial pubis</b> at the 5 cm mark (start of element 1) ≈ caudal sacrum.');
+  if(r==='bp') pos.push('With C-spine: position as a C-spine (dorsal). With shoulder: lateral, affected side down — only the side against the coil is diagnostic.');
+  if(lateral) pos.push('Forelimbs in a natural position, strapped. Up-side limb pulled caudally with a strap; down-side carpus flexed and tucked.');
+  // landmark + marker
+  var lm={brain:'Landmark: centre of the brain / coil centre.',brainc:'Landmark: brain centre for the brain series; re-landmark cranial to the thoracic inlet for the C-spine.',
+    csp:'Landmark: just cranial to the thoracic inlet / manubrium.',tl:'Landmark: mid-lumbar spine, usually between the 2nd set of nipples and the umbilicus.',
+    bp:'Landmark: just cranial to the thoracic inlet.',shoulder:'Landmark: shoulder joint of the down side.',scapula:'Landmark: mid-scapula.'}[r];
+  if(lm) pos.push(lm);
+  var mk={brain:'right side of the head',brainc:'right side of the head',csp:'right side, mid-neck',tl:'right side, cranial ischial wing',bp:'right side, mid-neck',shoulder:'right side',scapula:'right side'}[r]||'right side';
+  pos.push('Right-side marker (fish-oil capsule): '+mk+'.');
+  if(r==='brain'||r==='brainc') pos.push('BP cuff adapter <b>outside</b> the coil.');
+
+  // aids
+  var coilKey=(o.coil==='HNSP')?'HN':o.coil, c=COILS[coilKey];
+  if(c&&c.cradle&&(r==='brain'||r==='brainc')){
+    var sz=insertSize(o.coil,w,cat), brachy=skull==='brachy';
+    aids.push(kit('<b>'+c.name+' cradle</b>: shell'+(coilKey==='KN'?'':' ×2 + keys')+' + <b>'+(prone?'prone':'supine')+' '+sz+(brachy?'b (brachy)':'')+'</b> insert; line with 5–6 mm foam'));
+    aids.push(kit('ET arm on the rail at the nose end + <b>'+c.post+'</b> post + saddle (15 mm ET connector / 22 mm circuit); saddle '+(prone?'low':'high')));
+    if(skull==='dolicho') aids.push('Dolichocephalic: standard insert + foam side wedges; slide the chin rest back so the notch sits under the tongue.');
+    if(INSERT_HEAD[sz]) aids.push('Insert '+sz+' fits a head about '+INSERT_HEAD[sz][0]+' mm wide × '+INSERT_HEAD[sz][1]+' mm tall'+(brachy?' (brachy version 1.3× wider)':'')+'.');
+  }
+  if(supine||lateral||r==='pelvis'||r==='hip'||r==='longbone'){
+    var tr=w<5?'XS':(w<=10?'S':(w<=20?'M (2 sections + key pins)':null));
+    if(supine) aids.push(tr?kit('<b>Positioning trough '+tr+'</b>, thin foam only under the spine (keeps it close to the spine coil)'):'Over 20 kg: foam pads / sandbags to keep the spine straight (no printed trough this size).');
+    aids.push(tr?kit('Docking wedges 15° / 30° ('+tr.split(' ')[0]+') on the trough side walls'+(lateral?' to hold the lateral position':'')):'Foam wedges / sandbags'+(lateral?' to hold the lateral position':''));
+  }
+  if(lateral) aids.push('Straps for both forelimbs; foam under the neck so the spine stays level.');
+  if(r==='stifle') aids.push('Foam blocks to keep the limb still inside the flex coil; Velcro straps.');
+  aids.push(kit('SpO₂ tongue clip, <b>'+(cat||w<5?'kitten':'dog')+'</b> size (fiber-optic MR sensor)'+(prone?' — sits in the insert’s tongue notch':'')));
+  aids.push(kit('Quadtrode MR ECG pad on the TPU carrier'));
+  aids.push(kit('Temp probe holder: ET-tube clip (by tube ID) for oesophageal'+(cat||w<=10?' or tail saddle ('+(cat?'cat':'small dog')+') for rectal':'')));
+  aids.push(kit('Skin marker capsule (oil) on the right side')+' — or a fish-oil capsule');
+  if(skull==='brachy') aids.push('<b>Brachycephalic (BOAS)</b>: '+(prone?'don’t lift the chin high in the prone insert; ':'keep the neck extended and the airway clear; ')+'watch EtCO₂ closely.');
+
+  // planning notes
+  if(r==='brain'||r==='brainc'){
+    plan.push('<b>Sagittal T2</b>: parallel to the longitudinal fissure, perpendicular to the hard palate; both bullae laterally; top of skull to bottom of jaw. Odd number of slices.');
+    plan.push('<b>Axials</b>: perpendicular to the hard palate, cribriform plate to foramen magnum. <b>Dorsals</b>: parallel to the brainstem, top of skull to base of bullae.');
+  }
+  if(r==='csp'||r==='brainc'){
+    plan.push('<b>Coronal</b>: mid-cerebellum to ~T3. FOV small 16–22 cm, medium 22–28, large 30–38.');
+    plan.push('<b>Sagittal</b>: same FOV as coronal; '+({SMALL:9,MEDIUM:11,LARGE:13}[sizeBand(w)])+' slices (odd).');
+  }
+  if(r==='tl'){
+    plan.push('<b>Coronal</b>: most of the sacrum to T10–T13. FOV small 18–22 cm, medium 22–30, large 30–38.');
+    plan.push('<b>Sagittal</b>: 7–11 slices (small 9, medium 11, large 13); straighten a curved spine before going on (yaw is OK).');
+    if(sizeBand(w)!=='SMALL') plan.push('Run the <b>LSP</b> first, then calculate the <b>TSP</b> localizer centre from the overlap point; check TSP vs LSP labels (coil elements change).');
+    if(gel('short').checked) plan.push('Short-spined patient on a smaller protocol: <b>increase the axial FOV</b> or the axials will be grainy.');
+  }
+  if(r==='csp'||r==='tl'||r==='brainc') plan.push('<b>Axials</b>: perpendicular to the cord, a slice through the centre of each disc; line the stacks up. Ask the neurologist where to cut. STIR pre-contrast if needed; PD during the contrast wait.');
+  if(r==='bp'){
+    plan.push('Sagittal FOV to include the whole C-spine to T4: ~26 cm small, 32 cm medium, 38 cm large.');
+    plan.push('Axials C4–T4, one stack, FOV to include both axillae: small 14 cm, medium 16, large 18–20.');
+  }
+  if(r==='shoulder') plan.push('T1 sagittal from the lateral skin of the limb to the axilla; STIR and T2 sagittal copied from T1.');
+  plan.push('Grainy images → first check the coil elements selected (TSP/LSP, HE/NE/SP).');
+  gel('pos').innerHTML=li(pos); gel('aids').innerHTML=li(aids); gel('plan').innerHTML=li(plan);
+}
+
+// ── Sequences ──
+function isPost(n){return /POST/i.test(n);}
+function optional(n,f){
+  if(/^AX LOC/.test(n)) return true;
+  if(f.indexOf('BRAIN')===0){ if(/MPRAGE|TOF|ORBITS/.test(n)) return true; return false; }
+  return /FS POST|MEDIC|STIR|THIN|HASTE|\bPD\b|LARGER FOV|Siemens|CSP ONLY/.test(n);
+}
+function tsec(t){var p=(t||'0:00').split(':');return (+p[0])*60+(+p[1]||0);}
+function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+
+function renderSeq(o,r){
+  var tb=gel('seq'), gd=seg('gd')==='yes';
+  if(!o){tb.innerHTML='';gel('seq-time').textContent='';return;}
+  var h='<tr><th style="width:24px"></th><th>Sequence</th><th>Coil elements</th><th style="width:60px">Time</th></tr>', tot=0, n=0;
+  o.folders.forEach(function(f){
+    var list=(PROTOCOLS[f]||[]).map(function(s,i){return s.concat([i]);}), divDone=false;
+    // spine / MSK: keep every pre-contrast sequence ahead of the contrast line (tree order otherwise)
+    if(f.indexOf('BRAIN')!==0) list=list.filter(function(s){return !isPost(s[0]);}).concat(list.filter(function(s){return isPost(s[0]);}));
+    if(o.folders.length>1) h+='<tr class="grp"><td colspan="4">'+esc(f.replace(/\\/g,' › '))+'</td></tr>';
+    list.forEach(function(s){
+      var key=f+'|'+s[3], def=!optional(s[0],f)&&(gd||!isPost(s[0]));
+      var on=state.seqOff[key]===undefined?def:!state.seqOff[key];
+      var brainDiv=(r==='brain'||r==='brainc')&&/DWI|MEDIC/.test(s[0]);
+      if(gd&&!divDone&&(isPost(s[0])||(brainDiv&&f.indexOf('BRAIN')===0))){divDone=true;h+='<tr class="div"><td colspan="4">&#9888; Give contrast here'+((r==='brain'||r==='brainc')?' — run DWI / MEDIC during the wait':'')+'</td></tr>';}
+      if(on){tot+=tsec(s[1]);n++;}
+      h+='<tr class="'+(on?'':'off')+'"><td><input type="checkbox" data-k="'+esc(key)+'"'+(on?' checked':'')+'></td><td>'+esc(s[0])+'</td><td class="c">'+esc(s[2])+'</td><td class="t">'+esc(s[1])+'</td></tr>';
+    });
+  });
+  tb.innerHTML=h;
+  gel('seq-time').textContent=n+' sequences • ~'+fmt(tot)+' scan time';
+  tb.querySelectorAll('input').forEach(function(cb){cb.onchange=function(){state.seqOff[cb.dataset.k]=!cb.checked;render();};});
+}
+
+function renderGd(w){
+  var box=gel('gd-box');
+  if(seg('gd')!=='yes'){box.innerHTML='';return;}
+  var c=parseFloat((gel('gd-conc')||{}).value||'0.5');
+  var ml=w?(0.1*w/c):0;
+  box.innerHTML='<div class="amber" style="display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center"><b>Gadolinium 0.1 mmol/kg IV</b>'+
+    '<span>Agent: <select id="gd-conc" style="font-size:12px"><option value="0.5"'+(c===0.5?' selected':'')+'>0.5 mmol/mL (gadoterate, gadopentetate, gadoteridol)</option><option value="1"'+(c===1?' selected':'')+'>1.0 mmol/mL (gadobutrol)</option></select></span>'+
+    '<span>Dose: <b>'+(w?(0.1*w).toFixed(2)+' mmol = '+ml.toFixed(2)+' mL':'—')+'</b></span></div>'+
+    '<div class="legend">The brain training slide says 0.01 mmol/kg, which is 10× below the usual 0.1 mmol/kg. Check which the clinic intends.</div>';
+  gel('gd-conc').onchange=function(){renderGd(w);};
+}
+
+
+// ── Positioning reference photos ──
+// Built-in photos live in mri_positioning/ (from the training decks); uploads are kept in this browser (IndexedDB).
+var BUILTIN={
+  'brain-prone':[['brain_prone_1.jpg','Brain, prone in the coil; ET circuit supported']],
+  'csp':[['csp_ctl_1.jpg','C-spine on the CTL coil: ear canal at the 5 cm mark'],['csp_ctl_2.jpg','C-spine: body straight, top view']],
+  'csp-small':[['csp_extremity_1.jpg','Small patient (≤ 6 kg) in the CP extremity coil'],['csp_extremity_2.jpg','Coil ends at the copper pegs']],
+  'tl':[['tl_1.jpg','T-L spine on the CTL coil: last nipples / cranial pubis at the 5 cm mark'],['tl_2.jpg','T-L spine: body straight, top view'],['tl_landmark.jpg','Landmarking mid-lumbar']],
+  'shoulder':[['shoulder_1.jpg','Shoulder: lateral, affected side down'],['shoulder_2.jpg','Shoulder landmark']],
+  'bp':[['bp_1.jpg','Brachial plexus positioning'],['bp_2.jpg','Brachial plexus, top view']]
+};
+var KEY_NAMES={'brain-prone':'Brain — prone coil','brain-supine':'Brain — Head/Neck supine','brainc':'Brain + C-spine','csp':'C-spine','csp-small':'C-spine — small patient','tl':'T-L spine','bp':'Brachial plexus','shoulder':'Shoulder','scapula':'Scapula','pelvis':'Pelvis','hip':'Hip','longbone':'Long bone','stifle':'Stifle / carpus / hock'};
+function photoKey(r,o,w){
+  if(r==='brain') return o&&o.coil==='HN'?'brain-supine':'brain-prone';
+  if(r==='csp'&&w&&w<=6) return 'csp-small';
+  return r;
+}
+var DB=null;
+function dbOpen(cb){
+  if(DB) return cb(DB);
+  try{
+    var rq=indexedDB.open('vcaNeuroMriPhotos',1);
+    rq.onupgradeneeded=function(){rq.result.createObjectStore('photos',{keyPath:'id',autoIncrement:true}).createIndex('key','key');};
+    rq.onsuccess=function(){DB=rq.result;cb(DB);};
+    rq.onerror=function(){cb(null);};
+  }catch(e){cb(null);}
+}
+function dbList(key,cb){dbOpen(function(db){if(!db)return cb([]);try{var out=[];db.transaction('photos').objectStore('photos').index('key').openCursor(IDBKeyRange.only(key)).onsuccess=function(e){var c=e.target.result;if(c){out.push(c.value);c.continue();}else cb(out);};}catch(e){cb([]);}});}
+function dbAdd(rec,cb){dbOpen(function(db){if(!db){alert('This browser is not allowing photos to be saved.');return;}var tx=db.transaction('photos','readwrite');tx.objectStore('photos').add(rec);tx.oncomplete=cb;});}
+function dbDel(id,cb){dbOpen(function(db){if(!db)return;var tx=db.transaction('photos','readwrite');tx.objectStore('photos').delete(id);tx.oncomplete=cb;});}
+function hiddenKeys(){try{return JSON.parse(localStorage.getItem('vcaNeuro.mriHideBuiltin')||'{}');}catch(e){return {};}}
+function setHidden(k,v){var h=hiddenKeys();h[k]=v;try{localStorage.setItem('vcaNeuro.mriHideBuiltin',JSON.stringify(h));}catch(e){}}
+
+var curKey='';
+function renderPhotos(key){
+  curKey=key; gel('ph-key').textContent=KEY_NAMES[key]||key;
+  var hide=!!hiddenKeys()[key]; gel('ph-hide').checked=hide;
+  drawPhotos(key,hide,[]);            // built-in photos straight away, even if storage is unavailable
+  dbList(key,function(mine){ if(key===curKey&&mine.length) drawPhotos(key,hide,mine); });
+}
+function drawPhotos(key,hide,mine){
+  {
+    var h=mine.map(function(p){return '<div class="ph"><img src="'+p.data+'" alt=""><div class="cap"><span>'+esc(p.caption||'Uploaded photo')+'</span><span class="src mine">this computer</span><button class="x" title="Remove" data-id="'+p.id+'">&times;</button></div></div>';}).join('');
+    (BUILTIN[key]||[]).forEach(function(b){
+      if(hide&&mine.length) return;
+      h+='<div class="ph'+(hide?' hidden':'')+'"><img src="mri_positioning/'+b[0]+'" alt=""><div class="cap"><span>'+esc(b[1])+'</span><span class="src">training slides</span></div></div>';
+    });
+    gel('photos').innerHTML=h||'<div style="color:var(--mu);font-size:13px">No reference photo for this view yet. Upload one below.</div>';
+    gel('photos').querySelectorAll('.x').forEach(function(b){b.onclick=function(){if(confirm('Remove this photo from this computer?'))dbDel(+b.dataset.id,function(){renderPhotos(curKey);});};});
+    gel('photos').querySelectorAll('img').forEach(function(im){im.onclick=function(){var z=gel('zoom');z.querySelector('img').src=im.src;z.style.display='flex';};});
+  }
+}
+// Shrink uploads (max 1600 px, JPEG) so many photos fit in browser storage
+function shrink(file,cb){
+  var fr=new FileReader();
+  fr.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',0.82));};im.src=fr.result;};
+  fr.readAsDataURL(file);
+}
+gel('ph-file').onchange=function(){
+  var files=[].slice.call(this.files), key=curKey, left=files.length; this.value='';
+  files.forEach(function(f){
+    var cap=prompt('Caption for '+f.name+' (optional):','')||'';
+    shrink(f,function(data){dbAdd({key:key,caption:cap,data:data,added:Date.now()},function(){if(--left===0)renderPhotos(key);});});
+  });
+};
+gel('ph-hide').onchange=function(){setHidden(curKey,this.checked);renderPhotos(curKey);};
+// ── Paste from the MRI anesthesia sheet ──
+function togglePaste(){var b=gel('paste-box');b.style.display=b.style.display==='block'?'none':'block';}
+function applyPaste(){
+  var st=gel('paste-st');
+  try{var d=JSON.parse(gel('paste-in').value.trim());}catch(e){st.style.color='var(--warn)';st.textContent='Could not read that — copy again from the MRI anesthesia sheet.';return;}
+  if(d.pt_name) gel('pt-name').value=d.pt_name;
+  if(d.weight) gel('wt').value=d.weight;
+  if(d.species==='feline'||d.species==='canine') document.querySelectorAll('#sp button').forEach(function(b){b.classList.toggle('on',b.dataset.v===(d.species==='feline'?'cat':'dog'));});
+  st.style.color='var(--selb)';st.textContent='Loaded'+(d.pt_name?' — '+d.pt_name:'');gel('paste-in').value='';
+  render(); setTimeout(togglePaste,1200);
+}
+
+// ── Wire up ──
+gel('breeds').innerHTML=[].concat(BREEDS.brachy,BREEDS.dolicho,BREEDS.meso,SHORT_SPINE).filter(function(x,i,a){return a.indexOf(x)===i;}).sort().map(function(b){return '<option value="'+b+'">';}).join('');
+document.querySelectorAll('.seg').forEach(function(s){s.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;s.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});if(s.id!=='gd')state.coilIdx=0;state.seqOff={};render();});});
+['wt','breed','hw','hh'].forEach(function(id){gel(id).addEventListener('input',function(){if(id!=='hw'&&id!=='hh'){state.coilIdx=0;}render();});});
+['skull','region'].forEach(function(id){gel(id).addEventListener('change',function(){state.coilIdx=0;state.seqOff={};render();});});
+gel('short').addEventListener('change',function(){gel('short').dataset.auto='0';state.coilIdx=0;state.seqOff={};render();});
+gel('breed').addEventListener('input',function(){gel('short').dataset.auto='';});
+render();
+</script>
+</body>
+</html>

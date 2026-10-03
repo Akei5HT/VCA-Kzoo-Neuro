@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neurosurgery Checklist</title>
+<style>
+:root{--p:#2c5f8a;--ac:#e8f0f8;--bg:#f4f6f9;--sf:#fff;--bd:#ccd5e0;--tx:#1a2634;--mu:#6b7a8d;--sel:#d4edda;--selb:#3d9a5a;--warn:#c0392b;--wbg:#fdecea;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;color:var(--tx);background:var(--bg);}
+header{background:var(--p);color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5;}
+header h1{font-size:.95rem;font-weight:700;}
+.hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.prog{font-size:12px;font-weight:700;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:12px;white-space:nowrap;}
+.pbtn{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:13px;}
+.pbtn:hover{background:rgba(255,255,255,.3);}
+.tabs{display:flex;gap:4px;margin:10px 14px 0;}
+.tab{padding:7px 14px;border:1px solid var(--bd);border-bottom:none;border-radius:6px 6px 0 0;background:#e9eef4;color:var(--mu);font-weight:700;font-size:13px;cursor:pointer;}
+.tab.on{background:var(--sf);color:var(--p);}
+.pane{display:none;}.pane.on{display:block;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:6px;margin:8px 14px;padding:10px 12px;}
+.cardtitle{font-size:.82rem;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;}
+.cardtitle .cnt{margin-left:auto;font-size:11px;color:var(--mu);font-weight:600;text-transform:none;letter-spacing:0;}
+.cardtitle .cnt.done{color:var(--selb);}
+.setup{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;}
+.fg label{display:block;font-size:.68rem;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:2px;}
+.fg input,.fg select{width:100%;padding:5px 7px;border:1px solid var(--bd);border-radius:4px;font-size:14px;background:#fff;color:var(--tx);}
+.seg{display:flex;border:1px solid var(--bd);border-radius:4px;overflow:hidden;}
+.seg button{flex:1;padding:5px 6px;border:none;background:#fff;font-size:13px;cursor:pointer;color:var(--tx);}
+.seg button+button{border-left:1px solid var(--bd);}
+.seg button.on{background:var(--p);color:#fff;font-weight:700;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+.sub{font-size:.72rem;font-weight:700;color:var(--mu);text-transform:uppercase;margin:8px 0 3px;}
+.sub:first-child{margin-top:0;}
+.ci{display:flex;align-items:flex-start;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;line-height:1.35;}
+.ci:hover{background:var(--ac);}
+.ci input{width:16px;height:16px;margin-top:1px;flex-shrink:0;accent-color:var(--selb);}
+.ci.done{background:var(--sel);}
+.ci.done span{color:#4b6b55;}
+.ci small{color:var(--mu);}
+.ci.hl span{font-weight:700;}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;}
+ol.steps .ci span::before{counter-increment:s;content:counter(s) ". ";font-weight:700;color:var(--p);}
+.calc{width:100%;border-collapse:collapse;font-size:13px;}
+.calc th{background:var(--ac);color:var(--p);text-align:left;font-size:.68rem;text-transform:uppercase;padding:4px 6px;border:1px solid var(--bd);}
+.calc td{padding:4px 6px;border:1px solid var(--bd);vertical-align:top;}
+.calc td.v{font-weight:700;color:var(--p);white-space:nowrap;}
+.note{font-size:12px;color:var(--mu);margin-top:6px;}
+.alert{background:var(--wbg);color:var(--warn);border:1px solid #f5c6c0;border-radius:4px;padding:5px 8px;font-size:12.5px;font-weight:600;margin-top:6px;}
+.times{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.times label{display:flex;align-items:center;gap:4px;border:1px solid var(--bd);border-radius:12px;padding:2px 9px;font-size:12.5px;font-weight:600;cursor:pointer;}
+.times label.done{background:var(--sel);border-color:var(--selb);}
+.lbl-out{font-family:Consolas,monospace;background:#fffbe6;border:1px dashed #d9c27a;border-radius:4px;padding:6px 9px;font-size:14px;margin-top:6px;}
+.prhd{display:none;}
+@media (max-width:700px){.grid2{grid-template-columns:1fr;}.card{margin:8px;}.tabs{margin:10px 8px 0;}}
+@media print{
+  @page{size:letter portrait;margin:8mm;}
+  body{background:#fff;font-size:10.5px;}
+  header,.tabs,.no-print{display:none!important;}
+  .prhd{display:block;font-size:13px;font-weight:700;color:var(--p);border-bottom:2px solid var(--p);padding-bottom:3px;margin:0 0 4px;}
+  .pane{display:none!important;}.pane.on{display:block!important;}
+  .card{margin:4px 0;padding:5px 7px;break-inside:avoid;}
+  .cardtitle{font-size:.7rem;margin-bottom:3px;}
+  .ci{padding:1px 2px;}
+  .ci input{width:11px;height:11px;}
+  .fg input,.fg select{border:none;border-bottom:1px solid #999;border-radius:0;padding:1px 2px;font-size:11px;}
+  .calc{font-size:10px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#9829;&nbsp;VCA Neuro &mdash; Neurosurgery Set-Up Checklist</h1>
+  <div class="hbtns">
+    <span class="prog" id="prog">0 / 0</span>
+    <button class="pbtn" onclick="resetAll()">Reset</button>
+    <button class="pbtn" onclick="window.print()">&#128438;&nbsp;Print / PDF</button>
+  </div>
+</header>
+
+<div class="tabs no-print">
+  <div class="tab on" data-pane="p-setup" onclick="showTab(this)">Surgery Set-Up</div>
+  <div class="tab" data-pane="p-pack" onclick="showTab(this)">SC Routine Pack</div>
+</div>
+
+<!-- ═══════════ SURGERY SET-UP ═══════════ -->
+<div class="pane on" id="p-setup">
+<div class="prhd">Neurosurgery Set-Up Checklist</div>
+
+<div class="card">
+  <div class="cardtitle">Case</div>
+  <div class="setup">
+    <div class="fg"><label>Patient</label><input id="pt-name" placeholder="Last, First"></div>
+    <div class="fg"><label>Date</label><input id="pt-date"></div>
+    <div class="fg"><label>Weight (kg)</label><input type="number" id="wt" min="0" step="0.1" placeholder="e.g. 11.4" oninput="calc()"></div>
+    <div class="fg"><label>Species</label><div class="seg" id="sp"><button class="on" data-v="dog">Dog</button><button data-v="cat">Cat</button></div></div>
+    <div class="fg"><label>Procedure</label>
+      <select id="proc" onchange="render()">
+        <option value="hemi">Hemilaminectomy</option>
+        <option value="vs">Ventral slot</option>
+        <option value="dlam">Dorsal laminectomy</option>
+        <option value="other">Other</option>
+      </select></div>
+    <div class="fg"><label>Marker pin</label><div class="seg" id="pin"><button class="on" data-v="yes">Yes</button><button data-v="no">No</button></div></div>
+    <div class="fg"><label>CRI</label><div class="seg" id="cri"><button class="on" data-v="combo">F + K one syringe</button><button data-v="sep">Separate</button></div></div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div>
+    <div class="card" data-sec="inst"><div class="cardtitle">Instrument Table <span class="cnt"></span></div><div class="body"></div></div>
+  </div>
+  <div>
+    <div class="card" data-sec="pt"><div class="cardtitle">Patient Table <span class="cnt"></span></div><div class="body"></div></div>
+    <div class="card" data-sec="pin" id="pin-card"><div class="cardtitle">Marker Pin <span class="cnt"></span></div><div class="body"></div></div>
+  </div>
+</div>
+
+<div class="card" data-sec="fluid"><div class="cardtitle">CRI / Fluid Set-Up <span class="cnt"></span></div><div class="body grid2"></div></div>
+
+<div class="card">
+  <div class="cardtitle">Fluid &amp; CRI Calculations <span class="cnt" id="calc-wt">enter weight above</span></div>
+  <div class="grid2">
+    <div>
+      <div class="sub">Surgery fluid rate</div>
+      <table class="calc" id="t-fluid"></table>
+      <div class="note">Make sure the total fluid volume given does not exceed the surgical rate.</div>
+      <div class="sub" style="margin-top:10px">Cefazolin &mdash; IV every 90 min intra-op</div>
+      <table class="calc" id="t-cef"></table>
+      <div class="times no-print" id="cef-times"></div>
+    </div>
+    <div>
+      <div class="sub" id="cri-title">CRI</div>
+      <table class="calc" id="t-cri"></table>
+      <div id="cri-alert"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ SC ROUTINE PACK ═══════════ -->
+<div class="pane" id="p-pack">
+<div class="prhd">SC (Chen) Routine Pack &mdash; Assembly Checklist</div>
+<div class="card">
+  <div class="cardtitle">Pack</div>
+  <div class="setup">
+    <div class="fg"><label>Pack color</label><div class="seg" id="pk-color"><button class="on" data-v="Yellow">Yellow</button><button data-v="Green">Green</button></div></div>
+    <div class="fg"><label>Date</label><input id="pk-date" oninput="packLabel()"></div>
+    <div class="fg"><label>Your initials</label><input id="pk-init" oninput="packLabel()" placeholder="e.g. ERR"></div>
+  </div>
+  <div class="note">Indicator tape label:</div>
+  <div class="lbl-out" id="pk-label"></div>
+</div>
+<div class="grid2">
+  <div class="card" data-sec="pk1"><div class="cardtitle">Layer 1 &mdash; on towel <span class="cnt"></span></div><div class="body"></div></div>
+  <div>
+    <div class="card" data-sec="pk2"><div class="cardtitle">Layer 2 &mdash; handled instruments <span class="cnt"></span></div><div class="body"></div></div>
+    <div class="card" data-sec="pk3"><div class="cardtitle">Top layer &amp; wrap <span class="cnt"></span></div><div class="body"></div></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── Checklist content (from "Neurosurgery set up 9_4_2026" and "SC Routine Pack 9_24_26") ──
+// item: [text, opts]  opts.when: 'vs' | 'pin' | 'combo' | 'sep'; opts.hl: bold; opts.note: small grey text
+var LISTS={
+ inst:[
+  {sub:'Mayo stand'},
+  ['Size 6 sterile gloves'],['Size L surgical gown'],
+  {sub:'Final scrubs & table cover'},
+  ['Scrub bowls + sterile gloves for the person doing final scrubs'],['Scrub bottles (chlorhex, alcohol) + sterile gauze'],
+  ['Drape pack (soft tissue or ortho)',{note:'open to cover the whole table once final scrubs are done'}],
+  {sub:'Positioning'},
+  ['Extra blue hand towels'],['1- or 2-inch tape'],
+  ['Nearly finished roll of 1-inch tape as mouth gag',{when:'vs',hl:1}],
+  {sub:'Drop onto table once set'},
+  ['35 mL or 12 mL syringe(s)'],['Surgery lamp covers'],['SC routine surgery pack'],['Bipolar cautery'],
+  ['Scalpel blades #10, #11, #15'],['Vetspon / Gelfoam'],
+  {sub:'Have ready'},
+  ['SC neuro pack'],['Drill pack and burrs'],['Sterile flush (0.9% NaCl, in the bowl)'],['Bone wax'],['Sterile Q-tips'],
+  ['1 mm and 2 mm Kerrison rongeurs'],
+  ['Know where the separately packed instruments are',{note:'Gelpi sizes, osteotome, other neuro instruments'}],
+  ['Sutures: 2-0 or 3-0 PDS, 3-0 Monocryl, 3-0 Ethilon or staples'],
+  ['Extra blankets if needed'],
+  ['MRI images pulled up',{hl:1}],['Marker pin radiographs pulled up',{when:'pin',hl:1}]
+ ],
+ pt:[
+  {sub:'Table layers (top → bottom)'},
+  ['Blanket / potty pad'],['Bair Hugger blanket, plugged in',{note:'do not turn on yet'}],
+  ['Circulating warm-water blanket'],
+  ['Bean bag → suction tubing → suction bucket → suction regulator'],
+  {sub:'Monitoring'},
+  ['ECG leads (keep accessible)'],['SpO₂'],['Esophageal / rectal thermometer'],['Blood pressure + cuff'],
+  ['Alcohol bottle + ultrasound gel'],['Esophageal stethoscope (all patients)'],['Leave room for the ET tube'],
+  {sub:'Room'},
+  ['Foot mat on surgeon’s side; cautery pedal under surgeon’s right foot'],
+  ['Patient’s recovery cage set up',{note:'if time allows'}]
+ ],
+ pin:[
+  {sub:'Supplies'},
+  ['Clippers, alcohol, chlorhex scrub',{note:'4% soap + saline or alcohol to make 2%'}],
+  ['Propofol (bottle/syringe) to prevent waking'],['Ambu bag + portable SpO₂ monitor',{note:'if needed'}],
+  ['Patient entered in X-ray; DV abdomen view set'],['Sterile gloves (size 6)'],
+  ['20G or 22G spinal needles, 1.5 in',{note:'keep longer ones available'}],
+  ['Sterile pin cutter or sterile nail trimmer (orange handle)',{note:'or wrap tip in chlorhex scrub ≥ 2 min'}],
+  {sub:'Steps', ol:1},
+  ['Confirm with doctor that a marker pin is needed, and the shave area'],
+  ['Shave margin marked by SC before leaving MRI',{note:'usually center of lesion, 1.5 in lateral, 2–3 segments cranial & caudal'}],
+  ['Move patient (anesthetized) to X-ray; ambu-bag / extra propofol on hand'],
+  ['DV position, centered on T/L junction; FOV mid-thoracic → lumbosacral'],
+  ['Shave; dirty scrub (chlorhex ×3, alcohol ×3); marker pin supplies set aside'],
+  ['Doctor places pin → radiograph → position confirmed → doctor cuts outer pin'],
+  ['Move patient carefully into surgical suite']
+ ],
+ fluid:[
+  {sub:'Equipment'},
+  ['1 fluid pump + 2 syringe pumps',{when:'sep'}],['1 fluid pump + 1 syringe pump',{when:'combo'}],
+  ['Fluid bag (Isolyte or LRS), primary set (Plum set), extension set'],
+  ['Per CRI: syringe ×1, micro-bore extension ×1, drug stickers ×2'],
+  ['Y-set, locking blunt cannula or 21G needle',{when:'sep'}],
+  ['Cefazolin 1 g vial + 9.5 mL 0.9% NaCl (= 100 mg/mL)'],
+  {sub:'Set-up', ol:1},
+  ['Spike fluid bag with Plum line → extension set → prime line'],
+  ['CRI loading boluses: give separately before connecting, or via syringe pump'],
+  ['Intra-op: CRI micro-bore line(s) → Y-set → needle → T-set rubber pad',{when:'sep'}],
+  ['Intra-op: CRI micro-bore line → needle → T-set rubber pad',{when:'combo'}],
+  ['Cefazolin IV q90 min, slow over 10–15 min',{note:'via Plum set or extension-set injection site'}],
+  ['Post-op: switch to locking blunt cannula → IV extension set near patient']
+ ],
+ pk1:[
+  ['Double-wrapped in 2 large cloth drapes; towel underneath'],
+  ['Gelpis: one 6-inch right-angle, 2 medium, 2 small'],['Rongeurs (different sizes)'],
+  ['Scalpel handles (#3, #4)'],
+  ['House curette, Senn retractor, Freer ×2, Gracey #1/2 pick, Youngers-Good, 6 mm osteotome'],
+  ['Forceps: Adson-Brown ×2, DeBakey ×1'],['Small suction tip'],
+  ['Hand towel on top']
+ ],
+ pk2:[
+  ['Towel clamps ×12'],['Mosquito forceps ×4 (2 straight, 2 curved)'],
+  ['Metzenbaum scissors'],['Sharp/blunt scissors + Mayo scissors'],
+  ['Needle holders: Mayo-Hegar ×1, Olsen-Hegar ×1'],['Allis forceps ×4'],
+  ['Handles gathered on Allis forceps (clamped on last instrument); second Allis for remaining handles'],
+  ['Bigger suction tips'],['Hand towel on top']
+ ],
+ pk3:[
+  ['20 regular gauze in bowl; bowl on the towel'],['Two folded hand towels + indicator on the same layer'],
+  ['Wrapped in 2 large or XL drapes'],['Indicator tape labelled (see label above)'],['Autoclave on pack setting']
+ ]
+};
+
+function gel(id){return document.getElementById(id);}
+function segVal(id){var b=document.querySelector('#'+id+' button.on');return b?b.dataset.v:'';}
+function f1(n){return (Math.round(n*10)/10).toFixed(1);}
+function f2(n){return n.toFixed(2);}
+function f3(n){return n.toFixed(3);}
+
+var STATE_KEY='vcaNeuro.surgChecklist';
+var state={};
+try{state=JSON.parse(localStorage.getItem(STATE_KEY)||'{}')||{};}catch(e){state={};}
+function save(){try{localStorage.setItem(STATE_KEY,JSON.stringify(state));}catch(e){}}
+
+function visible(o){
+  if(!o||!o.when) return true;
+  if(o.when==='vs') return gel('proc').value==='vs';
+  if(o.when==='pin') return segVal('pin')==='yes';
+  return segVal('cri')===o.when;
+}
+
+function render(){
+  gel('pin-card').style.display=segVal('pin')==='yes'?'':'none';
+  document.querySelectorAll('.card[data-sec]').forEach(function(card){
+    var sec=card.dataset.sec, body=card.querySelector('.body'), html='', open=null, n=0;
+    var col=0, cols=(sec==='fluid')?2:1, chunks=[''];
+    LISTS[sec].forEach(function(it,i){
+      if(!Array.isArray(it)){
+        if(open){chunks[chunks.length-1]+='</'+open+'>';open=null;}
+        if(cols>1&&n>0) chunks.push('');
+        chunks[chunks.length-1]+='<div class="sub">'+it.sub+'</div>';
+        open=it.ol?'ol':'div'; chunks[chunks.length-1]+=it.ol?'<ol class="steps">':'<div>';
+        return;
+      }
+      var o=it[1]||{}; if(!visible(o)) return;
+      var key=sec+':'+i, on=!!state[key];
+      chunks[chunks.length-1]+=(open==='ol'?'<li>':'')+'<label class="ci'+(on?' done':'')+(o.hl?' hl':'')+'"><input type="checkbox" data-k="'+key+'"'+(on?' checked':'')+'><span>'+it[0]+(o.note?' <small>('+o.note+')</small>':'')+'</span></label>'+(open==='ol'?'</li>':'');
+      n++;
+    });
+    if(open) chunks[chunks.length-1]+='</'+open+'>';
+    body.innerHTML=cols>1?chunks.filter(Boolean).map(function(c){return '<div>'+c+'</div>';}).join(''):chunks.join('');
+  });
+  counts(); calc();
+}
+
+function counts(){
+  var tot=0,done=0;
+  document.querySelectorAll('.card[data-sec]').forEach(function(card){
+    if(card.offsetParent===null&&card.style.display==='none') return;
+    var cbs=card.querySelectorAll('.body input[type=checkbox]'), d=0;
+    cbs.forEach(function(c){if(c.checked)d++;});
+    var cnt=card.querySelector('.cnt'); cnt.textContent=d+' / '+cbs.length; cnt.classList.toggle('done',d===cbs.length&&cbs.length>0);
+    if(card.closest('.pane.on')){tot+=cbs.length;done+=d;}
+  });
+  gel('prog').textContent=done+' / '+tot+' done';
+}
+
+document.addEventListener('change',function(e){
+  var k=e.target.dataset&&e.target.dataset.k; if(!k) return;
+  state[k]=e.target.checked; save();
+  e.target.closest('.ci').classList.toggle('done',e.target.checked); counts();
+});
+
+document.querySelectorAll('.seg').forEach(function(seg){
+  seg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    seg.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});
+    if(seg.id==='pk-color') packLabel(); else render();
+  });
+});
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('on',x===t);});
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.toggle('on',p.id===t.dataset.pane);});
+  counts();
+}
+
+function resetAll(){
+  if(!confirm('Uncheck every item on both tabs?')) return;
+  state={}; save(); render();
+}
+
+// ── Calculations (rates from the set-up document) ──
+function rows(t,arr){gel(t).innerHTML=arr.map(function(r,i){return i===0?'<tr>'+r.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr>':'<tr><td>'+r[0]+'</td>'+r.slice(1).map(function(c){return '<td class="v">'+c+'</td>';}).join('')+'</tr>';}).join('');}
+
+function calc(){
+  var w=parseFloat(gel('wt').value)||0, dog=segVal('sp')!=='cat', D=function(x){return w?x:'—';};
+  gel('calc-wt').textContent=w?w+' kg '+(dog?'dog':'cat'):'enter weight above';
+  var r1=dog?10:5, r2=dog?5:3;
+  rows('t-fluid',[['','Rate','mL/hr'],
+    ['First hour',r1+' mL/kg/hr',D(f1(r1*w))],
+    ['After first hour',r2+' mL/kg/hr',D(f1(r2*w))]]);
+  rows('t-cef',[['','Dose','Volume'],
+    ['Cefazolin 22 mg/kg IV',D(f1(22*w)+' mg'),D(f2(22*w/100)+' mL')]]);
+  cefTimes();
+  var alert='';
+  if(segVal('cri')==='combo'){
+    gel('cri-title').textContent='Fentanyl + ketamine CRI — one 30 mL syringe (1 mL/hr = F 1 mcg/kg/hr + K 2 mcg/kg/min)';
+    var fv=0.6*w, kv=0.036*w, ns=30-fv-kv;
+    rows('t-cri',[['Step','Detail','Amount'],
+      ['Fentanyl (50 mcg/mL)','0.6 mL × kg',D(f2(fv)+' mL')],
+      ['Ketamine (100 mg/mL)','0.036 mL × kg',D(f3(kv)+' mL')],
+      ['0.9% NaCl','to 30 mL total',D(ns>=0?f2(ns)+' mL':'—')],
+      ['Loading: fentanyl','5 mcg/kg IV',D(f1(5*w)+' mcg = '+f2(5*w/50)+' mL')],
+      ['Loading: ketamine','0.5 mg/kg IV',D(f1(0.5*w)+' mg = '+f3(0.5*w/100)+' mL')],
+      ['Intra-op','5–10 mL/hr (F 5–10 mcg/kg/hr, K 10–20 mcg/kg/min)','5–10 mL/hr'],
+      ['Post-op, first 2 h','F 3 mcg/kg/hr, K 6 mcg/kg/min','3 mL/hr'],
+      ['Post-op, next 6 h','F 2 mcg/kg/hr, K 4 mcg/kg/min','2 mL/hr'],
+      ['Post-op, last 2 h','F 1 mcg/kg/hr, K 2 mcg/kg/min','1 mL/hr']]);
+    if(w&&ns<0) alert='Drug volume exceeds 30 mL — use a larger syringe and recalculate.';
+  } else {
+    gel('cri-title').textContent='Fentanyl and ketamine — separate syringes';
+    rows('t-cri',[['Drug','Dose','Amount'],
+      ['Fentanyl load (50 mcg/mL)','5 mcg/kg IV',D(f1(5*w)+' mcg = '+f2(5*w/50)+' mL')],
+      ['Fentanyl intra-op','5–10 mcg/kg/hr',D(f1(5*w)+'–'+f1(10*w)+' mcg/hr = '+f2(5*w/50)+'–'+f2(10*w/50)+' mL/hr undiluted')],
+      ['Fentanyl post-op','3–5 mcg/kg/hr',D(f1(3*w)+'–'+f1(5*w)+' mcg/hr = '+f2(3*w/50)+'–'+f2(5*w/50)+' mL/hr undiluted')],
+      ['Ketamine load (100 mg/mL)','0.5 mg/kg IV',D(f1(0.5*w)+' mg = '+f3(0.5*w/100)+' mL')],
+      ['Ketamine intra-op','10–20 mcg/kg/min',D(f2(10*w*60/1000)+'–'+f2(20*w*60/1000)+' mg/hr = '+f3(10*w*60/100000)+'–'+f3(20*w*60/100000)+' mL/hr undiluted')],
+      ['Ketamine post-op','2–5 mcg/kg/min',D(f2(2*w*60/1000)+'–'+f2(5*w*60/1000)+' mg/hr = '+f3(2*w*60/100000)+'–'+f3(5*w*60/100000)+' mL/hr undiluted')]]);
+    alert='<span style="font-weight:400">Fentanyl may be diluted so 1 mL/hr = 1 mcg/kg/hr (24 mL syringe: '+(w?f2(0.48*w)+' mL':'0.48 mL × kg')+' fentanyl + NaCl to 24 mL).</span>';
+  }
+  gel('cri-alert').innerHTML=alert?'<div class="'+(alert.indexOf('exceeds')>-1?'alert':'note')+'">'+alert+'</div>':'';
+}
+
+// Cefazolin redose times from first dose
+function cefTimes(){
+  var box=gel('cef-times');
+  if(!box.dataset.init){
+    box.dataset.init=1;
+    box.innerHTML='<span class="note" style="margin:0">First dose at</span> <input id="cef-start" type="time" style="padding:2px 5px;border:1px solid var(--bd);border-radius:4px"> <span id="cef-list" class="times" style="margin:0"></span>';
+    gel('cef-start').oninput=cefTimes;
+  }
+  var v=gel('cef-start').value, list=gel('cef-list');
+  if(!v){list.innerHTML='';return;}
+  var p=v.split(':'), t0=(+p[0])*60+(+p[1]), h='';
+  for(var i=1;i<=5;i++){
+    var t=(t0+90*i)%1440, hh=Math.floor(t/60), mm=t%60, lab=((hh%12)||12)+':'+(mm<10?'0':'')+mm+(hh<12?' AM':' PM');
+    h+='<label><input type="checkbox" onchange="this.parentNode.classList.toggle(\'done\',this.checked)"> '+lab+'</label>';
+  }
+  list.innerHTML=h;
+}
+
+function packLabel(){
+  gel('pk-label').textContent='Chen Routine Pack, '+segVal('pk-color')+', '+(gel('pk-date').value||'{date}')+', '+(gel('pk-init').value||'{initials}');
+}
+
+var today=new Date().toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'});
+gel('pt-date').value=today; gel('pk-date').value=today;
+render(); packLabel();
+</script>
+</body>
+</html>

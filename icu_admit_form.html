@@ -1198,7 +1198,7 @@ function applyHandoffPaste(){
   if(data.cpr_dnr==='CPR'){ var cprCb=gel('cpr-cb'); if(cprCb){ cprCb.checked=true; toggleCPR(); } }
   else if(data.cpr_dnr==='DNR'){ var dnrCb=gel('dnr-cb'); if(dnrCb){ dnrCb.checked=true; toggleDNR(); } }
 
-  if(data.pt_ivc||data.pt_cs){
+  if(data.pt_ivc_placed!=='not'&&(data.pt_ivc||data.pt_cs)){
     var loc=[data.pt_ivc,data.pt_cs].filter(Boolean).join(' — ');
     var ivCb=gel('iv-placed-cb');
     if(ivCb){ ivCb.checked=true; toggleIvPlaced(ivCb); }

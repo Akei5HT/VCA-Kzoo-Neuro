@@ -277,6 +277,7 @@ input[type=checkbox].dcb { width: 16px; height: 16px; cursor: pointer; accent-co
 <div class="card">
   <div class="card-header">Patient Information
     <button class="filter-btn no-print" id="handoff-paste-btn" style="margin-left:auto" onclick="toggleSec('handoff-paste-box', document.getElementById('handoff-paste-box').classList.contains('sec-hidden'))">📋 Paste Info ← MRI Sheet</button>
+    <button class="filter-btn no-print" id="handoff-copy-btn" style="margin-left:6px" onclick="copyHandoffInfo()">📋 Copy Info → ICU</button>
   </div>
   <div class="card-body">
 
@@ -1487,6 +1488,35 @@ function applyHandoffPaste() {
   status.textContent = `✅ Loaded${data.pt_name ? ' — ' + data.pt_name : ''}`;
   document.getElementById('handoff-paste-input').value = '';
   setTimeout(() => toggleSec('handoff-paste-box', false), 1500);
+}
+
+// ══ Handoff — Copy patient/anesthesia/IVC info for the ICU Admit Form ═════
+// Same JSON format as the MRI sheet; sends the most recent (post-op) vitals when filled in.
+
+function copyHandoffInfo() {
+  const cpr = document.getElementById('btn-cpr').classList.contains('cpr-active') ? 'CPR'
+            : document.getElementById('btn-dnr').classList.contains('dnr-active') ? 'DNR' : '';
+  const latest = (post, pre) => gv(post) || gv(pre);
+  const placed = gv('pt_ivc_placed') !== 'not';
+  const data = {
+    pt_name: gv('pt_name'), pt_case: gv('pt_case'), pt_dr: gv('pt_dr'), pt_tech: gv('pt_tech'),
+    pt_date: gv('pt_date'), pt_asa: gv('pt_asa'), species, weight: gv('weight'), pt_bw: gv('pt_bw'),
+    cpr_dnr: cpr, pt_ivc_placed: placed ? 'placed' : 'not',
+    pt_ivc: placed ? gv('pt_ivc') : '', pt_cs: placed ? gv('pt_cs') : '', pt_ctx: gv('pt_ctx'), pt_ivf: gv('pt_ivf'), pt_pain: gv('pt_pain'),
+    vit_mm: latest('vit_mm_post', 'vit_mm_pre'), vit_temp_pre: latest('vit_temp_post', 'vit_temp_pre'),
+    vit_pulse_pre: latest('vit_hr_post', 'vit_hr_pre'), vit_rr_pre: latest('vit_rr_post', 'vit_rr_pre')
+  };
+  const json = JSON.stringify(data);
+  const ta = document.createElement('textarea');
+  ta.value = json; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(json).catch(() => {});
+  const btn = document.getElementById('handoff-copy-btn');
+  btn.textContent = ok ? '✅ Copied — paste on ICU Admit Form' : '⚠ Copy failed — try again';
+  setTimeout(() => { btn.textContent = '📋 Copy Info → ICU'; }, 3000);
 }
 
 // ══ Anesthesia Report ════════════════════════════════════════════════════

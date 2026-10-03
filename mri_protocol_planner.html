@@ -66,6 +66,11 @@ table.seq tr.grp td{background:#f0f3f7;font-weight:700;color:var(--p);font-size:
 .upl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12.5px;color:var(--mu);}
 #zoom{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:20;align-items:center;justify-content:center;cursor:zoom-out;}
 #zoom img{max-width:94vw;max-height:92vh;}
+.artgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;}
+.art{border:1px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:12.5px;line-height:1.4;}
+.art.hot{border-color:#e0b252;background:#fffaf0;}
+.art b{color:var(--p);display:block;margin-bottom:2px;}
+.art .s{color:var(--mu);}
 #paste-box{display:none;}
 #paste-box textarea{width:100%;height:44px;font-size:12px;margin:6px 0;border:1px solid var(--bd);border-radius:4px;padding:4px;}
 .btn{background:var(--p);color:#fff;border:none;border-radius:4px;padding:5px 12px;font-size:13px;cursor:pointer;}
@@ -80,7 +85,7 @@ table.seq tr.grp td{background:#f0f3f7;font-weight:700;color:var(--p);font-size:
   .card{margin:4px 0;padding:5px 7px;break-inside:avoid;}
   .grid2{margin:0;gap:4px;}
   .coil:not(.on){display:none;}
-  table.seq{font-size:9.5px;} table.seq tr.off{display:none;}
+  table.seq{font-size:9.5px;} table.seq tr.off{display:none;} .art:not(.hot){display:none;}
   .ph img{height:120px;cursor:default;} .ph.hidden,.ph .x,.upl{display:none!important;}
   .fg input,.fg select{border:none;border-bottom:1px solid #999;border-radius:0;padding:1px 2px;font-size:11px;}
 }
@@ -129,14 +134,15 @@ table.seq tr.grp td{background:#f0f3f7;font-weight:700;color:var(--p);font-size:
           <option value="hip">Hip</option>
           <option value="longbone">Long bone</option>
           <option value="stifle">Stifle / carpus / hock</option>
+          <option value="abdomen">Abdomen</option>
         </optgroup>
       </select></div>
     <div class="fg"><label>Contrast</label><div class="seg" id="gd"><button class="on" data-v="yes">Yes</button><button data-v="no">No</button></div></div>
     <div class="fg"><label>Head W &times; H (mm) <span style="text-transform:none;font-weight:400">optional</span></label>
       <div style="display:flex;gap:4px"><input type="number" id="hw" placeholder="width"><input type="number" id="hh" placeholder="height"></div>
       <div class="hint">widest skull; mandible &rarr; top of skull</div></div>
-    <div class="fg"><label>Spine length</label>
-      <label class="chk"><input type="checkbox" id="short"> Short-spined / chondrodystrophic</label></div>
+    <div class="fg"><label>Body shape</label>
+      <label class="chk"><input type="checkbox" id="short"> Short, thick-bodied (e.g. French Bulldog)</label></div>
   </div>
   <datalist id="breeds"></datalist>
 </div>
@@ -159,9 +165,14 @@ table.seq tr.grp td{background:#f0f3f7;font-weight:700;color:var(--p);font-size:
     <ul class="li" id="aids"></ul>
   </div>
   <div class="card">
-    <div class="cardtitle">Planning Notes</div>
+    <div class="cardtitle">Planning Notes <span class="r">from the GE training decks</span></div>
     <ul class="li" id="plan"></ul>
   </div>
+</div>
+
+<div class="card" style="margin-top:8px">
+  <div class="cardtitle">Artifact Troubleshooting <span class="r">most likely for this region first</span></div>
+  <div id="arts" class="artgrid"></div>
 </div>
 
 <div class="card" style="margin-top:8px">
@@ -189,9 +200,9 @@ const PROTOCOLS={"BRAIN\\SMALL - SMALL FLEX":[["AX LOC BRAIN","0:12","FS"],["3PL
 var BREEDS={
   brachy:['Pug','French Bulldog','English Bulldog','Boston Terrier','Shih Tzu','Pekingese','Lhasa Apso','Boxer','Cavalier King Charles Spaniel','Brussels Griffon','Japanese Chin','Bullmastiff','Dogue de Bordeaux','Persian','Himalayan','Exotic Shorthair','British Shorthair'],
   dolicho:['Greyhound','Whippet','Italian Greyhound','Borzoi','Saluki','Afghan Hound','Collie','Shetland Sheepdog','Doberman Pinscher','Bull Terrier','Siamese','Oriental Shorthair'],
-  meso:['Labrador Retriever','Golden Retriever','German Shepherd','Beagle','Border Collie','Australian Shepherd','Poodle','Miniature Schnauzer','Yorkshire Terrier','Chihuahua','Maltese','Jack Russell Terrier','Cocker Spaniel','Husky','Rottweiler','Domestic Shorthair','Domestic Longhair','Maine Coon']
+  meso:['Dachshund','Corgi','Basset Hound','Bichon Frise','Labrador Retriever','Golden Retriever','German Shepherd','Beagle','Border Collie','Australian Shepherd','Poodle','Miniature Schnauzer','Yorkshire Terrier','Chihuahua','Maltese','Jack Russell Terrier','Cocker Spaniel','Husky','Rottweiler','Domestic Shorthair','Domestic Longhair','Maine Coon']
 };
-var SHORT_SPINE=['Dachshund','Corgi','Pembroke Welsh Corgi','Cardigan Welsh Corgi','Basset Hound','French Bulldog','English Bulldog','Pug','Shih Tzu','Lhasa Apso','Pekingese','Beagle','Cocker Spaniel','Boston Terrier','Bichon Frise'];
+var SHORT_SPINE=['French Bulldog','English Bulldog','Pug','Boston Terrier']; // short, thick-bodied (slide: 30 lb Frenchie, 70 lb English Bulldog)
 // Inner opening of each coil (training-slide notes, mm) and the head-cradle insert sizes (W × H of head, mm)
 var COILS={
   KN:{name:'8-ch knee (Invivo)',w:165,h:140,cradle:'knee8',post:'et_post (120 mm)'},
@@ -272,6 +283,7 @@ function coilOptions(r,w,cat,skull){
   else if(r==='hip') add('BOSP','MSK\\HIP','Body Matrix over the hips + Spine Matrix.');
   else if(r==='longbone') add('SP','MSK\\LONG BONE','Spine Matrix.');
   else if(r==='stifle') add('FL','MSK\\STIFLE/CARPUS/HOCK','Flex coil wrapped around the joint.');
+  else if(r==='abdomen') add(cat||w<=8?'EX':'BOSP',[],cat||w<=8?'Small dogs and cats: CP extremity coil (GE deck). No abdomen protocol is saved on the Avanto.':'Medium–large: Body Matrix over the abdomen + Spine Matrix (GE deck used a wrap-around flex coil). No abdomen protocol is saved on the Avanto.');
   return o;
 }
 
@@ -315,6 +327,7 @@ function render(){
 
   renderPos(o,r,w,cat,skull);
   renderPhotos(photoKey(r,o,w));
+  renderArtifacts(r);
   renderSeq(o,r);
   renderGd(w);
 }
@@ -327,24 +340,31 @@ function renderPos(o,r,w,cat,skull){
   var prone=(r==='brain'&&o.coil!=='HN');
   var supine=(o.coil==='HN'||o.coil==='HNSP'||r==='tl'||r==='csp'||r==='brainc'||(r==='bp'));
   var lateral=(r==='shoulder'||r==='scapula');
-  pos.push('<b>Head first</b> into the magnet (always).');
+  var limb=(r==='stifle');
+  var B=sizeBand(w);
+  if(r==='abdomen') pos.push('<b>Supine / dorsal recumbency</b>; head either direction depending on the protocol.');
+  else pos.push('<b>Head first</b> into the magnet (always).');
   if(prone) pos.push('<b>Prone / sternal</b> (brain only). Head straight, brain in the centre of the coil.');
-  else if(lateral) pos.push('<b>Lateral recumbency, affected side down</b>; head in the cervical part of the CTL coil.');
+  else if(lateral) pos.push('<b>Lateral recumbency, affected side down</b>; head in the cervical part of the spine coil.');
+  else if(limb) pos.push('<b>Lateral, affected limb down</b>; joint in a neutral position (stifle: tibia 90° to femur), centred side-to-side in the coil.');
   else if(supine) pos.push('<b>Supine / dorsal recumbency</b>; whole body straight.');
-  else pos.push('Position per the MSK training slides for this region.');
-  if(r==='brain'||r==='brainc') pos.push('Brain centred in the coil; head straight (not rotated).');
+  else if(r!=='abdomen') pos.push('Supine on the spine coil; region of interest over the coil elements.');
+  if(r==='brain'||r==='brainc') pos.push('Brain centred in the coil; head straight (not rotated). <b>Tumour / possible radiation therapy</b>: line the patient up physically with the lasers so slices are true transverse and sagittal.');
   if(r==='csp'||r==='brainc') pos.push('Entrance of the ear canal at the <b>5 cm mark</b> (start of spine element 1) ≈ cerebellum.');
-  if(r==='tl') pos.push('<b>Last set of nipples / cranial pubis</b> at the 5 cm mark (start of element 1) ≈ caudal sacrum.');
-  if(r==='bp') pos.push('With C-spine: position as a C-spine (dorsal). With shoulder: lateral, affected side down — only the side against the coil is diagnostic.');
-  if(lateral) pos.push('Forelimbs in a natural position, strapped. Up-side limb pulled caudally with a strap; down-side carpus flexed and tucked.');
+  if(r==='tl') pos.push('<b>Last set of nipples / cranial pubis</b> at the 5 cm mark (start of element 1) ≈ caudal sacrum. Pelvis wanted too: slide the patient forward so the tail base / anus is at the 5 cm mark.');
+  if(r==='tl'||r==='csp') pos.push('Straighten with anatomic landmarks: manubrium, xiphoid, umbilicus, prepuce.');
+  if(r==='bp') pos.push('With C-spine: position as a C-spine (dorsal). With shoulder: lateral, affected side down — only the side against the coil is diagnostic, and the cord is harder to straighten (focus on C4–T4).');
+  if(lateral) pos.push('Forelimbs in a natural position, strapped. Up-side limb pulled caudally with a strap; down-side carpus flexed and tucked. <b>IV catheter in a hind limb.</b>');
+  if(limb) pos.push('Other limbs pulled well out of the way so they don’t phase-wrap into the images.');
   // landmark + marker
   var lm={brain:'Landmark: centre of the brain / coil centre.',brainc:'Landmark: brain centre for the brain series; re-landmark cranial to the thoracic inlet for the C-spine.',
     csp:'Landmark: just cranial to the thoracic inlet / manubrium.',tl:'Landmark: mid-lumbar spine, usually between the 2nd set of nipples and the umbilicus.',
-    bp:'Landmark: just cranial to the thoracic inlet.',shoulder:'Landmark: shoulder joint of the down side.',scapula:'Landmark: mid-scapula.'}[r];
+    bp:'Landmark: just cranial to the thoracic inlet (≈ C5).',shoulder:'Landmark: point of the shoulder (down side).',scapula:'Landmark: mid-scapula.',
+    stifle:'Landmark: laser cross-hairs on the centre of the joint.',abdomen:'Landmark: around the last rib (as for an abdominal radiograph).'}[r];
   if(lm) pos.push(lm);
   var mk={brain:'right side of the head',brainc:'right side of the head',csp:'right side, mid-neck',tl:'right side, cranial ischial wing',bp:'right side, mid-neck',shoulder:'right side',scapula:'right side'}[r]||'right side';
   pos.push('Right-side marker (fish-oil capsule): '+mk+'.');
-  if(r==='brain'||r==='brainc') pos.push('BP cuff adapter <b>outside</b> the coil.');
+  if(r==='brain'||r==='brainc') pos.push('BP cuff adapter <b>outside</b> the coil; ET-tube <b>cuff pilot valve away from the head</b> (its metal spring causes artifact, often first seen on FLAIR).');
 
   // aids
   var coilKey=(o.coil==='HNSP')?'HN':o.coil, c=COILS[coilKey];
@@ -355,41 +375,72 @@ function renderPos(o,r,w,cat,skull){
     if(skull==='dolicho') aids.push('Dolichocephalic: standard insert + foam side wedges; slide the chin rest back so the notch sits under the tongue.');
     if(INSERT_HEAD[sz]) aids.push('Insert '+sz+' fits a head about '+INSERT_HEAD[sz][0]+' mm wide × '+INSERT_HEAD[sz][1]+' mm tall'+(brachy?' (brachy version 1.3× wider)':'')+'.');
   }
-  if(supine||lateral||r==='pelvis'||r==='hip'||r==='longbone'){
+  if(supine||lateral||r==='pelvis'||r==='hip'||r==='longbone'||r==='abdomen'){
     var tr=w<5?'XS':(w<=10?'S':(w<=20?'M (2 sections + key pins)':null));
-    if(supine) aids.push(tr?kit('<b>Positioning trough '+tr+'</b>, thin foam only under the spine (keeps it close to the spine coil)'):'Over 20 kg: foam pads / sandbags to keep the spine straight (no printed trough this size).');
+    if(supine||r==='abdomen') aids.push(tr?kit('<b>Positioning trough '+tr+'</b>, thin foam only under the spine (keeps it close to the spine coil)'):'Over 20 kg: foam pads / sandbags to keep the spine straight (no printed trough this size).');
     aids.push(tr?kit('Docking wedges 15° / 30° ('+tr.split(' ')[0]+') on the trough side walls'+(lateral?' to hold the lateral position':'')):'Foam wedges / sandbags'+(lateral?' to hold the lateral position':''));
   }
   if(lateral) aids.push('Straps for both forelimbs; foam under the neck so the spine stays level.');
-  if(r==='stifle') aids.push('Foam blocks to keep the limb still inside the flex coil; Velcro straps.');
+  if(limb) aids.push('Sandbag over the hock (stifle) or on the limb to stop small vibrations; foam blocks and Velcro straps inside the flex coil.');
+  if(r==='abdomen') aids.push('Ventilator set up for breath holds; a second person in the scan room.');
   aids.push(kit('SpO₂ tongue clip, <b>'+(cat||w<5?'kitten':'dog')+'</b> size (fiber-optic MR sensor)'+(prone?' — sits in the insert’s tongue notch':'')));
   aids.push(kit('Quadtrode MR ECG pad on the TPU carrier'));
   aids.push(kit('Temp probe holder: ET-tube clip (by tube ID) for oesophageal'+(cat||w<=10?' or tail saddle ('+(cat?'cat':'small dog')+') for rectal':'')));
   aids.push(kit('Skin marker capsule (oil) on the right side')+' — or a fish-oil capsule');
   if(skull==='brachy') aids.push('<b>Brachycephalic (BOAS)</b>: '+(prone?'don’t lift the chin high in the prone insert; ':'keep the neck extended and the airway clear; ')+'watch EtCO₂ closely.');
 
-  // planning notes
+  // planning notes (adapted from the GE training decks: anatomy, coverage, slice counts and FOV only)
   if(r==='brain'||r==='brainc'){
-    plan.push('<b>Sagittal T2</b>: parallel to the longitudinal fissure, perpendicular to the hard palate; both bullae laterally; top of skull to bottom of jaw. Odd number of slices.');
-    plan.push('<b>Axials</b>: perpendicular to the hard palate, cribriform plate to foramen magnum. <b>Dorsals</b>: parallel to the brainstem, top of skull to base of bullae.');
+    plan.push('<b>Sagittal T2</b> first (everything is planned off it), from the dorsal + transverse localizers: parallel to the longitudinal fissure, perpendicular to the hard palate; cover the whole brain width incl. both bullae; top of skull to bottom of jaw. Odd number of slices.');
+    plan.push('<b>Transverse</b>: perpendicular to the hard palate, cribriform plate to foramen magnum. FLAIR / GRE may run past the brain to reach their slice count; T1 / T2 can be trimmed to the area of interest to save time.');
+    plan.push('<b>Dorsal</b>: parallel to the brainstem, top of skull down through both ears / bullae. <b>DWI</b>: brain only.');
+    plan.push('Check both <b>bullae</b> on the sagittal: they should be black (air). Include the ears in the T1 if they are abnormal.');
+    plan.push('Small patient: don’t shrink the FOV too far (≈ 14 cm minimum) — SNR drops sharply. Match the coil to the patient instead.');
+    plan.push('<b>Radiation-therapy planning</b> (tumour cases): add <b>TRV T1 POST “for RT”</b>, medial canthus → C1, FOV 18 cm, 256 × 256, 2.0 mm slices, no gap; true transverse.');
   }
   if(r==='csp'||r==='brainc'){
-    plan.push('<b>Coronal</b>: mid-cerebellum to ~T3. FOV small 16–22 cm, medium 22–28, large 30–38.');
-    plan.push('<b>Sagittal</b>: same FOV as coronal; '+({SMALL:9,MEDIUM:11,LARGE:13}[sizeBand(w)])+' slices (odd).');
+    plan.push('<b>Coronal planning series</b> (not done for brains): one slice parallel to the flattest part of the cord, perpendicular to the spinous processes on the transverse view, then 5–7 slices. Mid-cerebellum to ~T3; C2 (longest vertebra) and T2–T3 are good reference points.');
+    plan.push('<b>FOV</b> small 16–22 cm, medium 22–28, large 30–38; once set, use the same FOV for every coronal and sagittal.');
+    plan.push('<b>Sagittal</b>: from the coronal + transverse; back of the cerebellum to T3; '+({SMALL:9,MEDIUM:11,LARGE:13}[B])+' slices (odd). Zoom ~2× on each end to centre the cord and match the yaw.');
   }
   if(r==='tl'){
-    plan.push('<b>Coronal</b>: most of the sacrum to T10–T13. FOV small 18–22 cm, medium 22–30, large 30–38.');
-    plan.push('<b>Sagittal</b>: 7–11 slices (small 9, medium 11, large 13); straighten a curved spine before going on (yaw is OK).');
-    if(sizeBand(w)!=='SMALL') plan.push('Run the <b>LSP</b> first, then calculate the <b>TSP</b> localizer centre from the overlap point; check TSP vs LSP labels (coil elements change).');
-    if(gel('short').checked) plan.push('Short-spined patient on a smaller protocol: <b>increase the axial FOV</b> or the axials will be grainy.');
+    plan.push('<b>Coronal planning series</b>: most of the sacrum to T10–T13, 6–8 slices, mostly <b>ventral</b> to the cord so the ribs are included (not every dog has 13 ribs / 7 lumbar vertebrae). Note the cranial–caudal positions of L7–S1 and T12–13 — they’re hard to see later.');
+    plan.push('<b>FOV</b> small 18–22 cm, medium 22–30, large 30–38; keep it the same for all lumbar coronal / sagittal series.');
+    plan.push('<b>Sagittal</b>: 7–11 slices (small 9, medium 11, large 13). A curved spine must be fixed now (wedges / foam, re-run the coronal); a straight but angled (yaw) spine is fine. <b>Max 3 attempts</b> — some (e.g. hemivertebrae breeds) won’t straighten.');
+    if(B!=='SMALL') plan.push('<b>Thoracic</b>: run the LSP first, then the TSP with at least one vertebra of overlap; note C7–T1 and T3 (studies are traditionally T3–L7) and focus on keeping T3 → overlap straight. Check each series is labelled TSP or LSP (coil elements follow it).');
+    if(gel('short').checked) plan.push('Short-spined patient on a smaller protocol: <b>increase the axial FOV</b> or the axials will be grainy (e.g. a 70 lb English Bulldog: medium protocol with large-size axials).');
   }
-  if(r==='csp'||r==='tl'||r==='brainc') plan.push('<b>Axials</b>: perpendicular to the cord, a slice through the centre of each disc; line the stacks up. Ask the neurologist where to cut. STIR pre-contrast if needed; PD during the contrast wait.');
+  if(r==='csp'||r==='tl'||r==='brainc'){
+    plan.push('<b>Axials</b> off the sagittal T2 (ask the neurologist where to cut): perpendicular to the cord, a slice through the centre of each disc, stack centrelines lined up. Change the angle mid-vertebral body, not at a disc or lesion.');
+    plan.push('<b>Cross-talk</b>: where stacks overlap, keep the crossing &gt; 1.5× the cord width away from the cord (worst at C6–T2 and L6–S1; slight under-rotation is OK). T1 axials can use a 1–2 cm larger FOV than T2; widen the axial FOV over C5–T8 (cord farther from the coil).');
+    plan.push('STIR pre-contrast if needed (copy from the sag T2, ~2 extra slices each side). <b>During the 2–3 min contrast wait</b>: PD (bone detail) or GRE (haemorrhage; T1–L1 may need breath holds). Review the pre-contrast T1s for motion before injecting.');
+    plan.push('Metal nearby (microchip, BB) ruining the myelogram or fat-sat post-contrast images → turn fat saturation off.');
+  }
   if(r==='bp'){
-    plan.push('Sagittal FOV to include the whole C-spine to T4: ~26 cm small, 32 cm medium, 38 cm large.');
-    plan.push('Axials C4–T4, one stack, FOV to include both axillae: small 14 cm, medium 16, large 18–20.');
+    plan.push('Sagittal FOV to include the whole C-spine to T4: ~26 cm small, 32 cm medium, 38 cm large. Sag T2 from shoulder to shoulder; myelogram cord only.');
+    plan.push('<b>Coronal STIR</b>: mid T1 spinous process to mid heart, C4–T4.');
+    plan.push('Axials C4–T4, one straight stack (not angled to the cord), every disc cut, centre placed <b>below</b> the cord; FOV to include both axillae: small 14 cm, medium 16, large 18–20.');
+    plan.push('Contrast is usual: T1 axials + T1 coronal and sagittal with fat sat.');
   }
-  if(r==='shoulder') plan.push('T1 sagittal from the lateral skin of the limb to the axilla; STIR and T2 sagittal copied from T1.');
-  plan.push('Grainy images → first check the coil elements selected (TSP/LSP, HE/NE/SP).');
+  if(r==='shoulder'){
+    plan.push('Sagittal from the localizers: T1 from the lateral skin of the limb to the axilla; STIR and T2 sagittal copied from T1.');
+    plan.push('Axial angle: the greater tubercle and caudal articular surface form an “S” — angle the slices across the tip of the S. Axial T2 copied from the axial STIR. ± sagittal T1 post.');
+  }
+  if(limb){
+    plan.push('<b>Sagittal first</b> (from the transverse + dorsal localizers); a good sagittal stifle looks like a lateral radiograph with the cruciates forming an X.');
+    plan.push('<b>Stifle</b>: coronal parallel to the patellar tendon, axials perpendicular to it. Start: sag/cor 3–3.5 mm, 16–18 cm FOV; axial 3–3.5 mm, 12–14 cm.');
+    plan.push('<b>Hock</b>: coronal parallel to the metatarsals / calcaneus, axials perpendicular. Start: sag/cor 2.5 mm, 12–14 cm FOV. Flexor / Achilles tendons: coronal parallel to the tibia, FOV up to ~20 cm, 3–3.5 mm.');
+    plan.push('Using a protocol built for the other limb? Flip the R/L on the localizer. Small patient: don’t shrink the FOV too far — if grainy, increase FOV and slice thickness.');
+    plan.push('Look at the STIR early: unexpected bright muscle → zoom the FOV out to find the extent (larger FOV gains SNR, so averages can drop).');
+  }
+  if(r==='abdomen'){
+    plan.push('No abdomen protocol is saved on the Avanto — build from the body sequences. Check the dorsal localizer covers <b>cranial liver to pelvic inlet</b>.');
+    plan.push('Routine (all breath-held): COR + TRV T2 FS, COR T2, COR + TRV T1, then post-contrast TRV + COR T1 FS and COR T1.');
+    plan.push('<b>Breath holds</b>: hyperventilate a few breaths, ventilator off, scan; every 15–20 s pause and give 1–2 breaths. Keep the plane deep enough to stop spontaneous breathing.');
+    plan.push('<b>Liver / splenic mass</b>: TRV T1 in/opposed phase (dual echo), dynamic TRV T1 post at ~15 s (arterial) and ~45 s (portal), delayed T1 at 4 min (venous). Prep the dynamic scan and prime the contrast line first.');
+    plan.push('<b>Portosystemic shunt</b>: T2 FS COR/TRV, T1 COR/TRV, then 2D TOF <b>post-contrast</b> acquired caudal → cranial (pelvis to ~3 cm cranial to the diaphragm) with a superior sat band, then TRV T1 post.');
+  }
+  plan.push('Grainy images or signal dropping off at one end → first check the coil elements selected.');
   gel('pos').innerHTML=li(pos); gel('aids').innerHTML=li(aids); gel('plan').innerHTML=li(plan);
 }
 
@@ -406,6 +457,7 @@ function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
 function renderSeq(o,r){
   var tb=gel('seq'), gd=seg('gd')==='yes';
   if(!o){tb.innerHTML='';gel('seq-time').textContent='';return;}
+  if(!o.folders.length){tb.innerHTML='<tr><td style="color:var(--mu)">No saved protocol for this region on the Avanto — see the planning notes for the sequence list.</td></tr>';gel('seq-time').textContent='';return;}
   var h='<tr><th style="width:24px"></th><th>Sequence</th><th>Coil elements</th><th style="width:60px">Time</th></tr>', tot=0, n=0;
   o.folders.forEach(function(f){
     var list=(PROTOCOLS[f]||[]).map(function(s,i){return s.concat([i]);}), divDone=false;
@@ -504,6 +556,23 @@ gel('ph-file').onchange=function(){
   });
 };
 gel('ph-hide').onchange=function(){setHidden(curKey,this.checked);renderPhotos(curKey);};
+
+// ── Artifact troubleshooting (from "MRI Artifacts" deck; GE console steps generalised) ──
+var ARTIFACTS=[
+ {n:'Metal / microchip',r:['csp','brainc','bp','shoulder','tl','brain'],see:'Distortion around the metal on all planes; worst on fat-sat, GRE and STIR. Follows the frequency direction.',fix:'Turn fat sat off (most effective). Swap frequency direction (moves the artifact; add phase oversampling). Raise bandwidth and echo-train length.'},
+ {n:'ET-tube cuff valve',r:['brain','brainc'],see:'Brain artifact, usually first noticed on FLAIR (check the localizer). The pilot-balloon valve has a metal spring.',fix:'Move the valve away from the head without moving the patient, then re-run.'},
+ {n:'Coil cut-off',r:['tl','csp','brainc','bp','brain'],see:'Signal lost at the cranial or caudal end (clearest on sagittals); axials planned on it come out grainy.',fix:'Wrong coil elements selected (e.g. TSP vs LSP) — correct them and re-run.'},
+ {n:'Cross-talk',r:['csp','tl','brainc'],see:'Dark band on axials where stacks overlap; mostly cervical, worst when they cross dorsal to the cord.',fix:'Move the crossing > 1.5× cord width from the cord; slight under-rotation is OK. Only re-run if it covers the cord or a lesion.'},
+ {n:'Herringbone',r:['tl'],see:'Herringbone pattern on the one or two most lateral sagittal slices, mostly thoracic.',fix:'Coil selection too large for the patient — use fewer elements; try turning flow compensation off.'},
+ {n:'Motion',r:['tl','abdomen','bp','csp','brain','brainc'],see:'Blurring; on axials alternate slices shifted side to side.',fix:'Deepen the anesthetic plane; breath-hold for thorax / abdomen (not needed for spine); repeat affected series.'},
+ {n:'Chemical shift',r:['tl','csp'],see:'Bright crescent on one side of the cord and dark on the other on T2 axials; mostly giant-breed T-L spines. Can mimic a subarachnoid diverticulum.',fix:'Increase bandwidth 1–2 steps or swap frequency direction; send both sets so the radiologist can compare.'},
+ {n:'RF zipper / corduroy',r:[],see:'Bright zipper line or grainy images overall.',fix:'Close the MRI door fully; turn off the syringe pump; run monitors on battery (unplugged); check the coil plug is seated.'}
+];
+function renderArtifacts(r){
+  var list=ARTIFACTS.map(function(a){return {a:a,hot:a.r.indexOf(r)>-1};});
+  list.sort(function(x,y){return y.hot-x.hot;});
+  gel('arts').innerHTML=list.map(function(x){return '<div class="art'+(x.hot?' hot':'')+'"><b>'+x.a.n+'</b><span class="s">'+x.a.see+'</span><br>'+x.a.fix+'</div>';}).join('');
+}
 // ── Paste from the MRI anesthesia sheet ──
 function togglePaste(){var b=gel('paste-box');b.style.display=b.style.display==='block'?'none':'block';}
 function applyPaste(){

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICU Transfer &amp; Handoff</title>
+<style>
+:root{--p:#1f5673;--tx:#111;--mu:#6b7785;--bd:#c9d3dc;--ln:#555;--bg:#eef2f6;--sf:#fff;--fill:#fffbe6;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--tx);font-size:13px;}
+header{position:sticky;top:0;z-index:5;background:var(--p);color:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;}
+header h1{font-size:15px;margin:0;flex:1;min-width:200px;}
+.pbtn{background:#fff;color:var(--p);border:none;border-radius:4px;padding:5px 12px;font-weight:700;font-size:12px;cursor:pointer;}
+.pbtn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);}
+#paste-box{display:none;max-width:8.5in;margin:10px auto 0;background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:10px 12px;}
+#paste-box textarea{width:100%;height:46px;font-size:12px;margin:6px 0;}
+#status{font-size:12px;margin-left:8px;}
+.sheet{max-width:8.5in;margin:12px auto 30px;background:var(--sf);padding:.45in .5in;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+h2.title{text-align:center;color:var(--p);font-size:17px;margin:0 0 14px;letter-spacing:.2px;}
+h3{color:var(--p);font-size:13.5px;margin:16px 0 6px;text-transform:uppercase;}
+h3.sm{font-size:12px;}
+.row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px 14px;margin:7px 0;}
+.f{display:flex;align-items:flex-end;gap:5px;flex:1 1 160px;min-width:0;}
+.f.s{flex:0 1 110px;}.f.m{flex:1 1 200px;}.f.l{flex:3 1 360px;}.f.full{flex:1 1 100%;}
+.f>b{white-space:nowrap;font-size:12.5px;}
+input.u{flex:1;min-width:30px;border:none;border-bottom:1px solid var(--ln);font:inherit;font-size:12.5px;padding:1px 2px;background:transparent;outline:none;}
+input.u:focus,textarea.ta:focus{background:var(--fill);}
+textarea.ta{width:100%;border:none;font:inherit;font-size:12.5px;line-height:22px;resize:vertical;outline:none;padding:0 2px;min-height:68px;overflow:hidden;
+  background:repeating-linear-gradient(transparent,transparent 21px,var(--ln) 21px,var(--ln) 22px);background-attachment:local;}
+textarea.ta.one{min-height:22px;}
+.lbl{font-weight:700;font-size:12.5px;margin-top:9px;}
+.cb{display:inline-flex;align-items:center;gap:4px;margin-right:12px;white-space:nowrap;font-size:12.5px;cursor:pointer;}
+.cb input{width:13px;height:13px;margin:0;}
+table.tx{width:100%;border-collapse:collapse;margin-top:4px;}
+table.tx th{font-size:11.5px;border:1px solid #333;padding:3px 4px;}
+table.tx td{border:1px solid #333;padding:0;}
+table.tx td input{width:100%;border:none;font:inherit;font-size:12px;padding:3px 4px;background:transparent;outline:none;}
+table.tx td input:focus{background:var(--fill);}
+.prep{border-top:1px dashed var(--bd);padding-top:2px;margin-top:6px;position:relative;}
+.prep:first-of-type{border-top:none;}
+.addbtn{background:none;border:1px dashed var(--bd);border-radius:4px;padding:2px 10px;font-size:11px;color:var(--mu);cursor:pointer;margin-top:5px;}
+.rm{position:absolute;right:-18px;top:6px;background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;}
+.ifrow{position:relative;}
+.hint{font-size:11px;color:var(--mu);}
+@media (max-width:640px){.sheet{padding:16px;margin:8px 0;}.rm{right:0;top:-4px;}}
+@media print{
+  @page{size:letter portrait;margin:.4in .45in;}
+  body{background:#fff;font-size:11px;}
+  header,#paste-box,.no-print{display:none!important;}
+  .sheet{box-shadow:none;margin:0;padding:0;max-width:none;}
+  input.u,textarea.ta,table.tx td input{background-color:transparent!important;}
+  textarea.ta{resize:none;}
+  h3{break-after:avoid;}
+  .keep{break-inside:avoid;}
+  input.u,table.tx td input{display:none!important;}
+  .pv{flex:1;min-width:30px;border-bottom:1px solid var(--ln);padding:1px 2px;white-space:pre-wrap;word-break:break-word;min-height:15px;font-size:11.5px;}
+  table.tx td .pv{display:block;border:none;padding:2px 4px;}
+}
+.pv{display:none;}
+@media print{.pv{display:block;}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Specialty &rarr; ICU Transfer &amp; Handoff</h1>
+  <button class="pbtn ghost" onclick="togglePaste()">&#128203; Paste Info</button>
+  <button class="pbtn ghost" onclick="if(confirm('Clear every field on this sheet?'))location.reload()">Clear</button>
+  <button class="pbtn" onclick="window.print()">&#128438; Print / PDF</button>
+</header>
+
+<div id="paste-box" class="no-print">
+  <b>Paste info</b> <span class="hint">&mdash; from the ICU Admit Form (&ldquo;&rarr; ICU Transfer Sheet&rdquo; copies it) or from the MRI/Surgery sheet (&ldquo;Copy Info &rarr; Surgery/ICU&rdquo;).</span>
+  <textarea id="paste-in" placeholder="Paste here (Cmd/Ctrl+V)…"></textarea>
+  <button class="pbtn" style="background:var(--p);color:#fff" onclick="applyPaste()">Apply</button>
+  <button class="addbtn" onclick="togglePaste()">Cancel</button>
+  <span id="status"></span>
+</div>
+
+<div class="sheet">
+<h2 class="title">SPECIALTY &rarr; ICU PATIENT TRANSFER &amp; HANDOFF</h2>
+
+<div class="row">
+  <div class="f s" style="flex-basis:170px"><b>Transfer Date:</b><input class="u" id="t-date"></div>
+  <div class="f s"><b>Time:</b><input class="u" id="t-time"></div>
+  <div class="f l"><b>Transferring From/Service:</b><input class="u" id="t-service" value="Neurology"></div>
+</div>
+<div class="row">
+  <div class="f m"><b>Transferring DVM:</b><input class="u" id="t-dvm"></div>
+  <div class="f m"><b>Receiving DVM:</b><input class="u" id="r-dvm"></div>
+  <div class="f"><b>ICU Tech:</b><input class="u" id="icu-tech"></div>
+</div>
+
+<h3>Patient</h3>
+<div class="row">
+  <div class="f m"><b>Name:</b><input class="u" id="pt-name"></div>
+  <div class="f s"><b>Patient ID</b><input class="u" id="pt-id"></div>
+  <div class="f m"><b>Species/Breed:</b><input class="u" id="pt-sb"></div>
+  <div class="f s"><b>Age:</b><input class="u" id="pt-age"></div>
+  <div class="f s"><b>Sex:</b><input class="u" id="pt-sex"></div>
+</div>
+<div class="row">
+  <div class="f s" style="flex-basis:150px"><b>Weight (kg):</b><input class="u" id="pt-wt"></div>
+  <div class="f m"><b>pDVM:</b><input class="u" id="pt-pdvm"></div>
+</div>
+<div class="row"><div class="f full"><b>Allergies/Drug Reactions/Warnings:</b><input class="u" id="warn"></div></div>
+<div class="row"><div class="f full"><b>Handling/Behavior/Food Preferences:</b><input class="u" id="handling"></div></div>
+
+<h3>History / Current Status</h3>
+<div class="lbl">Presenting Complaint &amp; Relevant History:</div>
+<textarea class="ta" id="hx"></textarea>
+<div class="lbl">Current Status / Pertinent Findings:</div>
+<textarea class="ta" id="status-now"></textarea>
+
+<h3>Diagnostics</h3>
+<div class="lbl">Completed Diagnostics &amp; Key Findings:</div>
+<textarea class="ta" id="dx-done"></textarea>
+<div class="row"><div class="f full"><b>Pending Diagnostics/Results:</b><input class="u" id="dx-pending"></div></div>
+
+<div class="keep">
+<h3>Reason / Goal of ICU Transfer</h3>
+<div class="row" style="gap:6px 0">
+  <label class="cb"><input type="checkbox" id="rs-sz"> Seizure Watch</label>
+  <label class="cb"><input type="checkbox" id="rs-postop"> Post-Op Recovery</label>
+  <label class="cb"><input type="checkbox" id="rs-anes"> Anesthesia Recovery</label>
+  <label class="cb"><input type="checkbox" id="rs-resp"> Respiratory Monitoring</label>
+  <label class="cb"><input type="checkbox" id="rs-pain"> Pain Management</label>
+</div>
+<div class="row" style="gap:6px 0">
+  <label class="cb"><input type="checkbox" id="rs-cv"> Cardiovascular/Blood Pressure Monitoring</label>
+  <label class="cb"><input type="checkbox" id="rs-crit"> Critical Care/Stabilization</label>
+  <div class="f" style="flex:1 1 220px"><label class="cb" style="margin-right:4px"><input type="checkbox" id="rs-other"> Other:</label><input class="u" id="rs-other-txt"></div>
+</div>
+<div class="row"><div class="f full"><b>Specific Goal / What needs to occur before return to specialty or discharge:</b><input class="u" id="goal"></div></div>
+</div>
+
+<h3>Treatments / Medications</h3>
+<table class="tx" id="tx-tbl">
+  <thead><tr><th style="width:24%">Drug / Treatment</th><th style="width:15%">Dose / Route</th><th style="width:11%">Frequency</th><th style="width:10%">Next Due</th><th>Special Administration Instructions</th></tr></thead>
+  <tbody></tbody>
+</table>
+<button class="addbtn no-print" onclick="addTx()">&#43; Add row</button>
+
+<h3 class="sm">Special Preparation / Fluid Orders:</h3>
+<div id="prep-list"></div>
+<button class="addbtn no-print" onclick="addPrep()">&#43; Add preparation</button>
+
+<div class="keep">
+<h3>Monitoring</h3>
+<div class="row"><b>Vital Signs:</b>
+  <label class="cb"><input type="checkbox" id="vs-15"> q15m</label><label class="cb"><input type="checkbox" id="vs-30"> q30m</label>
+  <label class="cb"><input type="checkbox" id="vs-1"> q1h</label><label class="cb"><input type="checkbox" id="vs-2"> q2h</label>
+  <div class="f"><b style="font-weight:400">Other:</b><input class="u" id="vs-other"></div>
+</div>
+<div class="row"><b>Blood Pressure:</b>
+  <label class="cb"><input type="checkbox" id="bp-1"> q1h</label><label class="cb"><input type="checkbox" id="bp-2"> q2h</label>
+  <div class="f s"><b style="font-weight:400">Other:</b><input class="u" id="bp-other"></div>
+  <b>ECG:</b><label class="cb"><input type="checkbox" id="ecg-c"> Continuous</label><label class="cb"><input type="checkbox" id="ecg-i"> Intermittent</label>
+</div>
+<div class="row"><b>SpO&#8322;/Oxygen Saturation:</b>
+  <label class="cb"><input type="checkbox" id="spo2-c"> Continuous</label><label class="cb"><input type="checkbox" id="spo2-i"> Intermittent</label>
+  <b>End-Tidal CO&#8322; (ETCO&#8322;):</b>
+  <label class="cb"><input type="checkbox" id="et-c"> Continuous</label><label class="cb"><input type="checkbox" id="et-i"> Intermittent</label>
+</div>
+<div class="row"><b>Temperature:</b>
+  <label class="cb"><input type="checkbox" id="tp-1"> q1h</label><label class="cb"><input type="checkbox" id="tp-2"> q2h</label>
+  <div class="f s"><b style="font-weight:400">Other:</b><input class="u" id="tp-other"></div>
+  <div class="f m"><b>Neurologic Checks:</b><input class="u" id="neuro-chk"></div>
+</div>
+<div class="row">
+  <div class="f m"><b>Pain Checks:</b><input class="u" id="pain-chk"></div>
+  <div class="f m"><b>Urine Output:</b><input class="u" id="uop"></div>
+</div>
+</div>
+
+<h3>If This &rarr; Then That Plan</h3>
+<div id="if-list"></div>
+<button class="addbtn no-print" onclick="addIf()">&#43; Add If/Then</button>
+<div class="lbl">Specific Parameters Requiring Notification:</div>
+<div class="row">
+  <div class="f s"><b>BP:</b><input class="u" id="n-bp"></div>
+  <div class="f s"><b>HR:</b><input class="u" id="n-hr"></div>
+  <div class="f s"><b>SpO&#8322;:</b><input class="u" id="n-spo2"></div>
+  <div class="f s" style="flex-basis:150px"><b>RR/Resp Effort:</b><input class="u" id="n-rr"></div>
+  <div class="f s"><b>Temp:</b><input class="u" id="n-temp"></div>
+  <div class="f s"><b>Neuro:</b><input class="u" id="n-neuro"></div>
+  <div class="f m"><b>Other:</b><input class="u" id="n-other"></div>
+</div>
+
+<div class="keep">
+<h3>Next-Day / Specialty Plan</h3>
+<div class="row"><b>Specialist Available Next Day?</b>
+  <label class="cb"><input type="checkbox" id="spec-y" onchange="excl(this,'spec-n')"> Yes</label>
+  <label class="cb"><input type="checkbox" id="spec-n" onchange="excl(this,'spec-y')"> No</label>
+</div>
+<div class="row"><div class="f full"><b>Next Specialist Recheck/Expected Handoff:</b><input class="u" id="recheck"></div></div>
+<div class="lbl">Plan Until Specialty Resumes Care:</div>
+<textarea class="ta one" id="plan-until"></textarea>
+</div>
+
+<div class="keep">
+<h3>Financial / Client Communication</h3>
+<div class="row">
+  <div class="f s" style="flex-basis:140px"><b>Deposit: $</b><input class="u" id="deposit"></div>
+  <div class="f s" style="flex-basis:140px"><b>Estimate: $</b><input class="u" id="estimate"></div>
+  <div class="f l"><b>Financial Notes:</b><input class="u" id="fin-notes"></div>
+</div>
+<div class="row"><b>Client Updated on ICU Transfer/Plan:</b>
+  <label class="cb"><input type="checkbox" id="cl-y" onchange="excl(this,'cl-n')"> Yes</label>
+  <label class="cb"><input type="checkbox" id="cl-n" onchange="excl(this,'cl-y')"> No</label>
+  <div class="f m"><b>Additional Communication Needed:</b><input class="u" id="comm"></div>
+</div>
+</div>
+
+<div class="keep">
+<h3 class="sm">Lines / Tubes / Devices</h3>
+<div class="row">
+  <div class="f m"><b>IV(s):</b><input class="u" id="ln-iv"></div>
+  <div class="f m"><b>Central Line:</b><input class="u" id="ln-central"></div>
+  <div class="f m"><b>Urinary:</b><input class="u" id="ln-ur"></div>
+</div>
+<div class="row">
+  <div class="f m"><b>Feeding Tube:</b><input class="u" id="ln-feed"></div>
+  <div class="f m"><b>Chest Tube:</b><input class="u" id="ln-chest"></div>
+  <div class="f m"><b>Other:</b><input class="u" id="ln-other"></div>
+</div>
+</div>
+
+<div class="keep">
+<h3 class="sm">Nutrition / Elimination</h3>
+<div class="row">
+  <div class="f l"><b>Diet/Feeding Plan:</b><input class="u" id="diet"></div>
+  <b>NPO:</b><label class="cb"><input type="checkbox" id="npo-y" onchange="excl(this,'npo-n')"> Yes</label><label class="cb"><input type="checkbox" id="npo-n" onchange="excl(this,'npo-y')"> No</label>
+  <div class="f s"><b>Until:</b><input class="u" id="npo-until"></div>
+</div>
+<div class="row">
+  <div class="f m"><b>Last Meal/Amount:</b><input class="u" id="last-meal"></div>
+  <div class="f s" style="flex-basis:150px"><b>Last Urination:</b><input class="u" id="last-ur"></div>
+  <div class="f s" style="flex-basis:130px"><b>Last BM:</b><input class="u" id="last-bm"></div>
+</div>
+</div>
+
+<h3>Special Notes</h3>
+<textarea class="ta" id="notes"></textarea>
+
+<div class="keep">
+<h3 class="sm">Handoff Confirmation</h3>
+<div class="row" style="gap:6px 0">
+  <label class="cb"><input type="checkbox"> History</label><label class="cb"><input type="checkbox"> Diagnostics/Pending Results</label>
+  <label class="cb"><input type="checkbox"> Medications</label><label class="cb"><input type="checkbox"> Monitoring</label>
+  <label class="cb"><input type="checkbox"> If/Then Plan</label><label class="cb"><input type="checkbox"> Specialty Follow-Up</label>
+</div>
+<div class="row" style="gap:6px 0">
+  <label class="cb"><input type="checkbox"> Client/Financial Status</label><label class="cb"><input type="checkbox"> Lines/Tubes</label>
+  <label class="cb"><input type="checkbox"> Nutrition</label><label class="cb"><input type="checkbox"> Special Handling/Notes</label>
+</div>
+<div class="lbl">Outstanding Questions:</div>
+<textarea class="ta one" id="questions"></textarea>
+<div class="row" style="margin-top:12px">
+  <div class="f m"><b>Transferring DVM:</b><input class="u" id="sig-tdvm"></div>
+  <div class="f s" style="flex-basis:150px"><b>Date/Time:</b><input class="u"></div>
+  <div class="f m"><b>Receiving DVM:</b><input class="u" id="sig-rdvm"></div>
+  <div class="f s" style="flex-basis:150px"><b>Date/Time:</b><input class="u"></div>
+</div>
+<div class="row">
+  <div class="f m"><b>Transferring Tech:</b><input class="u" id="sig-ttech"></div>
+  <div class="f s" style="flex-basis:150px"><b>Date/Time:</b><input class="u"></div>
+  <div class="f m"><b>Receiving ICU Tech:</b><input class="u" id="sig-rtech"></div>
+  <div class="f s" style="flex-basis:150px"><b>Date/Time:</b><input class="u"></div>
+</div>
+</div>
+</div>
+
+<script>
+var STORE_KEY='vcaNeuro.icuTransfer';
+function gel(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function setv(id,v){var e=gel(id);if(e&&v!=null&&String(v).trim()!=='')e.value=v;}
+function check(id,on){var e=gel(id);if(e&&on)e.checked=true;}
+function excl(cb,otherId){if(cb.checked)gel(otherId).checked=false;}
+
+function autosize(t){t.style.height='auto';t.style.height=Math.max(t.scrollHeight,parseInt(getComputedStyle(t).minHeight)||0)+'px';}
+document.addEventListener('input',function(e){if(e.target.classList&&e.target.classList.contains('ta'))autosize(e.target);});
+function autosizeAll(){document.querySelectorAll('textarea.ta').forEach(autosize);}
+// Print a wrapping copy of each one-line field so long entries are not cut off
+window.addEventListener('beforeprint',function(){
+  autosizeAll();
+  document.querySelectorAll('.pv').forEach(function(e){e.remove();});
+  document.querySelectorAll('input.u, table.tx td input').forEach(function(i){
+    var sp=document.createElement('span');sp.className='pv';sp.textContent=i.value||'\u00a0';i.after(sp);
+  });
+});
+window.addEventListener('afterprint',function(){document.querySelectorAll('.pv').forEach(function(e){e.remove();});});
+
+// ---- repeatable rows ----
+function addTx(r){
+  r=r||{};
+  var tr=document.createElement('tr');
+  tr.innerHTML=['drug','dose','freq','due','instr'].map(function(k){return '<td><input value="'+esc(r[k])+'"></td>';}).join('');
+  document.querySelector('#tx-tbl tbody').appendChild(tr);
+}
+function addPrep(p){
+  p=p||{};
+  var d=document.createElement('div');d.className='prep keep';
+  d.innerHTML=
+    '<button class="rm no-print" title="Remove" onclick="this.parentNode.remove()">&times;</button>'+
+    '<div class="row"><div class="f"><b>Drug:</b><input class="u" value="'+esc(p.drug)+'"></div><div class="f"><b>Fluid:</b><input class="u" value="'+esc(p.fluid)+'"></div>'+
+    '<div class="f"><b>Amount:</b><input class="u" value="'+esc(p.amount)+'"></div><div class="f"><b>Final Vol/Conc:</b><input class="u" value="'+esc(p.final)+'"></div></div>'+
+    '<div class="row"><div class="f s" style="flex-basis:150px"><b>Rate:</b><input class="u" value="'+esc(p.rate)+'"></div><div class="f s" style="flex-basis:150px"><b>Duration:</b><input class="u" value="'+esc(p.duration)+'"></div>'+
+    '<div class="f l"><b>Dilution/Mixing/Preparation:</b><input class="u" value="'+esc(p.prep)+'"></div></div>'+
+    '<div class="row"><div class="f full"><b>Flush / Line / Compatibility / Monitoring:</b><input class="u" value="'+esc(p.flush)+'"></div></div>';
+  gel('prep-list').appendChild(d);
+}
+function addIf(r){
+  r=r||{};
+  var d=document.createElement('div');d.className='row ifrow keep';
+  d.innerHTML='<button class="rm no-print" title="Remove" onclick="this.parentNode.remove()">&times;</button>'+
+    '<div class="f l" style="flex:2 1 220px"><b>If:</b><input class="u" value="'+esc(r.if)+'"></div>'+
+    '<div class="f l" style="flex:3 1 260px"><b>Then:</b><input class="u" value="'+esc(r.then)+'"></div>'+
+    '<div class="f s" style="flex-basis:150px"><b>Notify:</b><input class="u" value="'+esc(r.notify)+'"></div>';
+  gel('if-list').appendChild(d);
+}
+function clearList(sel){document.querySelectorAll(sel).forEach(function(e){e.remove();});}
+
+// ---- fill from data ----
+// Accepts the ICU Admit Form export (src:'icu_admit') or the MRI/Surgery sheet "Copy Info" JSON.
+function applyData(d){
+  setv('t-date',d.date);setv('t-time',d.time);
+  setv('t-dvm',d.dr_transfer||d.pt_dr);setv('sig-tdvm',d.dr_transfer||d.pt_dr);
+  setv('r-dvm',d.dr_receive);setv('sig-rdvm',d.dr_receive);
+  setv('sig-ttech',d.tech||d.pt_tech);
+  setv('pt-name',d.pt_name);setv('pt-id',d.pt_case);
+  var sp=d.species_txt||(d.species==='feline'?'Feline':d.species==='canine'?'Canine':d.species);
+  setv('pt-sb',sp);
+  setv('pt-wt',d.weight);
+  if(!d.date&&d.pt_date){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d.pt_date);if(m)setv('t-date',(+m[2])+'/'+(+m[3])+'/'+m[1]);}
+  var warn=[];
+  if(d.cpr_dnr) warn.push('CODE STATUS: '+d.cpr_dnr);
+  if(d.pt_asa) warn.push('ASA '+d.pt_asa);
+  if(warn.length) setv('warn',warn.join(' | ')+(gel('warn').value?' | '+gel('warn').value:''));
+
+  if(d.problems&&d.problems.length) setv('hx',d.problems.join('\n'));
+  var vit=[];
+  if(d.vit_temp_pre)vit.push('T '+d.vit_temp_pre);if(d.vit_pulse_pre)vit.push('HR '+d.vit_pulse_pre);
+  if(d.vit_rr_pre)vit.push('RR '+d.vit_rr_pre);if(d.vit_mm)vit.push('MM/CRT '+d.vit_mm);
+  if(vit.length) setv('status-now','Vitals: '+vit.join(', '));
+  if(d.status_now) setv('status-now',d.status_now);
+  setv('dx-done',d.dx_findings);
+
+  if(d.reasons){check('rs-sz',d.reasons.sz);check('rs-postop',d.reasons.postop);check('rs-pain',d.reasons.pain);
+    if(d.reasons.other){check('rs-other',true);setv('rs-other-txt',d.reasons.other);}}
+  setv('goal',d.goal);
+
+  if(d.meds&&d.meds.length){clearList('#tx-tbl tbody tr');d.meds.forEach(addTx);}
+  var n=document.querySelectorAll('#tx-tbl tbody tr').length;for(;n<6;n++)addTx();
+  if(d.preps&&d.preps.length){clearList('#prep-list .prep');d.preps.forEach(addPrep);}
+
+  var mon=d.monitor||{};
+  setv('vs-other',mon.vitals);setv('bp-other',mon.bp);setv('tp-other',mon.temp);setv('neuro-chk',mon.neuro);
+  setv('pain-chk',mon.pain);setv('uop',mon.urine);
+
+  if(d.ifthen&&d.ifthen.length){clearList('#if-list .ifrow');d.ifthen.forEach(addIf);}
+
+  setv('deposit',d.deposit);setv('recheck',d.recheck);
+  var ln=d.lines||{};
+  setv('ln-iv',ln.iv||[d.pt_ivc,d.pt_cs].filter(Boolean).join(', '));setv('ln-ur',ln.urinary);
+  var nu=d.nutrition||{};
+  setv('diet',nu.diet);if(nu.npo===true)check('npo-y',true);if(nu.npo===false)check('npo-n',true);
+  setv('notes',d.notes);
+  setTimeout(autosizeAll,0);
+}
+
+function togglePaste(){var b=gel('paste-box');b.style.display=b.style.display==='block'?'none':'block';if(b.style.display==='block')gel('paste-in').focus();}
+function applyPaste(){
+  var s=gel('status'),raw=gel('paste-in').value.trim();
+  try{var d=JSON.parse(raw);}catch(e){s.style.color='#c0392b';s.textContent='Could not read that. Copy it again from the ICU Admit, MRI or Surgery sheet.';return;}
+  applyData(d);
+  s.style.color='#27ae60';s.textContent='Loaded'+(d.pt_name?' — '+d.pt_name:'');
+  gel('paste-in').value='';setTimeout(togglePaste,1200);
+}
+
+// ---- init ----
+(function(){
+  var now=new Date();
+  gel('t-date').value=now.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'});
+  gel('t-time').value=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var data=null;
+  try{var raw=localStorage.getItem(STORE_KEY);if(raw){data=JSON.parse(raw);localStorage.removeItem(STORE_KEY);}}catch(e){}
+  if(data&&data.saved_at&&Date.now()-data.saved_at>60*60*1000) data=null; // ignore stale hand-offs (>1 h)
+  if(data) applyData(data);
+  else{for(var i=0;i<6;i++)addTx();addPrep();for(i=0;i<3;i++)addIf();autosizeAll();}
+  if(!document.querySelector('#prep-list .prep'))addPrep();
+  if(!document.querySelector('#if-list .ifrow'))for(var j=0;j<3;j++)addIf();
+})();
+</script>
+</body>
+</html>

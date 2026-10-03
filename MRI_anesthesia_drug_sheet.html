@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRI Anesthesia Drug Sheet — VCA Kalamazoo Neuro</title>
+<style>
+:root {
+  --primary: #2c5f8a;
+  --accent:  #4a9fd4;
+  --bg:      #f5f7fa;
+  --surface: #ffffff;
+  --border:  #d1d9e0;
+  --text:    #1a2332;
+  --muted:   #6b7c93;
+  --green:   #27ae60;
+  --red:     #c0392b;
+  --orange:  #e67e22;
+  --amber:   #f39c12;
+  --section-bg: #eef2f7;
+  --sel-bg:  #e8f4fd;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; }
+
+header { background: var(--primary); color: white; padding: 11px 20px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { font-size: 1rem; font-weight: 700; }
+header span { font-size: 0.78rem; opacity: 0.7; }
+
+.container { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 9px 16px; font-weight: 700; font-size: 0.86rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+.card-body { padding: 14px 16px; }
+
+.badge { font-size: 0.67rem; padding: 2px 8px; border-radius: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2px; }
+.badge-opt { background: var(--muted); color: white; }
+.badge-cond { background: var(--amber); color: white; }
+.card-sub { font-size: 0.72rem; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+/* ── Info grid ─────────────────────────────────────────────── */
+.info-grid { display: grid; gap: 10px; }
+.ig-2 { grid-template-columns: 1fr 1fr; }
+.ig-3 { grid-template-columns: 1fr 1fr 1fr; }
+.ig-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.ig-5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+.ig-6 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; }
+
+.field { display: flex; flex-direction: column; gap: 3px; }
+.field label { font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+.field input, .field select {
+  width: 100%; padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.92rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+.calc-val { padding: 6px 9px; background: var(--section-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 0.88rem; font-weight: 700; color: var(--primary); min-height: 33px; }
+
+/* ── Toggle buttons ────────────────────────────────────────── */
+.tog-group { display: flex; gap: 5px; }
+.tog-btn { flex: 1; padding: 5px 8px; border: 2px solid var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: var(--surface); text-align: center; transition: all 0.15s; }
+.tog-btn.sp-active { background: var(--primary); border-color: var(--primary); color: white; }
+.tog-btn.cpr-active { background: var(--green); border-color: var(--green); color: white; }
+.tog-btn.dnr-active { background: var(--red); border-color: var(--red); color: white; }
+
+#weight { font-size: 1.05rem; font-weight: 700; border: 2px solid var(--primary); }
+
+/* ── Proc checkboxes ───────────────────────────────────────── */
+.proc-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 6px; }
+.proc-row label { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.proc-row input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+
+/* ── Drug tables ───────────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; }
+.drug-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 580px; }
+.drug-table th { background: var(--section-bg); padding: 7px 10px; text-align: left; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); }
+.drug-table td { padding: 7px 10px; border-bottom: 1px solid #f0f3f6; vertical-align: middle; }
+.drug-table tr:last-child td { border-bottom: none; }
+
+.drug-table tbody tr:hover { background: #fafbfd; }
+.drug-table tr.sel { background: var(--sel-bg) !important; }
+.drug-table tr.sel td:first-child { border-left: 3px solid var(--accent); padding-left: 7px; }
+.drug-table tr.danger .dname { color: var(--red); }
+
+input[type=checkbox].dcb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+.dname { font-weight: 600; line-height: 1.3; }
+.dconc { font-size: 0.72rem; color: var(--muted); }
+.mlval strong { font-size: 13px; color: var(--primary); font-weight: 700; }
+.ml-lo { color: var(--muted); font-weight: 600; font-size: 12px; }
+.ml-hi { color: var(--primary); font-weight: 700; font-size: 12px; }
+.ml-u { font-size: 11px; color: var(--muted); }
+.dval { color: var(--muted); font-size: 11px; }
+.dval strong { color: var(--primary); font-size: 13px; font-weight: 700; }
+.dnote { font-size: 0.69rem; color: var(--orange); font-style: italic; }
+.dnote.danger { color: var(--red); font-weight: 600; }
+.droute { font-size: 0.77rem; font-weight: 600; color: #444; }
+.route-sel { font-size: 0.77rem; font-weight: 600; color: #444; border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px; background: var(--bg); width: 100%; }
+.dose-input { width: 100%; border: none; border-bottom: 1px solid var(--border); background: transparent; font-size: 0.77rem; color: var(--text); padding: 2px 3px; font-family: inherit; }
+.dose-input:focus { outline: none; border-bottom-color: var(--accent); }
+.dose-input::placeholder { color: var(--muted); font-size: 0.72rem; }
+
+.ti { padding: 4px 7px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.79rem; font-family: inherit; background: var(--surface); transition: border-color 0.15s; }
+.ti:focus { outline: none; border-color: var(--accent); }
+.t-vol  { width: 60px; }
+.t-time { width: 68px; }
+.t-init { width: 50px; }
+.t-check { width: 50px; }
+
+/* ── Fluid grid ────────────────────────────────────────────── */
+.fluid-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.fi { background: var(--section-bg); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--border); }
+.fi-lbl { font-size: 0.69rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+.fi-val { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
+.fi-sub { font-size: 0.71rem; color: var(--muted); margin-top: 2px; }
+.fluid-note { font-size: 0.73rem; color: var(--orange); font-style: italic; margin-top: 10px; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn { padding: 8px 16px; border: none; border-radius: 7px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-success { background: var(--green); color: white; }
+.btn-success:hover { background: #219a52; }
+
+/* ── Conditional sections ──────────────────────────────────── */
+.sec-hidden { display: none; }
+
+/* ── Filter: hide unselected drug rows ─────────────────────── */
+.drug-table.filter-on tr:not(.sel):not(thead tr) { display: none; }
+.filter-btn { margin-left: auto; font-size: 0.72rem; padding: 3px 10px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--muted); cursor: pointer; font-weight: 600; white-space: nowrap; transition: all 0.15s; }
+.filter-btn.on { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ── Marker pin ─────────────────────────────────────────────── */
+.pin-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 12px; }
+
+/* ── Approval ──────────────────────────────────────────────── */
+.approval { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+.approval label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+.approval input { flex: 1; padding: 6px 10px; border: none; border-bottom: 2px solid var(--border); border-radius: 0; font-size: 0.9rem; font-family: inherit; background: transparent; }
+.approval input:focus { outline: none; border-bottom-color: var(--primary); }
+
+/* ── Post-op ───────────────────────────────────────────────── */
+.po-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.po-table th { background: var(--section-bg); padding: 6px 10px; text-align: left; font-size: 0.69rem; font-weight: 700; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); }
+.po-table td { padding: 6px 10px; border-bottom: 1px solid #f0f3f6; vertical-align: middle; }
+.po-table tr:last-child td { border-bottom: none; }
+.po-dose { font-weight: 700; color: var(--primary); }
+
+/* ══ PRINT ══════════════════════════════════════════════════ */
+@media print {
+  @page { size: A4 portrait; margin: 6mm 8mm; }
+
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  header, .no-print { display: none !important; }
+
+  .print-header { display: block !important; margin-bottom: 4px; border-bottom: 1.5px solid #2c5f8a; padding-bottom: 4px; }
+
+  body { background: white; font-size: 7px; }
+  .container { max-width: 100%; padding: 0; margin: 0; }
+
+  /* Cards */
+  .card { border: 1px solid #bbb; border-radius: 2px; break-inside: avoid; margin-bottom: 3px; }
+  .card-header { background: #dde6f0 !important; padding: 2px 7px; font-size: 0.62rem; }
+  .card-body { padding: 3px 7px; }
+
+  /* Drug tables — selected rows only (extra-meds table always prints, it's blank fill-in) */
+  .drug-table:not(#extra-tbl):not(#abxnsaid-tbl) tr:not(.sel) { display: none; }
+  .drug-table tr.sel { background: #e5eff8 !important; }
+  .drug-table td, .drug-table th { padding: 2px 4px; font-size: 7px; }
+  .th-cb, input[type=checkbox].dcb { display: none; }
+  .dname { font-size: 7px; }
+  .dconc { font-size: 6px; }
+  .dnote { font-size: 6px; }
+  .route-sel { font-size: 6.5px; padding: 1px 2px; }
+  .dose-input { border: none; border-bottom: 1px solid #aaa; font-size: 7px; padding: 1px 2px; width: 100%; background: transparent; }
+
+  /* Input fields in drug rows */
+  .ti { border: none; border-bottom: 1px solid #aaa; border-radius: 0; background: transparent; padding: 1px 2px; font-size: 6.5px; }
+  .t-vol { width: 30px; }
+  .t-time { width: 36px; }
+  .t-init { width: 26px; }
+  .t-check { width: 26px; }
+
+  /* Patient info fields */
+  .field label { font-size: 5.5px; margin-bottom: 1px; }
+  .field input, .field select { border: none; border-bottom: 1px solid #aaa; border-radius: 0; background: transparent; padding: 1px 2px; font-size: 7px; }
+  .calc-val { background: transparent; border: none; border-bottom: 1px solid #aaa; padding: 1px 2px; font-size: 7px; }
+  .tog-btn { border: 1px solid #aaa; padding: 1px 4px; font-size: 0.62rem; }
+  .tog-btn.sp-active  { background: #c8dcec !important; color: #000 !important; }
+  .tog-btn.cpr-active { background: #c8e8cc !important; }
+  .tog-btn.dnr-active { background: #f0cccc !important; }
+  .info-grid { gap: 3px; margin-bottom: 3px !important; }
+
+  /* Fluid grid */
+  .fluid-grid { gap: 4px; }
+  .fi { padding: 3px 5px; }
+  .fi-lbl { font-size: 5.5px; margin-bottom: 1px; }
+  .fi-val { font-size: 0.85rem; }
+  .fi-sub { font-size: 5.5px; }
+
+  /* Hide screen-only controls */
+  .proc-row, .btn, #proc-mri-detail,
+  .proc-section { display: none !important; }
+  .drug-card.print-empty { display: none !important; }
+
+  /* Approval */
+  .approval { padding: 3px 7px; margin-bottom: 3px; }
+  .approval label { font-size: 6px; }
+  .approval input { font-size: 7.5px; padding: 1px 3px; }
+
+  .sec-hidden { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  .ig-5, .ig-6 { grid-template-columns: 1fr 1fr 1fr; }
+  .ig-4 { grid-template-columns: 1fr 1fr; }
+  .fluid-grid { grid-template-columns: 1fr 1fr; }
+  .pin-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1>Neuro MRI Anesthesia Drug Sheet</h1><span>VCA Vet Specialty &amp; Emergency Center of Kalamazoo</span></div>
+  <div class="no-print"><button class="btn btn-success" onclick="window.print()">&#128438; Print Sheet</button></div>
+</header>
+
+<div class="print-header" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:4px">
+    <img src="data:image/jpeg;base64,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" alt="VCA Logo" style="height:38px;width:auto">
+    <div style="text-align:left">
+      <div style="font-size:0.85rem;font-weight:700;color:#2c5f8a">Neuro MRI Anesthesia Drug Sheet</div>
+      <div style="font-size:0.6rem;color:#444">VCA Vet Specialty &amp; Emergency Center of Kalamazoo &nbsp;|&nbsp; 5348 S Westnedge Ave, Portage, MI 49002 &nbsp;|&nbsp; (269) 381-5228</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ══ PATIENT INFO ══════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Patient Information
+    <button class="filter-btn no-print" id="handoff-copy-btn" style="margin-left:auto" onclick="copyHandoffInfo()">📋 Copy Info → Surgery/ICU</button>
+  </div>
+  <div class="card-body">
+
+    <div class="info-grid ig-2" style="margin-bottom:10px">
+      <div class="field"><label>Patient Name</label><input type="text" id="pt_name" placeholder="Patient name"></div>
+      <div class="field"><label>Case Number</label><input type="text" id="pt_case" placeholder="Case #"></div>
+    </div>
+
+    <div class="info-grid ig-5" style="margin-bottom:10px">
+      <div class="field">
+        <label>CPR / DNR</label>
+        <div class="tog-group">
+          <button class="tog-btn" id="btn-cpr" onclick="setCPR('CPR')">CPR</button>
+          <button class="tog-btn" id="btn-dnr" onclick="setCPR('DNR')">DNR</button>
+        </div>
+      </div>
+      <div class="field"><label>Attending Dr.</label><input type="text" id="pt_dr" placeholder="Dr. Chen"></div>
+      <div class="field"><label>Tech</label><input type="text" id="pt_tech" placeholder="Tech name"></div>
+      <div class="field"><label>Date</label><input type="date" id="pt_date"></div>
+      <div class="field"><label>ASA Status</label>
+        <select id="pt_asa">
+          <option value="">—</option>
+          <option value="I">I — Normal healthy</option>
+          <option value="II">II — Mild systemic disease</option>
+          <option value="III">III — Severe systemic disease</option>
+          <option value="IV">IV — Life-threatening</option>
+          <option value="V">V — Moribund</option>
+          <option value="E">E — Emergency</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-grid ig-3" style="margin-bottom:10px">
+      <div class="field">
+        <label>Species</label>
+        <div class="tog-group">
+          <button class="tog-btn sp-active" id="btn-canine" onclick="setSpecies('canine')">Canine</button>
+          <button class="tog-btn" id="btn-feline" onclick="setSpecies('feline')">Feline</button>
+        </div>
+      </div>
+      <div class="field"><label>Weight (kg)</label><input type="number" id="weight" min="0.1" max="200" step="0.1" placeholder="0.0" oninput="onWeightChange()"></div>
+      <div class="field"><label>Blood Work</label>
+        <select id="pt_bw">
+          <option value="">—</option>
+          <option value="Done / reviewed">Done / reviewed</option>
+          <option value="Pending">Pending</option>
+          <option value="Waived by owner">Waived by owner</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-grid ig-6" style="margin-bottom:10px">
+      <div class="field"><label>IV Catheter</label>
+        <select id="pt_ivc_placed"><option value="placed" selected>Placed</option><option value="not">Not Placed</option></select>
+      </div>
+      <div class="field"><label>IVC Size</label><input type="text" id="pt_ivc" placeholder="e.g., 22g"></div>
+      <div class="field"><label>IVC Location</label>
+        <select id="pt_cs">
+          <option value="">—</option>
+          <option>Right cephalic</option><option>Left cephalic</option>
+          <option>Right saphenous</option><option>Left saphenous</option>
+          <option>Jugular</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Chest Rad</label>
+        <select id="pt_ctx"><option value="">—</option><option>Normal</option><option>Abnormal</option><option>Pending review</option><option>N/A</option></select>
+      </div>
+      <div class="field"><label>IVF Type</label>
+        <select id="pt_ivf"><option value="">—</option><option>Isolyte</option><option>LRS</option><option>Plasmalyte</option><option>0.9% NaCl</option><option>D5W</option></select>
+      </div>
+      <div class="field"><label>Pain Score</label>
+        <select id="pt_pain"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+      </div>
+    </div>
+
+    <div class="info-grid ig-6" style="margin-bottom:10px">
+      <div class="field"><label>MM / CRT</label><input type="text" id="vit_mm" placeholder="Pink / 1s"></div>
+      <div class="field"><label>Temp (°F) — Pre</label><input type="text" id="vit_temp_pre" placeholder=""></div>
+      <div class="field"><label>Pulse (bpm) — Pre</label><input type="text" id="vit_pulse_pre" placeholder=""></div>
+      <div class="field"><label>RR (bpm) — Pre</label><input type="text" id="vit_rr_pre" placeholder=""></div>
+      <div class="field"><label>@ mL/hr (set)</label><input type="number" id="pt_rate" placeholder="mL/hr" min="0"></div>
+    </div>
+
+    <div class="info-grid ig-3" style="margin-bottom:10px">
+      <div class="field"><label>Temp (°F) — Post</label><input type="text" id="vit_temp_post" placeholder=""></div>
+      <div class="field"><label>Pulse (bpm) — Post</label><input type="text" id="vit_pulse_post" placeholder=""></div>
+      <div class="field"><label>RR (bpm) — Post</label><input type="text" id="vit_rr_post" placeholder=""></div>
+    </div>
+
+    <div class="info-grid ig-3" style="margin-bottom:10px">
+      <div class="field"><label>ET Tube Size (mm)</label><input type="text" id="et-display" placeholder="—"></div>
+      <div class="field"><label>Fluid Rate (maint.)</label><div class="calc-val" id="rate-display">—</div></div>
+    </div>
+
+    <div class="proc-section" style="border-top:1px solid var(--border);padding-top:12px;margin-top:2px">
+      <div style="font-size:0.69rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px">Procedure</div>
+      <div class="proc-row" style="flex-wrap:wrap;gap:16px 24px">
+
+        <!-- MRI -->
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:600;cursor:pointer">
+          <input type="checkbox" id="proc-mri" onchange="onProcMri(this.checked)"> MRI
+        </label>
+        <div id="proc-mri-detail" style="display:none;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px">Region of Interest</span>
+          <select id="proc-mri-roi" style="font-size:0.82rem;padding:2px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg)">
+            <option value="">— select —</option>
+            <option>Brain</option>
+            <option>Neck</option>
+            <option>TL</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ ANESTHESIA TIMELINE ══════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Anesthesia Timeline</div>
+  <div class="card-body">
+    <div class="info-grid ig-6">
+      <div class="field"><label>Sedation/Anesth. Start</label><input type="text" id="tl_anes_start" placeholder="HH:MM"></div>
+      <div class="field"><label>Sedation/Anesth. Stop</label><input type="text" id="tl_anes_stop" placeholder="HH:MM"></div>
+      <div class="field"><label>Procedure/Surgery Start</label><input type="text" id="tl_proc_start" placeholder="HH:MM"></div>
+      <div class="field"><label>Procedure/Surgery Stop</label><input type="text" id="tl_proc_stop" placeholder="HH:MM"></div>
+      <div class="field"><label>Extubation Time</label><input type="text" id="tl_extubation" placeholder="HH:MM"></div>
+      <div class="field"><label>Move to Prep Time</label><input type="text" id="tl_move_prep" placeholder="HH:MM"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRE-PROCEDURE ═════════════════════════════════════════ -->
+<div class="card drug-card" id="card-preproc">
+  <div class="card-header">Pre-Procedure <span class="card-sub">— select preferred drugs</span><button class="filter-btn no-print" onclick="toggleFilter(this,'preproc-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="preproc-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:34px"></th>
+        <th style="width:27%">Drug</th>
+        <th style="width:13%">Volume</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="preproc-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ PRE-MEDICATION ════════════════════════════════════════ -->
+<div class="card drug-card" id="card-premed">
+  <div class="card-header">Pre-Med <span class="card-sub">— select preferred drugs</span><button class="filter-btn no-print" onclick="toggleFilter(this,'premed-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="premed-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:34px"></th>
+        <th style="width:27%">Drug</th>
+        <th style="width:13%">Volume</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="premed-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ INDUCTION ═════════════════════════════════════════════ -->
+<div class="card drug-card" id="card-induct">
+  <div class="card-header">Induction <span class="card-sub">— select preferred drugs</span><button class="filter-btn no-print" onclick="toggleFilter(this,'induct-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="induct-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:34px"></th>
+        <th style="width:27%">Drug</th>
+        <th style="width:13%">Volume</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="induct-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ INTRA-PROCEDURE ════════════════════════════════════════ -->
+<div class="card drug-card" id="card-intraop">
+  <div class="card-header">Intra-procedure <span class="card-sub">— select drugs used</span><button class="filter-btn no-print" onclick="toggleFilter(this,'intraop-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="intraop-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:34px"></th>
+        <th style="width:27%">Drug</th>
+        <th style="width:13%">Volume</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="intraop-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ ANTIBIOTICS & NSAID ═══════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Antibiotics &amp; NSAID <span class="card-sub">— intra-op, for anesthesia report</span></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="abxnsaid-tbl">
+      <thead><tr>
+        <th style="width:27%">Drug</th>
+        <th style="width:22%">Dose</th>
+        <th style="width:18%">Route</th>
+        <th style="width:12%">Time</th>
+      </tr></thead>
+      <tbody id="abxnsaid-body">
+        <tr><td><div class="dname">Cefazolin</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Convenia</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option>IV</option><option>IV slow</option><option selected>SC</option><option>IM</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Enrofloxacin</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Ondansetron</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Unasyn</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Carprofen <span class="dnote">NSAID</span></div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Meloxicam <span class="dnote">NSAID</span></div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>SC</option><option>IV</option><option>IV slow</option><option>IM</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Onsior <span class="dnote">NSAID</span></div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>PO</option><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ ADDITIONAL MEDICATIONS ═══════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Additional Medications <span class="card-sub">— any extra drug given not listed above</span></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="extra-tbl">
+      <thead><tr>
+        <th style="width:27%">Drug</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="extra-body">
+        <tr>
+          <td><input class="dose-input" type="text" placeholder="Drug name" style="font-weight:600"></td>
+          <td><input class="dose-input" type="text" placeholder="dose"></td>
+          <td class="droute">
+            <select class="route-sel"><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select>
+          </td>
+          <td><input class="ti t-vol" placeholder="mL"></td>
+          <td><input class="ti t-time" placeholder="time"></td>
+          <td><input class="ti t-init" placeholder="init"></td>
+          <td><input class="ti t-check" placeholder="check"></td>
+        </tr>
+        <tr>
+          <td><input class="dose-input" type="text" placeholder="Drug name" style="font-weight:600"></td>
+          <td><input class="dose-input" type="text" placeholder="dose"></td>
+          <td class="droute">
+            <select class="route-sel"><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select>
+          </td>
+          <td><input class="ti t-vol" placeholder="mL"></td>
+          <td><input class="ti t-time" placeholder="time"></td>
+          <td><input class="ti t-init" placeholder="init"></td>
+          <td><input class="ti t-check" placeholder="check"></td>
+        </tr>
+        <tr>
+          <td><input class="dose-input" type="text" placeholder="Drug name" style="font-weight:600"></td>
+          <td><input class="dose-input" type="text" placeholder="dose"></td>
+          <td class="droute">
+            <select class="route-sel"><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select>
+          </td>
+          <td><input class="ti t-vol" placeholder="mL"></td>
+          <td><input class="ti t-time" placeholder="time"></td>
+          <td><input class="ti t-init" placeholder="init"></td>
+          <td><input class="ti t-check" placeholder="check"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ FLUID RATES ════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Fluid Rates &amp; Bolus Volumes</div>
+  <div class="card-body">
+    <div class="fluid-grid" id="fluid-grid"></div>
+    <div class="fluid-note" id="fluid-note"></div>
+  </div>
+</div>
+
+<!-- ══ ANESTHESIA REPORT ══════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Anesthesia Report</div>
+  <div class="card-body">
+    <div class="info-grid ig-2" style="margin-bottom:10px">
+      <div class="field">
+        <label>Assessment of Patient Response to Anesthesia</label>
+        <select id="rpt-assess-sel" onchange="if(this.value)document.getElementById('rpt-assess-text').value=this.value;">
+          <option value="">— choose a preset —</option>
+          <option value="Unremarkable; adequate">Unremarkable; adequate</option>
+          <option value="Difficult to maintain consistent plane">Difficult to maintain consistent plane</option>
+          <option value="Very sensitive to anesthesia">Very sensitive to anesthesia</option>
+        </select>
+        <textarea id="rpt-assess-text" rows="2" style="width:100%;margin-top:6px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="Assessment notes…"></textarea>
+      </div>
+      <div class="field">
+        <label>Patient Recovery</label>
+        <select id="rpt-recovery-sel" onchange="if(this.value)document.getElementById('rpt-recovery-text').value=this.value;">
+          <option value="">— choose a preset —</option>
+          <option value="Patient recovered quickly and without complications">Patient recovered quickly and without complications</option>
+          <option value="Patient recovered rapidly and dysphoric">Patient recovered rapidly and dysphoric</option>
+          <option value="Patient recovered slowly and hypothermic">Patient recovered slowly and hypothermic</option>
+        </select>
+        <textarea id="rpt-recovery-text" rows="2" style="width:100%;margin-top:6px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="Recovery notes…"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px" class="no-print">
+      <button class="btn btn-primary" onclick="generateAnesthesiaReport()">📝 Generate Report</button>
+      <button class="btn" id="rpt-copy-btn" style="background:var(--section-bg);color:var(--primary)" onclick="copyAnesthesiaReport()">📋 Copy Report</button>
+    </div>
+    <textarea id="rpt-output" rows="18" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;resize:vertical" placeholder="Click “Generate Report” to build the anesthesia report from the data entered above…"></textarea>
+  </div>
+</div>
+
+<!-- ══ ATTENDING APPROVAL ════════════════════════════════════ -->
+<div class="approval">
+  <label>Attending Veterinarian — Drug Sheet Approval:</label>
+  <input type="text" id="attending-sig" placeholder="Signature / initials">
+  <label style="margin-left:12px">Time:</label>
+  <input type="text" id="attending-time" placeholder="Time" style="width:90px;flex:none">
+</div>
+
+</div><!-- /container -->
+
+<script>
+'use strict';
+
+// ══ Drug database ═════════════════════════════════════════════════════════
+
+const DB = {
+  canine: {
+    preproc: [
+      { id:'pp_mar',   name:'Maropitant (Cerenia)', conc:'10 mg/mL',  dose:'1 mg/kg',  mLpkg:0.1,  route:'SC / IV' },
+      { id:'pp_panto', name:'Pantoprazole',         conc:'4 mg/mL',   dose:'1 mg/kg',  mLpkg:0.25, route:'IV' },
+      { id:'pp_add',   name:'', custom:true, route:'IV' },
+    ],
+    premed: [
+      { id:'pm_meth',  name:'Methadone',             conc:'10 mg/mL',        dose:'0.1–0.2 mg/kg',   mLpkgL:0.01,  mLpkgH:0.02, route:'IV' },
+      { id:'pm_butor', name:'Butorphanol',           conc:'10 mg/mL',        dose:'0.2–0.4 mg/kg',   mLpkgL:0.02,  mLpkgH:0.04, route:'IV' },
+      { id:'pm_fen',   name:'Fentanyl',             conc:'50 µg/mL',        dose:'10 µg/kg',        mLpkg:0.2,           route:'IV / IM' },
+      { id:'pm_mid',   name:'Midazolam',            conc:'5 mg/mL',         dose:'0.5 mg/kg',       mLpkg:0.1,           route:'IV / IM' },
+      { id:'pm_dia',   name:'Diazepam / Valium',   conc:'5 mg/mL',         dose:'0.5 mg/kg',       mLpkg:0.1,           route:'IV only' },
+      { id:'pm_dex',   name:'Dexmedetomidine',      conc:'500 µg/mL',       dose:'1–5 µg/kg',       mLpkgL:0.002, mLpkgH:0.01, route:'IV / IM' },
+      { id:'pm_ace',   name:'Acepromazine',         conc:'10 mg/mL',        dose:'0.025 mg/kg',     mLpkg:0.0025,        route:'IM / SC',   note:'Max 3 mg total', cap:{ maxMg:3, concMgML:10 } },
+    ],
+    induct: [
+      { id:'in_prop',  name:'Propofol',             conc:'10 mg/mL',        dose:'3–6 mg/kg',       mLpkgL:0.3,   mLpkgH:0.6,  route:'IV slow',  note:'Titrate to effect' },
+      { id:'in_alf',   name:'Alfaxalone',           conc:'10 mg/mL',        dose:'2–3 mg/kg',       mLpkgL:0.2,   mLpkgH:0.3,  route:'IV slow' },
+      { id:'in_ket',   name:'Ketamine',             conc:'100 mg/mL',       dose:'5–10 mg/kg',      mLpkgL:0.05,  mLpkgH:0.1,  route:'IV / IM' },
+      { id:'in_eto',   name:'Etomidate',            conc:'2 mg/mL',         dose:'0.5–2.0 mg/kg',   mLpkgL:0.25,  mLpkgH:1.0,  route:'IV',       note:'Preferred for cardiac cases' },
+    ],
+    intraop: [
+      { id:'io_gad_n', name:'Gadolinium — Normal', conc:'0.5 mmol/mL',     dose:'0.1 mmol/kg',     mLpkg:0.2,               route:'IV' },
+      { id:'io_gad_r', name:'Gadolinium — Renal',  conc:'0.5 mmol/mL',     dose:'0.05 mmol/kg',    mLpkg:0.1,               route:'IV' },
+      { id:'io_dsp',   name:'DexSP',                conc:'4 mg/mL',         dose:'0.07–0.14 mg/kg', mLpkgL:0.0175,mLpkgH:0.035,route:'IV' },
+      { id:'io_lid',   name:'Lidocaine (bolus)',    conc:'20 mg/mL',        dose:'2 mg/kg',         mLpkg:0.1,               route:'IV',       note:'Dog only' },
+      { id:'io_atr',   name:'Atropine',             conc:'0.54 mg/mL',      dose:'0.04 mg/kg',      mLpkg:0.04/0.54,     route:'IV / IM / SC', note:'Start at 60% unless emergency', p60:true },
+      { id:'io_gly',   name:'Glycopyrrolate',       conc:'0.2 mg/mL',       dose:'0.01 mg/kg',      mLpkg:0.05,          route:'IV / IM / SC', note:'Start at 60% unless emergency', p60:true },
+      { id:'io_mann',  name:'Mannitol 20%',         conc:'200 mg/mL',       dose:'1 g/kg',          mLpkg:5.0,               route:'IV slow',  note:'Filter required; infuse >15 min' },
+    ],
+    fluids: { ratePkg:5, crystB:10, hetaB:5, note:'↓ rate to 2–3 mL/kg/hr and bolus by 50% for patients with cardiac disease' },
+  },
+
+  feline: {
+    preproc: [
+      { id:'pp_mar',   name:'Maropitant (Cerenia)', conc:'10 mg/mL',  dose:'1 mg/kg',  mLpkg:0.1,  route:'SC / IV' },
+      { id:'pp_panto', name:'Pantoprazole',         conc:'4 mg/mL',   dose:'1 mg/kg',  mLpkg:0.25, route:'IV' },
+      { id:'pp_add',   name:'', custom:true, route:'IV' },
+    ],
+    premed: [
+      { id:'pm_meth',  name:'Methadone',             conc:'10 mg/mL',        dose:'0.1–0.2 mg/kg',   mLpkgL:0.01,  mLpkgH:0.02, route:'IV' },
+      { id:'pm_butor', name:'Butorphanol',           conc:'10 mg/mL',        dose:'0.2–0.4 mg/kg',   mLpkgL:0.02,  mLpkgH:0.04, route:'IV' },
+      { id:'pm_fen',   name:'Fentanyl',             conc:'50 µg/mL',        dose:'10 µg/kg',        mLpkg:0.2,           route:'IV / IM' },
+      { id:'pm_mid',   name:'Midazolam',            conc:'5 mg/mL',         dose:'0.5 mg/kg',       mLpkg:0.1,           route:'IV / IM' },
+      { id:'pm_dex',   name:'Dexmedetomidine',      conc:'500 µg/mL',       dose:'5–20 µg/kg',      mLpkgL:0.01, mLpkgH:0.04, route:'IV / IM' },
+      { id:'pm_ace',   name:'Acepromazine',         conc:'10 mg/mL',        dose:'0.025 mg/kg',     mLpkg:0.0025,        route:'IM / SC',   note:'Max 1 mg; caution in cardiac disease', cap:{ maxMg:1, concMgML:10 } },
+    ],
+    induct: [
+      { id:'in_prop',  name:'Propofol',             conc:'10 mg/mL',        dose:'3–6 mg/kg',       mLpkgL:0.3,  mLpkgH:0.6,  route:'IV slow',  note:'Titrate to effect' },
+      { id:'in_alf',   name:'Alfaxalone',           conc:'10 mg/mL',        dose:'3–5 mg/kg',       mLpkgL:0.3,  mLpkgH:0.5,  route:'IV slow' },
+      { id:'in_ket',   name:'Ketamine',             conc:'100 mg/mL',       dose:'5–10 mg/kg',      mLpkgL:0.05, mLpkgH:0.1,  route:'IV / IM' },
+      { id:'in_eto',   name:'Etomidate',            conc:'2 mg/mL',         dose:'0.5–2.0 mg/kg',   mLpkgL:0.25, mLpkgH:1.0,  route:'IV',       note:'Preferred for cardiac cases' },
+    ],
+    intraop: [
+      { id:'io_gad_n', name:'Gadolinium — Normal', conc:'0.5 mmol/mL',     dose:'0.1 mmol/kg',     mLpkg:0.2,               route:'IV' },
+      { id:'io_gad_r', name:'Gadolinium — Renal',  conc:'0.5 mmol/mL',     dose:'0.05 mmol/kg',    mLpkg:0.1,               route:'IV' },
+      { id:'io_dsp',   name:'DexSP',                conc:'4 mg/mL',         dose:'0.07–0.14 mg/kg', mLpkgL:0.0175,mLpkgH:0.035,route:'IV' },
+      { id:'io_lid',   name:'Lidocaine — MAX DOSE', conc:'20 mg/mL',        dose:'0.5 mg/kg MAX',   mLpkg:0.025,             route:'IV',       note:'⚠ SEIZURE RISK IN CATS — absolute maximum', danger:true },
+      { id:'io_atr',   name:'Atropine',             conc:'0.54 mg/mL',      dose:'0.04 mg/kg',      mLpkg:0.04/0.54,     route:'IV / IM / SC', note:'Start at 60% unless emergency', p60:true },
+      { id:'io_gly',   name:'Glycopyrrolate',       conc:'0.2 mg/mL',       dose:'0.01 mg/kg',      mLpkg:0.05,          route:'IV / IM / SC', note:'Start at 60% unless emergency', p60:true },
+      { id:'io_mann',  name:'Mannitol 20%',         conc:'200 mg/mL',       dose:'1 g/kg',          mLpkg:5.0,               route:'IV slow',  note:'Filter required; infuse >15 min' },
+    ],
+    fluids: { ratePkg:5, crystB:5, hetaB:2.5, note:'Surgical maintenance: 3 mL/kg/hr; Cardiac: 2.5 mL/kg/hr; ↓ bolus by 50% for cardiac patients' },
+  }
+};
+
+
+// ══ State ═════════════════════════════════════════════════════════════════
+
+let species = 'canine';
+let weight  = 0;
+const sel   = {};   // drugId → boolean (checked state)
+
+// ══ Calculation helpers ═══════════════════════════════════════════════════
+
+const f2 = n => n.toFixed(2);
+
+function renderVolume(d, w) {
+  if (!w) return '<span style="color:var(--muted)">—</span>';
+
+  // Special (atipamizole)
+  if (d.mLpkg === null) return '<span class="dval" style="font-size:0.77rem">= vol of dexmed</span>';
+
+  // Capped drug (acepromazine)
+  if (d.cap) {
+    const mgTotal  = w * d.mLpkg * d.cap.concMgML;
+    const mgCapped = Math.min(mgTotal, d.cap.maxMg);
+    const mL       = mgCapped / d.cap.concMgML;
+    const capped   = mgTotal > d.cap.maxMg;
+    return `<strong>${f2(mL)}</strong> <span class="ml-u">mL</span>` +
+           (capped ? `<br><span class="dnote">↑ capped at ${d.cap.maxMg} mg</span>` : '');
+  }
+
+  // Single dose with optional 60% note
+  if (d.mLpkg !== undefined) {
+    const mL = d.mLpkg * w;
+    const html = `<strong>${f2(mL)}</strong> <span class="ml-u">mL</span>`;
+    return d.p60
+      ? html + `<br><span class="dnote">60% start: ${f2(mL * 0.6)} mL</span>`
+      : html;
+  }
+
+  // Range
+  return `<span class="ml-lo">${f2(d.mLpkgL * w)}</span> – <span class="ml-hi">${f2(d.mLpkgH * w)}</span> <span class="ml-u">mL</span>`;
+}
+
+function etTube(w, sp) {
+  if (sp === 'feline') return '3.0 – 4.0 mm';
+  if (w < 2.5)  return '3.0 mm';
+  if (w < 5)    return '4.0 – 5.0 mm';
+  if (w < 10)   return '5.0 – 7.0 mm';
+  if (w < 20)   return '7.0 – 9.0 mm';
+  if (w < 30)   return '9.0 – 11.0 mm';
+  if (w < 45)   return '11.0 – 13.0 mm';
+  return '13.0 – 16.0 mm';
+}
+
+const ROUTES = ['IV','IV slow','IM','SC','OTM','CRI'];
+function primaryRoute(r) {
+  if (!r) return 'IV';
+  if (ROUTES.includes(r)) return r;
+  const first = r.split(/[\s,/]+/)[0];
+  return ROUTES.includes(first) ? first : 'IV';
+}
+function routeSel(def) {
+  const primary = primaryRoute(def);
+  const opts = ROUTES.map(r => `<option${r === primary ? ' selected' : ''}>${r}</option>`).join('');
+  return `<select class="route-sel">${opts}</select>`;
+}
+
+// ══ Table builders ════════════════════════════════════════════════════════
+
+function buildSelectTable(bodyId, drugs) {
+  document.getElementById(bodyId).innerHTML = drugs.map(d => {
+    const checked = !!sel[d.id];
+    const dangerCls = d.danger ? ' danger' : '';
+
+    if (d.custom) {
+      return `<tr class="${checked ? 'sel' : ''}" id="row-${d.id}">
+        <td><input type="checkbox" class="dcb" data-id="${d.id}" ${checked ? 'checked' : ''} onchange="toggleDrug(this)"></td>
+        <td><input class="dose-input" type="text" placeholder="Add medication…" style="font-weight:600" oninput="onCustomNameInput('${d.id}',this.value)"></td>
+        <td class="mlval"><span style="color:var(--muted)">—</span></td>
+        <td class="dval"><input class="dose-input" type="text" placeholder="dose"></td>
+        <td class="droute">${routeSel(d.route)}</td>
+        <td><input class="ti t-vol" placeholder="mL"></td>
+        <td><input class="ti t-time" placeholder="time"></td>
+        <td><input class="ti t-init" placeholder="init"></td>
+        <td><input class="ti t-check" placeholder="check"></td>
+      </tr>`;
+    }
+
+    return `<tr class="${checked ? 'sel' : ''}${dangerCls}" id="row-${d.id}">
+      <td><input type="checkbox" class="dcb" data-id="${d.id}" ${checked ? 'checked' : ''} onchange="toggleDrug(this)"></td>
+      <td><div class="dname">${d.name}</div><div class="dconc">${d.conc}</div></td>
+      <td class="mlval" id="ml-${d.id}">${renderVolume(d, weight)}</td>
+      <td class="dval">
+        <input class="dose-input" id="dose-${d.id}" type="text" placeholder="${d.dose}" oninput="onDoseInput('${d.id}',this.value)">
+        ${d.note ? `<span class="dnote${d.danger ? ' danger' : ''}">${d.note}</span>` : ''}
+      </td>
+      <td class="droute">${routeSel(d.route)}</td>
+      <td><input class="ti t-vol" placeholder="mL"></td>
+      <td><input class="ti t-time" placeholder="time"></td>
+      <td><input class="ti t-init" placeholder="init"></td>
+      <td><input class="ti t-check" placeholder="check"></td>
+    </tr>`;
+  }).join('');
+}
+
+function onCustomNameInput(id, val) {
+  const d = findDrug(id);
+  if (d) d.name = val;
+}
+
+function buildFluids() {
+  const fl = DB[species].fluids;
+  const w  = weight;
+  const rate   = w > 0 ? f2(fl.ratePkg * w) : '—';
+  const cryst  = w > 0 ? f2(fl.crystB * w) : '—';
+  const heta   = w > 0 ? f2(fl.hetaB * w) : '—';
+  const rNum   = w > 0 ? fl.ratePkg * w : 0;
+  const macro  = w > 0 ? f2(rNum * 10 / 360) : '—';
+
+  document.getElementById('fluid-grid').innerHTML = `
+    <div class="fi"><div class="fi-lbl">Maint. Fluid Rate</div><div class="fi-val">${rate} <span style="font-size:0.78rem">mL/hr</span></div><div class="fi-sub">${fl.ratePkg} mL/kg/hr</div></div>
+    <div class="fi"><div class="fi-lbl">Crystalloid Bolus</div><div class="fi-val">${cryst} <span style="font-size:0.78rem">mL</span></div><div class="fi-sub">${fl.crystB} mL/kg</div></div>
+    <div class="fi"><div class="fi-lbl">Hetastarch Bolus</div><div class="fi-val">${heta} <span style="font-size:0.78rem">mL</span></div><div class="fi-sub">${fl.hetaB} mL/kg</div></div>
+    <div class="fi"><div class="fi-lbl">Macrodrip (10 gtt/mL)</div><div class="fi-val">${macro} <span style="font-size:0.78rem">gtt/10 s</span></div><div class="fi-sub">at ${fl.ratePkg} mL/kg/hr</div></div>`;
+  document.getElementById('fluid-note').textContent = fl.note;
+}
+
+// ══ Update helpers ════════════════════════════════════════════════════════
+
+function findDrug(id) {
+  return [...DB[species].preproc, ...DB[species].premed, ...DB[species].induct, ...DB[species].intraop].find(d => d.id === id);
+}
+
+function parseDoseLow(str) {
+  const m = str.match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function onDoseInput(id, val) {
+  const d = findDrug(id);
+  if (!d) return;
+  const el = document.getElementById('ml-' + id);
+  if (!el) return;
+  const num = parseFloat(val);
+  if (!isNaN(num) && num > 0 && weight > 0) {
+    const refMlpkg = d.mLpkg !== undefined ? d.mLpkg : d.mLpkgL;
+    const refDose  = parseDoseLow(d.dose);
+    if (refMlpkg != null && refDose) {
+      const mL = num * (refMlpkg / refDose) * weight;
+      el.innerHTML = `<strong>${f2(mL)}</strong> <span class="ml-u">mL</span>`;
+    }
+  } else {
+    el.innerHTML = renderVolume(d, weight);
+  }
+}
+
+function updateVolumeCells() {
+  [...DB[species].preproc, ...DB[species].premed, ...DB[species].induct, ...DB[species].intraop]
+    .forEach(d => {
+      const el = document.getElementById('ml-' + d.id);
+      if (!el) return;
+      const inp = document.getElementById('dose-' + d.id);
+      if (inp && inp.value) {
+        onDoseInput(d.id, inp.value);
+      } else {
+        el.innerHTML = renderVolume(d, weight);
+      }
+    });
+
+  // ET tube
+  const etEl = document.getElementById('et-display');
+  etEl.placeholder = weight > 0 ? etTube(weight, species) : '—';
+
+  // Rate display
+  document.getElementById('rate-display').textContent = weight > 0
+    ? f2(DB[species].fluids.ratePkg * weight) + ' mL/hr' : '—';
+
+  buildFluids();
+}
+
+function rebuildAll() {
+  buildSelectTable('preproc-body', DB[species].preproc);
+  buildSelectTable('premed-body',  DB[species].premed);
+  buildSelectTable('induct-body',  DB[species].induct);
+  buildSelectTable('intraop-body', DB[species].intraop);
+  updateVolumeCells();
+}
+
+// ══ Event handlers ════════════════════════════════════════════════════════
+
+function setSpecies(sp) {
+  species = sp;
+  document.getElementById('btn-canine').classList.toggle('sp-active', sp === 'canine');
+  document.getElementById('btn-feline').classList.toggle('sp-active', sp === 'feline');
+  Object.keys(sel).forEach(k => delete sel[k]);
+  rebuildAll();
+}
+
+function onWeightChange() {
+  weight = parseFloat(document.getElementById('weight').value) || 0;
+  updateVolumeCells();
+}
+
+function toggleDrug(cb) {
+  const id  = cb.dataset.id;
+  sel[id]   = cb.checked;
+  const row = document.getElementById('row-' + id);
+  if (row) row.classList.toggle('sel', cb.checked);
+}
+
+function setCPR(val) {
+  document.getElementById('btn-cpr').classList.toggle('cpr-active', val === 'CPR');
+  document.getElementById('btn-cpr').classList.remove('dnr-active');
+  document.getElementById('btn-dnr').classList.toggle('dnr-active', val === 'DNR');
+  document.getElementById('btn-dnr').classList.remove('cpr-active');
+}
+
+function toggleSec(id, show) {
+  document.getElementById(id).classList.toggle('sec-hidden', !show);
+}
+
+function onHemiChange(checked) {
+  const row = document.getElementById('hemi-pin-row');
+  row.style.display = checked ? 'flex' : 'none';
+  if (!checked) {
+    document.querySelectorAll('input[name="pin"]').forEach(r => r.checked = false);
+    toggleSec('sec-pin', false);
+  }
+}
+
+function onProcMri(checked) {
+  const d = document.getElementById('proc-mri-detail');
+  d.style.display = checked ? 'flex' : 'none';
+  if (!checked) document.getElementById('proc-mri-roi').value = '';
+}
+
+// ══ Filter toggle ═════════════════════════════════════════════════════════
+
+function toggleFilter(btn, tblId) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  const on = tbl.classList.toggle('filter-on');
+  btn.classList.toggle('on', on);
+  btn.textContent = on ? 'Show all' : 'Selected only';
+}
+
+// ══ Init ══════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pt_date').value = new Date().toISOString().slice(0, 10);
+  rebuildAll();
+});
+
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('.drug-card').forEach(card => {
+    const hasSelected = card.querySelector('tr.sel');
+    card.classList.toggle('print-empty', !hasSelected);
+  });
+});
+
+window.addEventListener('afterprint', () => {
+  document.querySelectorAll('.drug-card').forEach(card => {
+    card.classList.remove('print-empty');
+  });
+});
+
+// ══ Handoff — Copy patient/anesthesia/IVC info for Surgery or ICU sheet ═════
+
+function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function copyHandoffInfo() {
+  const cpr = document.getElementById('btn-cpr').classList.contains('cpr-active') ? 'CPR'
+            : document.getElementById('btn-dnr').classList.contains('dnr-active') ? 'DNR' : '';
+
+  const data = {
+    pt_name: gv('pt_name'), pt_case: gv('pt_case'), pt_dr: gv('pt_dr'), pt_tech: gv('pt_tech'),
+    pt_date: gv('pt_date'), pt_asa: gv('pt_asa'), species, weight: gv('weight'), pt_bw: gv('pt_bw'),
+    cpr_dnr: cpr,
+    pt_ivc: gv('pt_ivc'), pt_cs: gv('pt_cs'), pt_ctx: gv('pt_ctx'), pt_ivf: gv('pt_ivf'), pt_pain: gv('pt_pain'),
+    vit_mm: gv('vit_mm'), vit_temp_pre: gv('vit_temp_pre'), vit_pulse_pre: gv('vit_pulse_pre'), vit_rr_pre: gv('vit_rr_pre')
+  };
+
+  const json = JSON.stringify(data);
+  const ta = document.createElement('textarea');
+  ta.value = json;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+
+  const btn = document.getElementById('handoff-copy-btn');
+  const restore = () => { btn.textContent = '📋 Copy Info → Surgery/ICU'; };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(json).catch(() => {});
+  }
+
+  btn.textContent = ok ? '✅ Copied — paste on Surgery/ICU sheet' : '⚠ Copy failed — try again';
+  setTimeout(restore, 3000);
+}
+
+// ══ Anesthesia Report ════════════════════════════════════════════════════
+
+// Which structured drug rows belong in each report section (by row id).
+const RPT_PREMED_IDS   = ['pp_mar','pp_add','pm_meth','pm_butor','pm_fen','pm_mid','pm_dia','pm_dex','pm_ace'];
+const RPT_INDUCT_IDS   = ['in_prop','in_alf','in_ket','in_eto'];
+const RPT_INTRAOP_IDS  = ['pp_panto','io_gad_n','io_gad_r','io_dsp','io_lid','io_atr','io_gly','io_mann'];
+
+// Reads one drug-table row and returns {name, dose, route, time} or null if
+// there's nothing documented (no dose/volume/time recorded).
+function scrapeDrugRow(row) {
+  if (!row) return null;
+  const volEl   = row.querySelector('.t-vol');
+  const timeEl  = row.querySelector('.t-time');
+  const routeEl = row.querySelector('.route-sel');
+  const vol   = volEl  ? volEl.value.trim()  : '';
+  const time  = timeEl ? timeEl.value.trim() : '';
+  const route = routeEl ? routeEl.value : '';
+  const doseInputs = row.querySelectorAll('.dose-input');
+  const dnameEl = row.querySelector('.dname');
+  const dconcEl = row.querySelector('.dconc');
+
+  let name, dose;
+  if (dnameEl && dnameEl.textContent.trim()) {
+    name = dnameEl.textContent.trim();
+    const concStr = dconcEl ? dconcEl.textContent.trim() : '';
+    const m = concStr.match(/^([\d.]+)\s*([^\/]+)\/mL$/);
+    if (m) {
+      // Known concentration — dose is derived only from the actual volume given.
+      if (vol) {
+        const amt = parseFloat(vol) * parseFloat(m[1]);
+        dose = isNaN(amt) ? vol + ' mL' : amt.toFixed(2) + m[2].trim();
+      } else {
+        dose = '';
+      }
+    } else {
+      // No fixed concentration (e.g. antibiotics/NSAID list) — dose is free text.
+      const freeDose = doseInputs.length ? doseInputs[doseInputs.length - 1].value.trim() : '';
+      dose = freeDose || (vol ? vol + ' mL' : '');
+    }
+  } else {
+    // Fully custom row (Additional Medications): first input = name, second = dose.
+    name = doseInputs[0] ? doseInputs[0].value.trim() : '';
+    dose = doseInputs[1] ? doseInputs[1].value.trim() : (vol ? vol + ' mL' : '');
+  }
+
+  if (!name) return null;
+  if (!vol && !time && !dose) return null;
+  return { name, dose, route, time };
+}
+
+function formatDrugLine(d) {
+  return `${d.name}${d.dose ? ' ' + d.dose : ''}; route: ${d.route || '—'}; time: ${d.time || '—'}`;
+}
+
+function rptRowsFor(ids) {
+  return ids.map(id => scrapeDrugRow(document.getElementById('row-' + id))).filter(Boolean);
+}
+
+function generateAnesthesiaReport() {
+  const lines = [];
+
+  lines.push('Pre-medications:');
+  const premed = rptRowsFor(RPT_PREMED_IDS);
+  if (premed.length) premed.forEach(d => lines.push(formatDrugLine(d)));
+  else lines.push('None recorded');
+  lines.push('');
+
+  lines.push('Induction:');
+  const ivcSel = document.getElementById('pt_ivc_placed');
+  const placed = !ivcSel || ivcSel.value === 'placed';
+  lines.push('IV Catheter ' + (placed ? 'placed' : 'not placed'));
+  if (placed) lines.push(`IVC size: ${gv('pt_ivc') || '—'}, location: ${gv('pt_cs') || '—'}`);
+  lines.push('');
+  rptRowsFor(RPT_INDUCT_IDS).forEach(d => lines.push(formatDrugLine(d)));
+  lines.push('');
+
+  lines.push('Maintenance Anesthesia:');
+  const etEl = document.getElementById('et-display');
+  const ett = (etEl && etEl.value.trim()) || (etEl && etEl.placeholder) || '—';
+  lines.push(`ETT size: ${ett} mm`);
+  lines.push('');
+  lines.push('Isoflurane and Oxygen (see anesthesia record for rate)');
+  lines.push('');
+
+  lines.push('Intra-Op:');
+  const fluidType = gv('pt_ivf');
+  const fluidRate = gv('pt_rate');
+  if (fluidType || fluidRate) lines.push(`${fluidType || 'IV fluids'} @ ${fluidRate || '—'} mL/hr`);
+  rptRowsFor(RPT_INTRAOP_IDS).forEach(d => lines.push(formatDrugLine(d)));
+  [...document.querySelectorAll('#abxnsaid-body tr')].map(scrapeDrugRow).filter(Boolean).forEach(d => lines.push(formatDrugLine(d)));
+  lines.push('');
+
+  lines.push('Medications/changes during procedure:');
+  const extra = [...document.querySelectorAll('#extra-body tr')].map(scrapeDrugRow).filter(Boolean);
+  if (extra.length) extra.forEach(d => lines.push(formatDrugLine(d)));
+  else lines.push('None');
+  lines.push('');
+
+  lines.push('Assessment of patient response to anesthesia:');
+  lines.push(gv('rpt-assess-text').trim() || '—');
+  lines.push('');
+
+  lines.push('Patient recovery:');
+  lines.push(gv('rpt-recovery-text').trim() || '—');
+
+  document.getElementById('rpt-output').value = lines.join('\n');
+}
+
+function copyAnesthesiaReport() {
+  const ta = document.getElementById('rpt-output');
+  const btn = document.getElementById('rpt-copy-btn');
+  if (!ta.value.trim()) { generateAnesthesiaReport(); }
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).catch(() => {});
+  }
+  const restore = () => { btn.textContent = '📋 Copy Report'; };
+  btn.textContent = ok ? '✅ Copied' : '⚠ Copy failed — try again';
+  setTimeout(restore, 2500);
+}
+</script>
+</body>
+</html>

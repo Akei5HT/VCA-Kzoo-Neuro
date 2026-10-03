@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surgery Anesthesia Drug Sheet — VCA Kalamazoo Neuro</title>
+<style>
+:root {
+  --primary: #2c5f8a;
+  --accent:  #4a9fd4;
+  --bg:      #f5f7fa;
+  --surface: #ffffff;
+  --border:  #d1d9e0;
+  --text:    #1a2332;
+  --muted:   #6b7c93;
+  --green:   #27ae60;
+  --red:     #c0392b;
+  --orange:  #e67e22;
+  --amber:   #f39c12;
+  --section-bg: #eef2f7;
+  --sel-bg:  #e8f4fd;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; }
+
+header { background: var(--primary); color: white; padding: 11px 20px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { font-size: 1rem; font-weight: 700; }
+header span { font-size: 0.78rem; opacity: 0.7; }
+
+.container { max-width: 1020px; margin: 0 auto; padding: 16px; }
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 9px 16px; font-weight: 700; font-size: 0.86rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+.card-body { padding: 14px 16px; }
+
+.badge { font-size: 0.67rem; padding: 2px 8px; border-radius: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2px; }
+.badge-opt { background: var(--muted); color: white; }
+.badge-cond { background: var(--amber); color: white; }
+.card-sub { font-size: 0.72rem; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+/* ── Info grid ─────────────────────────────────────────────── */
+.info-grid { display: grid; gap: 10px; }
+.ig-2 { grid-template-columns: 1fr 1fr; }
+.ig-3 { grid-template-columns: 1fr 1fr 1fr; }
+.ig-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.ig-5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+.ig-6 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; }
+
+.field { display: flex; flex-direction: column; gap: 3px; }
+.field label { font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+.field input, .field select {
+  width: 100%; padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.92rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+.calc-val { padding: 6px 9px; background: var(--section-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 0.88rem; font-weight: 700; color: var(--primary); min-height: 33px; }
+
+/* ── Toggle buttons ────────────────────────────────────────── */
+.tog-group { display: flex; gap: 5px; }
+.tog-btn { flex: 1; padding: 5px 8px; border: 2px solid var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: var(--surface); text-align: center; transition: all 0.15s; }
+.tog-btn.sp-active { background: var(--primary); border-color: var(--primary); color: white; }
+.tog-btn.cpr-active { background: var(--green); border-color: var(--green); color: white; }
+.tog-btn.dnr-active { background: var(--red); border-color: var(--red); color: white; }
+
+#weight { font-size: 1.05rem; font-weight: 700; border: 2px solid var(--primary); }
+
+/* ── Proc checkboxes ───────────────────────────────────────── */
+.proc-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 6px; }
+.proc-row label { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.proc-row input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+
+/* ── Drug tables ───────────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; }
+.drug-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 580px; }
+.drug-table.repeat-tbl { min-width: 780px; }
+.drug-table.cri-table { min-width: 760px; }
+.drug-table th { background: var(--section-bg); padding: 7px 10px; text-align: left; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); }
+.drug-table td { padding: 7px 10px; border-bottom: 1px solid #f0f3f6; vertical-align: middle; }
+.drug-table tr:last-child td { border-bottom: none; }
+
+.drug-table tbody tr:hover { background: #fafbfd; }
+.drug-table tr.sel { background: var(--sel-bg) !important; }
+.drug-table tr.sel td:first-child { border-left: 3px solid var(--accent); padding-left: 7px; }
+.drug-table tr.danger .dname { color: var(--red); }
+
+input[type=checkbox].dcb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+.dname { font-weight: 600; line-height: 1.3; }
+.dconc { font-size: 0.72rem; color: var(--muted); }
+.mlval strong { font-size: 13px; color: var(--primary); font-weight: 700; }
+.ml-lo { color: var(--muted); font-weight: 600; font-size: 12px; }
+.ml-hi { color: var(--primary); font-weight: 700; font-size: 12px; }
+.ml-u { font-size: 11px; color: var(--muted); }
+.dval { color: var(--muted); font-size: 11px; }
+.dval strong { color: var(--primary); font-size: 13px; font-weight: 700; }
+.dnote { font-size: 0.69rem; color: var(--orange); font-style: italic; }
+.dnote.danger { color: var(--red); font-weight: 600; }
+.droute { font-size: 0.77rem; font-weight: 600; color: #444; }
+.route-sel { font-size: 0.77rem; font-weight: 600; color: #444; border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px; background: var(--bg); width: 100%; }
+.dose-input { width: 100%; border: none; border-bottom: 1px solid var(--border); background: transparent; font-size: 0.77rem; color: var(--text); padding: 2px 3px; font-family: inherit; }
+.dose-input:focus { outline: none; border-bottom-color: var(--accent); }
+.dose-input::placeholder { color: var(--muted); font-size: 0.72rem; }
+
+.ti { padding: 4px 7px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.79rem; font-family: inherit; background: var(--surface); transition: border-color 0.15s; }
+.ti:focus { outline: none; border-color: var(--accent); }
+.t-vol  { width: 60px; }
+.t-time { width: 68px; }
+.t-init { width: 50px; }
+.t-check { width: 50px; }
+
+/* ── Repeat / Next-Due tracking ──────────────────────────────── */
+.rep-wrap { display: flex; align-items: center; gap: 3px; }
+.rep-wrap input { width: 46px; }
+.rep-unit { font-size: 0.66rem; color: var(--muted); }
+.due-disp { font-size: 0.82rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+.due-disp.due-alert { color: var(--red); }
+.prn-tag { font-size: 0.7rem; font-weight: 700; color: var(--muted); }
+
+/* ── CRI / prep boxes ─────────────────────────────────────────── */
+.cri-row.sel { background: var(--sel-bg) !important; }
+.cri-row.sel td:first-child { border-left: 3px solid var(--accent); padding-left: 7px; }
+.prep-row td { padding: 0 !important; border-bottom: 1px solid #f0f3f6 !important; }
+.prep-box { background: #eef8f1; border: 1px solid var(--green); border-top: none; border-radius: 0 0 8px 8px; padding: 8px 12px; margin: 0 0 4px; }
+.prep-note { font-size: 0.72rem; color: var(--muted); margin-top: 5px; font-style: italic; }
+.prep-title { font-size: 0.74rem; font-weight: 700; color: var(--green); display: block; margin-bottom: 5px; }
+.prep-steps { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.prep-step { display: flex; align-items: center; gap: 6px; }
+.prep-label { font-size: 0.72rem; color: var(--muted); }
+.prep-val { font-size: 0.82rem; font-weight: 700; color: var(--primary); }
+.bolus-toggle { display: flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.bolus-toggle input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+.bolus-row { display: none; align-items: center; gap: 6px; margin-top: 5px; }
+.bolus-row input { width: 66px; }
+.bolus-vol { font-size: 0.76rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+.feline-warn { color: var(--red); font-weight: 700; font-size: 0.68rem; display: none; margin-top: 2px; }
+
+/* ── Fluid grid ────────────────────────────────────────────── */
+.fluid-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.fi { background: var(--section-bg); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--border); }
+.fi-lbl { font-size: 0.69rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+.fi-val { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
+.fi-sub { font-size: 0.71rem; color: var(--muted); margin-top: 2px; }
+.fluid-note { font-size: 0.73rem; color: var(--orange); font-style: italic; margin-top: 10px; }
+.ivf-summary { margin-top: 12px; padding: 9px 12px; background: var(--section-bg); border-radius: 8px; font-size: 0.82rem; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn { padding: 8px 16px; border: none; border-radius: 7px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-success { background: var(--green); color: white; }
+.btn-success:hover { background: #219a52; }
+
+/* ── Conditional sections ──────────────────────────────────── */
+.sec-hidden { display: none; }
+
+/* ── Filter: hide unselected drug rows ─────────────────────── */
+.drug-table.filter-on tr:not(.sel):not(thead tr) { display: none; }
+.filter-btn { margin-left: auto; font-size: 0.72rem; padding: 3px 10px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--muted); cursor: pointer; font-weight: 600; white-space: nowrap; transition: all 0.15s; }
+.filter-btn.on { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ── Marker pin ─────────────────────────────────────────────── */
+.pin-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 12px; }
+
+/* ── Approval ──────────────────────────────────────────────── */
+.approval { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+.approval label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+.approval input { flex: 1; padding: 6px 10px; border: none; border-bottom: 2px solid var(--border); border-radius: 0; font-size: 0.9rem; font-family: inherit; background: transparent; }
+.approval input:focus { outline: none; border-bottom-color: var(--primary); }
+
+/* ══ PRINT ══════════════════════════════════════════════════ */
+@media print {
+  @page { size: A4 portrait; margin: 6mm 8mm; }
+
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  header, .no-print { display: none !important; }
+
+  .print-header { display: block !important; margin-bottom: 4px; border-bottom: 1.5px solid #2c5f8a; padding-bottom: 4px; }
+
+  body { background: white; font-size: 7px; }
+  .container { max-width: 100%; padding: 0; margin: 0; }
+
+  /* Cards */
+  .card { border: 1px solid #bbb; border-radius: 2px; break-inside: avoid; margin-bottom: 3px; }
+  .card-header { background: #dde6f0 !important; padding: 2px 7px; font-size: 0.62rem; }
+  .card-body { padding: 3px 7px; }
+
+  /* Drug tables — selected rows only (Antibiotics/NSAID & Additional Meds always print) */
+  .drug-table:not(#abxnsaid-tbl):not(#extra-tbl) tr:not(.sel):not(.cri-row):not(.prep-row) { display: none; }
+  .drug-table tr.sel { background: #e5eff8 !important; }
+  .drug-table td, .drug-table th { padding: 2px 4px; font-size: 7px; }
+  .th-cb, input[type=checkbox].dcb { display: none; }
+  .dname { font-size: 7px; }
+  .dconc { font-size: 6px; }
+  .dnote { font-size: 6px; }
+  .route-sel { font-size: 6.5px; padding: 1px 2px; }
+  .dose-input { border: none; border-bottom: 1px solid #aaa; font-size: 7px; padding: 1px 2px; width: 100%; background: transparent; }
+
+  /* Input fields in drug rows */
+  .ti { border: none; border-bottom: 1px solid #aaa; border-radius: 0; background: transparent; padding: 1px 2px; font-size: 6.5px; }
+  .t-vol { width: 30px; }
+  .t-time { width: 36px; }
+  .t-init { width: 26px; }
+  .t-check { width: 26px; }
+  .rep-wrap input { width: 24px; }
+  .due-disp { font-size: 7px; }
+
+  /* CRI rows only print if checked */
+  .cri-row:not(.sel) { display: none; }
+  .prep-row[style*="display:none"] { display: none !important; }
+  .prep-box { font-size: 6.5px; padding: 4px 6px; }
+  .prep-title { font-size: 6.5px; }
+  .prep-label { font-size: 6px; }
+  .prep-val { font-size: 7px; }
+  .bolus-toggle, .bolus-row input[type=checkbox] { display: none; }
+  .bolus-row { display: flex !important; }
+
+  /* Patient info fields */
+  .field label { font-size: 5.5px; margin-bottom: 1px; }
+  .field input, .field select { border: none; border-bottom: 1px solid #aaa; border-radius: 0; background: transparent; padding: 1px 2px; font-size: 7px; }
+  .calc-val { background: transparent; border: none; border-bottom: 1px solid #aaa; padding: 1px 2px; font-size: 7px; }
+  .tog-btn { border: 1px solid #aaa; padding: 1px 4px; font-size: 0.62rem; }
+  .tog-btn.sp-active  { background: #c8dcec !important; color: #000 !important; }
+  .tog-btn.cpr-active { background: #c8e8cc !important; }
+  .tog-btn.dnr-active { background: #f0cccc !important; }
+  .info-grid { gap: 3px; margin-bottom: 3px !important; }
+
+  /* Fluid grid */
+  .fluid-grid { gap: 4px; }
+  .fi { padding: 3px 5px; }
+  .fi-lbl { font-size: 5.5px; margin-bottom: 1px; }
+  .fi-val { font-size: 0.85rem; }
+  .fi-sub { font-size: 5.5px; }
+  .ivf-summary { font-size: 7px; padding: 3px 5px; }
+
+  /* Hide screen-only controls */
+  .proc-row, .btn, #proc-mri-detail, #proc-surg-detail,
+  .proc-section { display: none !important; }
+  .drug-card.print-empty { display: none !important; }
+
+  /* Approval */
+  .approval { padding: 3px 7px; margin-bottom: 3px; }
+  .approval label { font-size: 6px; }
+  .approval input { font-size: 7.5px; padding: 1px 3px; }
+
+  .sec-hidden { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  .ig-5, .ig-6 { grid-template-columns: 1fr 1fr 1fr; }
+  .ig-4 { grid-template-columns: 1fr 1fr; }
+  .fluid-grid { grid-template-columns: 1fr 1fr; }
+  .pin-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1>Neuro Surgery Anesthesia Drug Sheet</h1><span>VCA Vet Specialty &amp; Emergency Center of Kalamazoo</span></div>
+  <div class="no-print"><button class="btn btn-success" onclick="window.print()">&#128438; Print Sheet</button></div>
+</header>
+
+<div class="print-header" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:4px">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAkACQAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCABjARIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2WiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooPSgBKKxtX8RW+lHylHnzn+BT0+vpUWk+KLbUZRBKvkSnoC3DfQ1p7KfLzW0Od4mkp+z5tTfooorM6AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiig9KAGnjr0Fcpr3iyOF2srBw0nR5uyew96g8Z65dQTDTLcmNGTdJIOrZ7e1cbW9OH2mdEML7SDu7XLzMzsXZizE5JJyTSDIOQcEdCKgt3kkdIVVnLnChetW3heGRo5UKOvVSMGu6tjKVGnzP7j5yOSYmeJ9lHbudNoPiYjba6g3HRJj/I11Y2kblOQeRzXl+M10PhfVrgXaWMhLxOPkz1XFfOU8Z7So1JWTPsK2V+orkd7LW52dFFFdx5QUUUUAFFFFABRRRQAUUUUAFRzTRwQPNI21I1LMfQDrUlNZQ6lWAKkYIPegDj/8AhaXhntLcH3EJ5qzp3xC8P6nfw2UE0olmbam+MqCfTNeV+L9DbQPEVxahSIHPmwn/AGD2/A5FY0ckkEyTRMVkjYMrDsR0NepHCU5wvFnA684ysz6WorL8PavHrmiWt+mMyp849GHDD86068xpp2Z3J3V0ZGveJdN8NxRSahIyiViqBF3E8ZPFYv8AwtLw3/z0uP8Avya4L4iax/a3ieSKNsw2Q8pfQt1Y/nx+Fc1b20t5cxWsCl5ZnCIB6nivRp4SDgpTOKpiJKVon0HpGr2eu6cmoWMheFyQMgg5HUEVbuLmC1haa4lSKNRku7AAVhmaw8D+Eo/NIEdtGFAHWRz2H1NeP6/4l1LxHdGa9lIjz+7twfkQf1Pua5qWHdWT5djedbkir7nqV/8AEzw5ZEpFNLduO0CZH5nArMPxe08PgaXclPXcAfyryoe1T/2ffFPMFlc7P73lNj+VdywdJLU5XiKj2PX7D4oeHbtgs0k1mxP/AC2Tj8xmust7qC8gWa2mSaNujowINfN8cbzSrFEhkkc7VQDJJ9MV7L4B8J3Ph6zea8uJPPuBk26t+7j/AA9feuXEUKdNXTN6NWc3Zo7AkAEk4Fc9qnjnw9pLNHPfpJIvVIfnI/Ks/wCIema3f6SH0q6cRRAma1ThpR9ep+lePWlnc31yLWztpJp2OBGikkfX0qaGHhNc0mOrWlB2SPU5vi7pKkiGwu5R2J2rn9aIfi5pTHE1hdxD1G1v61zVr8LPEE8QeR7W3JGdjOSfxwDWRrng/WfDyebeW4e3zgTQnco+vcV0qjhm+VP8TF1KyV2j2HRvFui68dljeqZf+eL/ACv+Rra7V80xu8MiyROySKcq6HBBr2zwF4jfxFon+ksDeWrBJSP4/Q/jXPiMM6S5lsbUa/O+Vmnr3h+31qAbv3dwg/dygdPr6ivP5dF1CLURp5t2MxPyY5BHrn0969XpNoJ3YGa5ozcTvp1pQ0MPw/4Zg0dBNLiW7YcuRwvsvpVjWNEh1SMtwk6j5Xx+h9q1aD0rOa5/iJVWanzp6nm7aXeR332IwEy54wOGHr9K6bRrGx0eYRyyF71zsJ2kjOM4H4VuiSFpzGHQyqMlcjcB9KkwK56eGhCXNudWIx9StHl27+YopaKK6ThCiqy31q181is8ZuUTe0W75gp6HFWaACiiigAooooAKKKKACiiigDi/iXoP9p6D9uhTdcWOXGByyfxD+v4V43X0rIiyxsjKGVhgg9xXgXirRG0DxDcWe0iEnfCfVD0/LkfhXp4GrvBnDiYfaR1nwn1ryru40WVvllHmw57MPvD8etd94m1ddE8P3d+33o4yIx6seAPzrwbTb+XS9Str+E4kt5Aw9wO39K7X4meI49Ti0+ytJMxPGLl8HuR8oP60q2HvWTWzCnWtTa6o4FnaRy7tuZiWYnuT1ru/hZof2zVpNWmXMVoNseR1c9/wH9K4VI3kkWONSzu21QO5r3/AMMaMmg6DbWCj51XdIfVzya2xdTkp8q6kYeHNO/Y89+LOpPNrFrpob93bxiRh6sT/gK4A8Cu0+Kds8Pi0TH7k9upU4/u5z/MVxZ6GtcKkqSsZ1m/aM9d+HnhO0s9Jh1a6hSW8uBvQuMiNT0AH9a7vA9BWB4K1GHUvCtlJEwLRRiKQD+EjtXQV41WUpVHzHo00lBWM2LQtKi1I6jHYW6XZHMqoM/X61pUUhOASTgCobbLtYjmnit4mlmdY41GWdzgD8a5C68e+EdInlNoFmmkOXa1hHzH3bgGvP8Axr4pute1WaFZWWwt3KRxA8MR/EfU1gW1rNeXMdtbRNLNK21EUcsa9Glg1y802cdTEa2ij0yX4v2at+50mdx6tIB/jVG++KkV9ZzWb6LmOaMoQ03Yjr0qKw+Eupzxq99fw2xI+4ilyPr0FXJvhHFDbySnWJCUQtjyhzgfWhLCx/pheuzzQDHToD+QrvvhHOya7fW+eJIA35GuC/ln88V23wn/AORpn/69j/OuvEWdGRz0f4iPYqyfEGptpenefHPawyFwFN05Vf05J9q1qxte8PW+vJbmWWWCW1k8yGWIjKN9DxXhxtfU9R3toYuleMrm6ur+0nW3kktrU3MUsKuqsAOhDc/jVRPGmvLo1hrk+nWgsbiRYnjWQ+YMnGR2xW1beEIIL+4vpr66ubi5tjbSPIR909xgDFOk8IWkvhu10IzzCC2ZGVxjcdpzzxW3NTXQztOxnSalFa+MdYeKwgFxb6cJhcEnc/GQre1Uv+E08QRaJZa5JptmbS5kWMRLI3mZPAIPQDNdJJ4YtZdUvr8zSiS9tRbOoxgLjGRx1qCTwjZyeHbTRDPMIbR0kR+NxKnIzxihShpdCcZkFj4h1eLxNFo+sW1qn2i3M8UkDn5cdmz/AErN1Dx1eWMryiTTbmBJhG0cBdmAzjO/G3PtXSXXh63u9ch1WSSTzIrdrfywRtZW659+ayD8PrU6edN/tS++wq++ODK4U5z1xk80k4Xu0NqfQSyYP8Ubx8HDabGR+ddfWVBoMEGvyawskhmkt1gKn7uB3+tatZyabVi4ppO4tFFFSUFFFFABRRRQAUUUUAFcN8TtB/tHRF1KFMz2WS2By0Z6j8Ov4V3FMliSaJ4pFDKwwwPcVcJuElJEzipRaPmuiu4vfhXrQvp/sTWzWxcmIvIQ23sCMdulQf8ACrPEn/Tp/wB/j/hXtLE0mviPMdGp2D4Z6F/afiD7dKmYLHDcjgv2H9a9mrB8H+Hx4d0GKycq07EvMy9Cx9PYdK368nEVPaVLrY9CjDkjY5Px74XbxDo4e2UG9tctF/tjuv414pJG8UjxSoyOh2urDBU+hFfS1c34i8DaV4izLIht7rGBPFwT9R3/AbK2xWJ9n7stjOvR59VueOaLr+p+H7gzafP5e75XQjKt9RXVf8AC29Z8vabC0L47c/zFQ33wr12NibOS3vE9d+xvyP+NY0ngfxLCxH9lSN/tI6H9DXY5YeprscrjWj2Oht/iPr83iqDRn02FWkl8l9rNlX9iD0z+dehRalcC6kt7qxkiZEZg6sHUkDJBx0r5xFncjWl0vy2+1NKIthIBJJwMk9K9d8C+NW1FhpGqNi6UZhlP8Ay0UDkH3qMTh1BXiyqFbnfLLQ6LXtZi0TSnvHUu2dqID944zj8q8P1XUbjV9Sn1C5bMszFiM8D0H0rt/iJrl9bXiaVGxjtmUS5H8R9K82J3HOa68LBqPMzlxM1zchc0bV59F1W31C2P7yJgSueGHcH6iuw+IGuWms+HrGW1ciNrwFkJBKkA9/xFcFEivIFkfYh+824LitO/jtvs6va3Bnfa5cEbSmUwAD9c1liFGU0pb/AK/odGHcowd0tfuPR/hD/wAjRP8A9ex/nXsFePfCH/kaZ/8Ar2P866j4gePToXmaXpYVtQK/O5GRCPUe/wDKvIxKcqz5VqepRaVNXOvZlRGZmCqoySTgAV5h4k+LSwStb6DF55BwbmVSFHuF7/jXm+p69qmsSs+oXs05J+6Wyv5dKzuoGTXbSwPWozinicR9E9D2rxL8R7lrE2cFsLWS6j2+cH3bFPXjHUiuHv5tPkg8y3gNvIqjCj7re/WqtlPapaKl0ZSxx5ajkL7mrEsmnz6VLaQWkkNyWyk7tuDDuD614mOoyr1LRvZaep9bkOMhgsHKVaMeaTumtbJW+V/66GbqOoS6hKrSABUXaig9B/n3q7pOl3OrXKW9tE0hY8sB8q+5NJYWN1Pu8q2eSNR8xAHzexJ9a9a8CeHE0bTBcSIftdwNzkjlVP3R+HWupVqdGm1Hd9T5bGcQ4vMMXGpWhywT0S1bZ0Wn2cOn2ENpCoVI1Axjr7/AIk1ZooryrtvU/RoxUUoroFFFFIYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFVp7O2uGVp7eOVlOQXQEirNFADEiSONY0UIqjAAAAqSiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA/9k=" alt="VCA Logo" style="height:38px;width:auto">
+    <div style="text-align:left">
+      <div style="font-size:0.85rem;font-weight:700;color:#2c5f8a">Neuro Surgery Anesthesia Drug Sheet</div>
+      <div style="font-size:0.6rem;color:#444">VCA Vet Specialty &amp; Emergency Center of Kalamazoo &nbsp;|&nbsp; 5348 S Westnedge Ave, Portage, MI 49002 &nbsp;|&nbsp; (269) 381-5228</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ══ PATIENT INFO ══════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Patient Information
+    <button class="filter-btn no-print" id="handoff-paste-btn" style="margin-left:auto" onclick="toggleSec('handoff-paste-box', document.getElementById('handoff-paste-box').classList.contains('sec-hidden'))">📋 Paste Info ← MRI Sheet</button>
+  </div>
+  <div class="card-body">
+
+    <div id="handoff-paste-box" class="sec-hidden no-print" style="margin-bottom:12px;padding:10px 12px;background:var(--section-bg);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);margin-bottom:6px">Paste the info copied from the MRI sheet, then click Apply.</div>
+      <textarea id="handoff-paste-input" rows="2" style="width:100%;font-family:monospace;font-size:0.78rem;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)" placeholder="Paste here (Cmd/Ctrl+V)…"></textarea>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" style="padding:5px 12px;font-size:0.78rem" onclick="applyHandoffPaste()">Apply</button>
+        <button class="filter-btn" onclick="toggleSec('handoff-paste-box', false)">Cancel</button>
+        <span id="handoff-paste-status" style="font-size:0.78rem;font-weight:600"></span>
+      </div>
+    </div>
+
+    <div class="info-grid ig-2" style="margin-bottom:10px">
+      <div class="field"><label>Patient Name</label><input type="text" id="pt_name" placeholder="Patient name"></div>
+      <div class="field"><label>Case Number</label><input type="text" id="pt_case" placeholder="Case #"></div>
+    </div>
+
+    <div class="info-grid ig-5" style="margin-bottom:10px">
+      <div class="field">
+        <label>CPR / DNR</label>
+        <div class="tog-group">
+          <button class="tog-btn" id="btn-cpr" onclick="setCPR('CPR')">CPR</button>
+          <button class="tog-btn" id="btn-dnr" onclick="setCPR('DNR')">DNR</button>
+        </div>
+      </div>
+      <div class="field"><label>Attending Dr.</label><input type="text" id="pt_dr" placeholder="Dr. Chen"></div>
+      <div class="field"><label>Tech</label><input type="text" id="pt_tech" placeholder="Tech name"></div>
+      <div class="field"><label>Date</label><input type="date" id="pt_date"></div>
+      <div class="field"><label>ASA Status</label>
+        <select id="pt_asa">
+          <option value="">—</option>
+          <option value="I">I — Normal healthy</option>
+          <option value="II">II — Mild systemic disease</option>
+          <option value="III">III — Severe systemic disease</option>
+          <option value="IV">IV — Life-threatening</option>
+          <option value="V">V — Moribund</option>
+          <option value="E">E — Emergency</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-grid ig-3" style="margin-bottom:10px">
+      <div class="field">
+        <label>Species</label>
+        <div class="tog-group">
+          <button class="tog-btn sp-active" id="btn-canine" onclick="setSpecies('canine')">Canine</button>
+          <button class="tog-btn" id="btn-feline" onclick="setSpecies('feline')">Feline</button>
+        </div>
+      </div>
+      <div class="field"><label>Weight (kg)</label><input type="number" id="weight" min="0.1" max="200" step="0.1" placeholder="0.0" oninput="onWeightChange()"></div>
+      <div class="field"><label>Blood Work</label>
+        <select id="pt_bw">
+          <option value="">—</option>
+          <option value="Done / reviewed">Done / reviewed</option>
+          <option value="Pending">Pending</option>
+          <option value="Waived by owner">Waived by owner</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-grid ig-6" style="margin-bottom:10px">
+      <div class="field"><label>IV Catheter</label>
+        <select id="pt_ivc_placed"><option value="placed" selected>Placed</option><option value="not">Not Placed</option></select>
+      </div>
+      <div class="field"><label>IVC Size</label><input type="text" id="pt_ivc" placeholder="e.g., 22g"></div>
+      <div class="field"><label>IVC Location</label>
+        <select id="pt_cs">
+          <option value="">—</option>
+          <option>Right cephalic</option><option>Left cephalic</option>
+          <option>Right saphenous</option><option>Left saphenous</option>
+          <option>Jugular</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Chest Rad</label>
+        <select id="pt_ctx"><option value="">—</option><option>Normal</option><option>Abnormal</option><option>Pending review</option><option>N/A</option></select>
+      </div>
+      <div class="field"><label>IVF Type</label>
+        <select id="pt_ivf"><option value="">—</option><option>Isolyte</option><option>LRS</option><option>Plasmalyte</option><option>0.9% NaCl</option><option>D5W</option></select>
+      </div>
+      <div class="field"><label>Pain Score</label>
+        <select id="pt_pain"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+      </div>
+    </div>
+
+    <div class="info-grid ig-5" style="margin-bottom:10px">
+      <div class="field"><label>MM / CRT — Pre</label><input type="text" id="vit_mm_pre" placeholder="Pink / 1s"></div>
+      <div class="field"><label>Temp (°F) — Pre</label><input type="text" id="vit_temp_pre" placeholder=""></div>
+      <div class="field"><label>HR (bpm) — Pre</label><input type="text" id="vit_hr_pre" placeholder=""></div>
+      <div class="field"><label>RR (bpm) — Pre</label><input type="text" id="vit_rr_pre" placeholder=""></div>
+      <div class="field"><label>@ mL/hr (set)</label><input type="number" id="pt_rate" placeholder="mL/hr" min="0"></div>
+    </div>
+
+    <div class="info-grid ig-4" style="margin-bottom:10px">
+      <div class="field"><label>MM / CRT — Post</label><input type="text" id="vit_mm_post" placeholder="Pink / 1s"></div>
+      <div class="field"><label>Temp (°F) — Post</label><input type="text" id="vit_temp_post" placeholder=""></div>
+      <div class="field"><label>HR (bpm) — Post</label><input type="text" id="vit_hr_post" placeholder=""></div>
+      <div class="field"><label>RR (bpm) — Post</label><input type="text" id="vit_rr_post" placeholder=""></div>
+    </div>
+
+    <div class="info-grid ig-3" style="margin-bottom:10px">
+      <div class="field"><label>ET Tube Size (mm)</label><input type="text" id="et-display" placeholder="—"></div>
+      <div class="field"><label>Fluid Rate (maint.)</label><div class="calc-val" id="rate-display">—</div></div>
+    </div>
+
+    <div class="proc-section" style="border-top:1px solid var(--border);padding-top:12px;margin-top:2px">
+      <div style="font-size:0.69rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px">Procedure</div>
+      <div class="proc-row" style="flex-wrap:wrap;gap:16px 24px">
+
+        <!-- MRI -->
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:600;cursor:pointer">
+          <input type="checkbox" id="proc-mri" onchange="onProcMri(this.checked)"> MRI
+        </label>
+        <div id="proc-mri-detail" style="display:none;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px">Region of Interest</span>
+          <select id="proc-mri-roi" style="font-size:0.82rem;padding:2px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg)">
+            <option value="">— select —</option>
+            <option>Brain</option>
+            <option>Neck</option>
+            <option>TL</option>
+          </select>
+        </div>
+
+        <!-- Surgery -->
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:600;cursor:pointer">
+          <input type="checkbox" id="proc-surg" onchange="onProcSurg(this.checked)"> Surgery
+        </label>
+        <div id="proc-surg-detail" style="display:none;align-items:center;gap:16px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:600;cursor:pointer">
+            <input type="radio" name="surg-type" id="surg-hemi" value="hemi" onchange="onSurgType()"> Hemi
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:600;cursor:pointer">
+            <input type="radio" name="surg-type" id="surg-vs" value="vs" onchange="onSurgType()"> Ventral slot
+          </label>
+          <div id="proc-pin-row" style="display:none;align-items:center;gap:10px">
+            <span style="font-size:0.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px">Marker Pin</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;font-weight:600;cursor:pointer"><input type="radio" name="marker-pin" value="yes"> Yes</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:0.82rem;font-weight:600;cursor:pointer"><input type="radio" name="marker-pin" value="no"> No</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ SURGICAL TIMELINE ════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Surgical Timeline</div>
+  <div class="card-body">
+    <div class="info-grid ig-4" style="margin-bottom:10px">
+      <div class="field"><label>Anesthesia Start</label><input type="text" id="tl_anes_start" placeholder="HH:MM"></div>
+      <div class="field"><label>Anesthesia Stop</label><input type="text" id="tl_anes_stop" placeholder="HH:MM"></div>
+      <div class="field"><label>Surgery Start</label><input type="text" id="tl_surg_start" placeholder="HH:MM"></div>
+      <div class="field"><label>Surgery Stop</label><input type="text" id="tl_surg_stop" placeholder="HH:MM"></div>
+    </div>
+    <div class="info-grid ig-3">
+      <div class="field"><label>Extubation Time</label><input type="text" id="tl_extubation" placeholder="HH:MM"></div>
+      <div class="field"><label>Sponge Count — Pre</label><input type="text" id="tl_sponge_pre" placeholder="#"></div>
+      <div class="field"><label>Sponge Count — Post</label><input type="text" id="tl_sponge_post" placeholder="#"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRE-PROCEDURE ═════════════════════════════════════════ -->
+<div class="card drug-card" id="card-preproc">
+  <div class="card-header">Pre-Procedure <span class="card-sub">— select preferred drugs · often already given during MRI</span><button class="filter-btn no-print" onclick="toggleFilter(this,'preproc-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table repeat-tbl" id="preproc-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:30px"></th>
+        <th style="width:19%">Drug</th>
+        <th style="width:10%">Volume</th>
+        <th style="width:12%">Dose</th>
+        <th style="width:10%">Route</th>
+        <th style="width:7%">Vol Given</th>
+        <th style="width:9%">Time Given</th>
+        <th style="width:6%">Init</th>
+        <th style="width:6%">Check</th>
+        <th style="width:9%">Repeat</th>
+        <th style="width:9%">Next Due</th>
+      </tr></thead>
+      <tbody id="preproc-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ PRE-MEDICATION ════════════════════════════════════════ -->
+<div class="card drug-card" id="card-premed">
+  <div class="card-header">Pre-Med <span class="card-sub">— select preferred drugs · often already given during MRI</span><button class="filter-btn no-print" onclick="toggleFilter(this,'premed-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table repeat-tbl" id="premed-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:30px"></th>
+        <th style="width:19%">Drug</th>
+        <th style="width:10%">Volume</th>
+        <th style="width:12%">Dose</th>
+        <th style="width:10%">Route</th>
+        <th style="width:7%">Vol Given</th>
+        <th style="width:9%">Time Given</th>
+        <th style="width:6%">Init</th>
+        <th style="width:6%">Check</th>
+        <th style="width:9%">Repeat</th>
+        <th style="width:9%">Next Due</th>
+      </tr></thead>
+      <tbody id="premed-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ INDUCTION ═════════════════════════════════════════════ -->
+<div class="card drug-card" id="card-induct">
+  <div class="card-header">Induction <span class="card-sub">— select preferred drugs · in case of surgery-only cases</span><button class="filter-btn no-print" onclick="toggleFilter(this,'induct-tbl')">Selected only</button></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="induct-tbl">
+      <thead><tr>
+        <th class="th-cb" style="width:34px"></th>
+        <th style="width:27%">Drug</th>
+        <th style="width:13%">Volume</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="induct-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ IV FLUIDS & CRI ═══════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">IV Fluids &amp; CRI</div>
+  <div class="card-body">
+
+    <div class="tog-group" style="max-width:280px;margin-bottom:10px">
+      <button class="tog-btn sp-active" id="btn-fp-first" onclick="setFluidPhase('first')">1st Hour of Surgery</button>
+      <button class="tog-btn" id="btn-fp-after" onclick="setFluidPhase('after')">After 1st Hour</button>
+    </div>
+
+    <div class="fluid-grid" id="fluid-grid"></div>
+    <div class="fluid-note" id="fluid-note"></div>
+
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table class="drug-table cri-table" id="cri-tbl">
+        <thead><tr>
+          <th class="th-cb" style="width:30px"></th>
+          <th style="width:16%">CRI</th>
+          <th style="width:14%">Dose Range</th>
+          <th style="width:9%">Run at</th>
+          <th style="width:26%">Bolus Before CRI?</th>
+          <th style="width:9%">Time</th>
+          <th style="width:7%">Init</th>
+          <th style="width:7%">Check</th>
+        </tr></thead>
+        <tbody>
+
+          <!-- Fentanyl CRI -->
+          <tr class="cri-row" id="cri-fent">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('fent',this.checked)"></td>
+            <td><div class="dname">Fentanyl CRI</div><div class="dconc">50 µg/mL</div></td>
+            <td class="dval"><span id="cr-fent">5–10 µg/kg/hr</span></td>
+            <td>
+              <input class="ti" style="width:58px" id="r-fent" placeholder="mL/hr" oninput="calcNetIVF()">
+              <div style="margin-top:4px">
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.66rem;font-weight:600;cursor:pointer;white-space:nowrap">
+                  <input type="checkbox" id="fent-undiluted-cb" onchange="toggleFentUndiluted(this.checked)" style="width:12px;height:12px"> Undiluted (50 µg/mL)
+                </label>
+                <div id="fent-undiluted-calc" style="display:none;margin-top:3px;align-items:center;gap:4px">
+                  <input type="text" id="fent-undiluted-dose" placeholder="µg/kg/hr" style="width:46px;font-size:0.7rem;border:1px solid var(--border);border-radius:4px;padding:2px 4px" oninput="calcFentUndiluted()">
+                  <span id="fent-undiluted-result" style="font-size:0.68rem;font-weight:700;color:var(--primary)">→ — mL/hr</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <label class="bolus-toggle"><input type="checkbox" onchange="toggleBolusRow('fent',this.checked)"> Give bolus first</label>
+              <div class="bolus-row" id="bolus-row-fent">
+                <input class="ti dose-input" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:3px 6px" type="text" id="bolus-dose-fent" value="5" placeholder="µg/kg" oninput="calcBolus('fent')">
+                <span class="bolus-vol" id="bolus-vol-fent">—</span>
+              </div>
+            </td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-fent" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Fentanyl CRI Prep — 24 h syringe (24 mL total, run at 1 mL/hr = 1 µg/kg/hr)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Fentanyl (50 µg/mL):</span><span class="prep-val" id="vol-fent">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-fent">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">24 mL</span></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Ketamine CRI -->
+          <tr class="cri-row" id="cri-ket">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('ket',this.checked)"></td>
+            <td><div class="dname">Ketamine CRI</div><div class="dconc">100 mg/mL</div></td>
+            <td class="dval"><span id="cr-ket">10–20 µg/kg/min</span></td>
+            <td><input class="ti" style="width:58px" id="r-ket" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td>
+              <label class="bolus-toggle"><input type="checkbox" onchange="toggleBolusRow('ket',this.checked)"> Give bolus first</label>
+              <div class="bolus-row" id="bolus-row-ket">
+                <input class="ti dose-input" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:3px 6px" type="text" id="bolus-dose-ket" value="0.5" placeholder="mg/kg" oninput="calcBolus('ket')">
+                <span class="bolus-vol" id="bolus-vol-ket">—</span>
+              </div>
+            </td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-ket" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Ketamine CRI Prep — 12 h syringe (12 mL total, run at 1 mL/hr = 2 µg/kg/min)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Ketamine (100 mg/mL):</span><span class="prep-val" id="vol-ket">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-ket">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">12 mL</span></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Fentanyl + Ketamine CRI (combined syringe) -->
+          <tr class="cri-row" id="cri-fentket">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('fentket',this.checked)"></td>
+            <td><div class="dname">Fentanyl + Ketamine CRI</div><div class="dconc">combined syringe · F 50 µg/mL + K 100 mg/mL</div></td>
+            <td class="dval"><span id="cr-fentket">Intra-op 5–10 mL/hr<br>(F 5–10 µg/kg/hr + K 10–20 µg/kg/min)</span></td>
+            <td><input class="ti" style="width:58px" id="r-fentket" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td>
+              <label class="bolus-toggle"><input type="checkbox" onchange="toggleBolusRow('fentket',this.checked)"> Give loading dose first</label>
+              <div class="bolus-row" id="bolus-row-fentket">
+                <span style="font-size:0.72rem;color:var(--muted);white-space:nowrap">F 5 µg/kg + K 0.5 mg/kg IV</span>
+                <span class="bolus-vol" id="bolus-vol-fentket">—</span>
+              </div>
+            </td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-fentket" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Fentanyl + Ketamine CRI Prep — combined 30 mL syringe (run at 1 mL/hr = Fentanyl 1 µg/kg/hr + Ketamine 2 µg/kg/min)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Fentanyl (50 µg/mL):</span><span class="prep-val" id="vol-fentket-f">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Ketamine (100 mg/mL):</span><span class="prep-val" id="vol-fentket-k">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-fentket">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">30 mL</span></div>
+                </div>
+                <div class="prep-note">Post-op taper: 3 mL/hr ×2h (F 3 / K 6) → 2 mL/hr ×6h (F 2 / K 4) → 1 mL/hr ×2h (F 1 / K 2)</div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Lidocaine CRI -->
+          <tr class="cri-row" id="cri-lido">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('lido',this.checked)"></td>
+            <td><div class="dname">Lidocaine CRI</div><div class="dconc">20 mg/mL</div><div class="feline-warn" id="lido-feline-warn">⚠ Avoid in cats — CRI toxicity risk</div></td>
+            <td class="dval"><span id="cr-lido">25–50 µg/kg/min</span></td>
+            <td><input class="ti" style="width:58px" id="r-lido" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td>
+              <label class="bolus-toggle"><input type="checkbox" onchange="toggleBolusRow('lido',this.checked)"> Give bolus first</label>
+              <div class="bolus-row" id="bolus-row-lido">
+                <input class="ti dose-input" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:3px 6px" type="text" id="bolus-dose-lido" value="2" placeholder="mg/kg" oninput="calcBolus('lido')">
+                <span class="bolus-vol" id="bolus-vol-lido">—</span>
+              </div>
+            </td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-lido" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Lidocaine CRI Prep — 24 h syringe (24 mL total, run at 1 mL/hr = 25 µg/kg/hr ref.)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Lidocaine (20 mg/mL):</span><span class="prep-val" id="vol-lido">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-lido">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">24 mL</span></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Dexdomitor CRI -->
+          <tr class="cri-row" id="cri-dex">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('dex',this.checked)"></td>
+            <td><div class="dname">Dexdomitor CRI</div><div class="dconc">0.5 mg/mL</div></td>
+            <td class="dval"><span id="cr-dex">1–3 µg/kg/hr</span></td>
+            <td><input class="ti" style="width:58px" id="r-dex" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td>
+              <label class="bolus-toggle"><input type="checkbox" onchange="toggleBolusRow('dex',this.checked)"> Give bolus first</label>
+              <div class="bolus-row" id="bolus-row-dex">
+                <input class="ti dose-input" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:3px 6px" type="text" id="bolus-dose-dex" value="2" placeholder="µg/kg" oninput="calcBolus('dex')">
+                <span class="bolus-vol" id="bolus-vol-dex">—</span>
+              </div>
+            </td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-dex" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Dexdomitor CRI Prep — 24 h syringe (24 mL total, run at 1 mL/hr = 1 µg/kg/hr)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Dexdomitor (0.5 mg/mL):</span><span class="prep-val" id="vol-dex">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-dex">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">24 mL</span></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Metoclopramide CRI -->
+          <tr class="cri-row" id="cri-meto">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('meto',this.checked)"></td>
+            <td><div class="dname">Metoclopramide CRI</div><div class="dconc">5 mg/mL</div></td>
+            <td class="dval"><span id="cr-meto">2 mg/kg/day</span></td>
+            <td><input class="ti" style="width:58px" id="r-meto" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td><span class="dnote">No bolus — start CRI directly</span></td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+
+          <!-- Dobutamine CRI -->
+          <tr class="cri-row" id="cri-dobut">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('dobut',this.checked)"></td>
+            <td><div class="dname">Dobutamine CRI</div><div class="dconc">12.5 mg/mL</div></td>
+            <td class="dval"><span id="cr-dobut">ref. 2 µg/kg/min</span></td>
+            <td><input class="ti" style="width:58px" id="r-dobut" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td><span class="dnote">Inotrope — not bolused</span></td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-dobut" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Dobutamine CRI Prep — 12 h syringe (12 mL total, run at 1 mL/hr = 2 µg/kg/min)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Dobutamine (12.5 mg/mL):</span><span class="prep-val" id="vol-dobut">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-dobut">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">12 mL</span></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Dopamine CRI -->
+          <tr class="cri-row" id="cri-dopa">
+            <td><input type="checkbox" class="dcb" onchange="toggleCri('dopa',this.checked)"></td>
+            <td><div class="dname">Dopamine CRI</div><div class="dconc">40 mg/mL</div></td>
+            <td class="dval"><span id="cr-dopa">ref. 2 µg/kg/min</span></td>
+            <td><input class="ti" style="width:58px" id="r-dopa" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+            <td><span class="dnote">Vasopressor — not bolused</span></td>
+            <td><input class="ti t-time" placeholder="time"></td>
+            <td><input class="ti t-init" placeholder="init"></td>
+            <td><input class="ti t-check" placeholder="check"></td>
+          </tr>
+          <tr class="prep-row" id="prep-dopa" style="display:none">
+            <td></td>
+            <td colspan="7">
+              <div class="prep-box">
+                <span class="prep-title">⏲ Dopamine CRI Prep — 12 h syringe (12 mL total, run at 1 mL/hr = 2 µg/kg/min)</span>
+                <div class="prep-steps">
+                  <div class="prep-step"><span class="prep-label">Dopamine (40 mg/mL):</span><span class="prep-val" id="vol-dopa">—</span></div>
+                  <div class="prep-step"><span class="prep-label">0.9% NaCl to add:</span><span class="prep-val" id="nacl-dopa">—</span></div>
+                  <div class="prep-step"><span class="prep-label">Total syringe:</span><span class="prep-val">12 mL</span></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ivf-summary" id="ivf-summary">Enter weight above to calculate fluid rate.</div>
+
+  </div>
+</div>
+
+<!-- ══ ANTIBIOTICS & NSAID ═══════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Antibiotics &amp; NSAID <span class="card-sub">— intra-op &amp; post-op, for anesthesia report</span></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="abxnsaid-tbl">
+      <thead><tr>
+        <th style="width:27%">Drug</th>
+        <th style="width:22%">Dose</th>
+        <th style="width:18%">Route</th>
+        <th style="width:12%">Time</th>
+      </tr></thead>
+      <tbody id="abxnsaid-body">
+        <tr><td><div class="dname">Convenia</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option>IV</option><option>IV slow</option><option selected>SC</option><option>IM</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Enrofloxacin</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Ondansetron</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Unasyn</div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Carprofen <span class="dnote">NSAID</span></div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Meloxicam <span class="dnote">NSAID</span></div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>SC</option><option>IV</option><option>IV slow</option><option>IM</option><option>OTM</option><option>CRI</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+        <tr><td><div class="dname">Onsior <span class="dnote">NSAID</span></div></td><td><input class="dose-input" type="text" placeholder="dose"></td><td class="droute"><select class="route-sel"><option selected>PO</option><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option></select></td><td><input class="ti t-time" placeholder="time"></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="fluid-note" style="padding:0 16px 12px">Cefazolin is tracked in Pre-Procedure above (repeat-dosed intra-op) and is included in the report automatically.</div>
+</div>
+
+<!-- ══ ADDITIONAL / AS-NEEDED MEDICATIONS ═══════════════════════ -->
+<div class="card">
+  <div class="card-header">Additional / As-Needed Medications <span class="card-sub">— any extra drug given not listed above (e.g. Antisedan, repeat boluses)</span></div>
+  <div class="tbl-wrap">
+    <table class="drug-table" id="extra-tbl">
+      <thead><tr>
+        <th style="width:27%">Drug</th>
+        <th style="width:18%">Dose</th>
+        <th style="width:14%">Route</th>
+        <th style="width:9%">Vol Given</th>
+        <th style="width:9%">Time</th>
+        <th style="width:7%">Init</th>
+        <th style="width:7%">Check</th>
+      </tr></thead>
+      <tbody id="extra-body">
+        <tr>
+          <td><input class="dose-input" type="text" placeholder="Drug name" style="font-weight:600"></td>
+          <td><input class="dose-input" type="text" placeholder="dose"></td>
+          <td class="droute"><select class="route-sel"><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td>
+          <td><input class="ti t-vol" placeholder="mL"></td>
+          <td><input class="ti t-time" placeholder="time"></td>
+          <td><input class="ti t-init" placeholder="init"></td>
+          <td><input class="ti t-check" placeholder="check"></td>
+        </tr>
+        <tr>
+          <td><input class="dose-input" type="text" placeholder="Drug name" style="font-weight:600"></td>
+          <td><input class="dose-input" type="text" placeholder="dose"></td>
+          <td class="droute"><select class="route-sel"><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td>
+          <td><input class="ti t-vol" placeholder="mL"></td>
+          <td><input class="ti t-time" placeholder="time"></td>
+          <td><input class="ti t-init" placeholder="init"></td>
+          <td><input class="ti t-check" placeholder="check"></td>
+        </tr>
+        <tr>
+          <td><input class="dose-input" type="text" placeholder="Drug name" style="font-weight:600"></td>
+          <td><input class="dose-input" type="text" placeholder="dose"></td>
+          <td class="droute"><select class="route-sel"><option>IV</option><option>IV slow</option><option>IM</option><option>SC</option><option>OTM</option><option>CRI</option></select></td>
+          <td><input class="ti t-vol" placeholder="mL"></td>
+          <td><input class="ti t-time" placeholder="time"></td>
+          <td><input class="ti t-init" placeholder="init"></td>
+          <td><input class="ti t-check" placeholder="check"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ ANESTHESIA REPORT ══════════════════════════════════════ -->
+<div class="card">
+  <div class="card-header">Anesthesia Report</div>
+  <div class="card-body">
+    <div class="info-grid ig-2" style="margin-bottom:10px">
+      <div class="field">
+        <label>Assessment of Patient Response to Anesthesia</label>
+        <select id="rpt-assess-sel" onchange="if(this.value)document.getElementById('rpt-assess-text').value=this.value;">
+          <option value="">— choose a preset —</option>
+          <option value="Unremarkable; adequate">Unremarkable; adequate</option>
+          <option value="Difficult to maintain consistent plane">Difficult to maintain consistent plane</option>
+          <option value="Very sensitive to anesthesia">Very sensitive to anesthesia</option>
+        </select>
+        <textarea id="rpt-assess-text" rows="2" style="width:100%;margin-top:6px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="Assessment notes…"></textarea>
+      </div>
+      <div class="field">
+        <label>Patient Recovery</label>
+        <select id="rpt-recovery-sel" onchange="if(this.value)document.getElementById('rpt-recovery-text').value=this.value;">
+          <option value="">— choose a preset —</option>
+          <option value="Patient recovered quickly and without complications">Patient recovered quickly and without complications</option>
+          <option value="Patient recovered rapidly and dysphoric">Patient recovered rapidly and dysphoric</option>
+          <option value="Patient recovered slowly and hypothermic">Patient recovered slowly and hypothermic</option>
+        </select>
+        <textarea id="rpt-recovery-text" rows="2" style="width:100%;margin-top:6px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;font-family:inherit;resize:vertical" placeholder="Recovery notes…"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px" class="no-print">
+      <button class="btn btn-primary" onclick="generateAnesthesiaReport()">📝 Generate Report</button>
+      <button class="btn" id="rpt-copy-btn" style="background:var(--section-bg);color:var(--primary)" onclick="copyAnesthesiaReport()">📋 Copy Report</button>
+    </div>
+    <textarea id="rpt-output" rows="18" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;resize:vertical" placeholder="Click “Generate Report” to build the anesthesia report from the data entered above…"></textarea>
+  </div>
+</div>
+
+<!-- ══ ATTENDING APPROVAL ════════════════════════════════════ -->
+<div class="approval">
+  <label>Attending Veterinarian — Drug Sheet Approval:</label>
+  <input type="text" id="attending-sig" placeholder="Signature / initials">
+  <label style="margin-left:12px">Time:</label>
+  <input type="text" id="attending-time" placeholder="Time" style="width:90px;flex:none">
+</div>
+
+</div><!-- /container -->
+
+<script>
+'use strict';
+
+// ══ Drug database ═════════════════════════════════════════════════════════
+// Pre-Procedure / Pre-Med / Induction share the same list across species for
+// this sheet (no species-specific dosing differences were specified for
+// surgery, except Acepromazine's max-dose cap, carried over from the MRI sheet).
+
+const DB = {
+  canine: {
+    preproc: [
+      { id:'pp_mar',   name:'Maropitant (Cerenia)', conc:'10 mg/mL',  dose:'1 mg/kg',  mLpkg:0.1,  route:'SC / IV', repeatDefaultHrs:24 },
+      { id:'pp_panto', name:'Pantoprazole',         conc:'4 mg/mL',   dose:'1 mg/kg',  mLpkg:0.25, route:'IV',      repeatDefaultHrs:12, note:'Reconstitute: add 10 mL 0.9% NaCl to vial → 4 mg/mL' },
+      { id:'pp_cefa',  name:'Cefazolin',            conc:'100 mg/mL', dose:'22 mg/kg', mLpkg:0.22, route:'IV slow', repeatDefaultHrs:1.5, note:'Prep: 1 g vial + 9.5 mL 0.9% NaCl, or 10 g vial + 96 mL 0.9% NaCl → 100 mg/mL. Pre-incision antibiotic, repeat q90min intra-op.' },
+      { id:'pp_add',   name:'', custom:true, route:'IV' },
+    ],
+    premed: [
+      { id:'pm_meth',  name:'Methadone',             conc:'10 mg/mL',        dose:'0.1–0.2 mg/kg',   mLpkgL:0.01,  mLpkgH:0.02, route:'IV', repeatDefaultHrs:4 },
+      { id:'pm_butor', name:'Butorphanol',           conc:'10 mg/mL',        dose:'0.2–0.4 mg/kg',   mLpkgL:0.02,  mLpkgH:0.04, route:'IV', repeatDefaultHrs:null },
+      { id:'pm_fen',   name:'Fentanyl',             conc:'50 µg/mL',        dose:'10 µg/kg',        mLpkg:0.2,           route:'IV / IM', repeatDefaultHrs:null },
+      { id:'pm_mid',   name:'Midazolam',            conc:'5 mg/mL',         dose:'0.5 mg/kg',       mLpkg:0.1,           route:'IV / IM', repeatPRN:true },
+      { id:'pm_dia',   name:'Diazepam / Valium',   conc:'5 mg/mL',         dose:'0.5 mg/kg',       mLpkg:0.1,           route:'IV only', repeatPRN:true },
+      { id:'pm_dex',   name:'Dexmedetomidine',      conc:'500 µg/mL',       dose:'1–5 µg/kg',       mLpkgL:0.002, mLpkgH:0.01, route:'IV / IM', repeatPRN:true },
+      { id:'pm_ace',   name:'Acepromazine',         conc:'10 mg/mL',        dose:'0.025 mg/kg',     mLpkg:0.0025,        route:'IM / SC',   note:'Max 3 mg total', cap:{ maxMg:3, concMgML:10 }, repeatDefaultHrs:12 },
+    ],
+    induct: [
+      { id:'in_prop',  name:'Propofol',             conc:'10 mg/mL',        dose:'3–6 mg/kg',       mLpkgL:0.3,   mLpkgH:0.6,  route:'IV slow',  note:'Titrate to effect' },
+      { id:'in_alf',   name:'Alfaxalone',           conc:'10 mg/mL',        dose:'2–3 mg/kg',       mLpkgL:0.2,   mLpkgH:0.3,  route:'IV slow' },
+      { id:'in_ket',   name:'Ketamine',             conc:'100 mg/mL',       dose:'5–10 mg/kg',      mLpkgL:0.05,  mLpkgH:0.1,  route:'IV / IM' },
+      { id:'in_eto',   name:'Etomidate',            conc:'2 mg/mL',         dose:'0.5–2.0 mg/kg',   mLpkgL:0.25,  mLpkgH:1.0,  route:'IV',       note:'Preferred for cardiac cases' },
+    ],
+    fluids: { ratePkg1:10, ratePkgAfter:5, crystB:10, hetaB:5, note:'↓ rate and bolus by 50% for patients with cardiac disease' },
+  },
+
+  feline: {
+    preproc: [
+      { id:'pp_mar',   name:'Maropitant (Cerenia)', conc:'10 mg/mL',  dose:'1 mg/kg',  mLpkg:0.1,  route:'SC / IV', repeatDefaultHrs:24 },
+      { id:'pp_panto', name:'Pantoprazole',         conc:'4 mg/mL',   dose:'1 mg/kg',  mLpkg:0.25, route:'IV',      repeatDefaultHrs:12, note:'Reconstitute: add 10 mL 0.9% NaCl to vial → 4 mg/mL' },
+      { id:'pp_cefa',  name:'Cefazolin',            conc:'100 mg/mL', dose:'22 mg/kg', mLpkg:0.22, route:'IV slow', repeatDefaultHrs:1.5, note:'Prep: 1 g vial + 9.5 mL 0.9% NaCl, or 10 g vial + 96 mL 0.9% NaCl → 100 mg/mL. Pre-incision antibiotic, repeat q90min intra-op.' },
+      { id:'pp_add',   name:'', custom:true, route:'IV' },
+    ],
+    premed: [
+      { id:'pm_meth',  name:'Methadone',             conc:'10 mg/mL',        dose:'0.1–0.2 mg/kg',   mLpkgL:0.01,  mLpkgH:0.02, route:'IV', repeatDefaultHrs:4 },
+      { id:'pm_butor', name:'Butorphanol',           conc:'10 mg/mL',        dose:'0.2–0.4 mg/kg',   mLpkgL:0.02,  mLpkgH:0.04, route:'IV', repeatDefaultHrs:null },
+      { id:'pm_fen',   name:'Fentanyl',             conc:'50 µg/mL',        dose:'10 µg/kg',        mLpkg:0.2,           route:'IV / IM', repeatDefaultHrs:null },
+      { id:'pm_mid',   name:'Midazolam',            conc:'5 mg/mL',         dose:'0.5 mg/kg',       mLpkg:0.1,           route:'IV / IM', repeatPRN:true },
+      { id:'pm_dex',   name:'Dexmedetomidine',      conc:'500 µg/mL',       dose:'5–20 µg/kg',      mLpkgL:0.01, mLpkgH:0.04, route:'IV / IM', repeatPRN:true },
+      { id:'pm_ace',   name:'Acepromazine',         conc:'10 mg/mL',        dose:'0.025 mg/kg',     mLpkg:0.0025,        route:'IM / SC',   note:'Max 1 mg; caution in cardiac disease', cap:{ maxMg:1, concMgML:10 }, repeatDefaultHrs:12 },
+    ],
+    induct: [
+      { id:'in_prop',  name:'Propofol',             conc:'10 mg/mL',        dose:'3–6 mg/kg',       mLpkgL:0.3,  mLpkgH:0.6,  route:'IV slow',  note:'Titrate to effect' },
+      { id:'in_alf',   name:'Alfaxalone',           conc:'10 mg/mL',        dose:'3–5 mg/kg',       mLpkgL:0.3,  mLpkgH:0.5,  route:'IV slow' },
+      { id:'in_ket',   name:'Ketamine',             conc:'100 mg/mL',       dose:'5–10 mg/kg',      mLpkgL:0.05, mLpkgH:0.1,  route:'IV / IM' },
+      { id:'in_eto',   name:'Etomidate',            conc:'2 mg/mL',         dose:'0.5–2.0 mg/kg',   mLpkgL:0.25, mLpkgH:1.0,  route:'IV',       note:'Preferred for cardiac cases' },
+    ],
+    fluids: { ratePkg1:5, ratePkgAfter:3, crystB:10, hetaB:5, note:'↓ rate and bolus by 50% for patients with cardiac disease' },
+  }
+};
+
+
+// ══ State ═════════════════════════════════════════════════════════════════
+
+let species = 'canine';
+let weight  = 0;
+let fluidPhase = 'first'; // 'first' hour vs 'after' first hour of surgery
+const sel   = {};   // drugId → boolean (checked state)
+
+// ══ Calculation helpers ═══════════════════════════════════════════════════
+
+const f2 = n => n.toFixed(2);
+const f3 = n => n.toFixed(3);
+
+function st(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+function renderVolume(d, w) {
+  if (!w) return '<span style="color:var(--muted)">—</span>';
+
+  if (d.cap) {
+    const mgTotal  = w * d.mLpkg * d.cap.concMgML;
+    const mgCapped = Math.min(mgTotal, d.cap.maxMg);
+    const mL       = mgCapped / d.cap.concMgML;
+    const capped   = mgTotal > d.cap.maxMg;
+    return `<strong>${f2(mL)}</strong> <span class="ml-u">mL</span>` +
+           (capped ? `<br><span class="dnote">↑ capped at ${d.cap.maxMg} mg</span>` : '');
+  }
+
+  if (d.mLpkg !== undefined) {
+    const mL = d.mLpkg * w;
+    return `<strong>${f2(mL)}</strong> <span class="ml-u">mL</span>`;
+  }
+
+  return `<span class="ml-lo">${f2(d.mLpkgL * w)}</span> – <span class="ml-hi">${f2(d.mLpkgH * w)}</span> <span class="ml-u">mL</span>`;
+}
+
+function etTube(w, sp) {
+  if (sp === 'feline') return '3.0 – 4.0 mm';
+  if (w < 2.5)  return '3.0 mm';
+  if (w < 5)    return '4.0 – 5.0 mm';
+  if (w < 10)   return '5.0 – 7.0 mm';
+  if (w < 20)   return '7.0 – 9.0 mm';
+  if (w < 30)   return '9.0 – 11.0 mm';
+  if (w < 45)   return '11.0 – 13.0 mm';
+  return '13.0 – 16.0 mm';
+}
+
+const ROUTES = ['IV','IV slow','IM','SC','OTM','CRI'];
+function primaryRoute(r) {
+  if (!r) return 'IV';
+  if (ROUTES.includes(r)) return r;
+  const first = r.split(/[\s,/]+/)[0];
+  return ROUTES.includes(first) ? first : 'IV';
+}
+function routeSel(def) {
+  const primary = primaryRoute(def);
+  const opts = ROUTES.map(r => `<option${r === primary ? ' selected' : ''}>${r}</option>`).join('');
+  return `<select class="route-sel">${opts}</select>`;
+}
+
+// ══ Table builders ════════════════════════════════════════════════════════
+
+function repeatCellsHTML(d) {
+  if (d.repeatPRN) {
+    return `<td><span class="prn-tag">PRN</span></td><td><span class="due-disp" style="color:var(--muted)">Reassess</span></td>`;
+  }
+  const val = (d.repeatDefaultHrs != null) ? d.repeatDefaultHrs : '';
+  return `<td><div class="rep-wrap"><input type="number" step="0.5" min="0" class="ti" id="rep-${d.id}" value="${val}" oninput="onTimeOrRepeatChange('${d.id}')"><span class="rep-unit">hr</span></div></td>
+          <td><span class="due-disp" id="due-${d.id}">—</span></td>`;
+}
+
+function buildSelectTable(bodyId, drugs, opts) {
+  opts = opts || {};
+  const repeat = !!opts.repeat;
+
+  document.getElementById(bodyId).innerHTML = drugs.map(d => {
+    const checked = !!sel[d.id];
+    const dangerCls = d.danger ? ' danger' : '';
+    const timeCell = repeat
+      ? `<input type="time" class="ti" id="time-${d.id}" oninput="onTimeOrRepeatChange('${d.id}')">`
+      : `<input class="ti t-time" placeholder="time">`;
+
+    if (d.custom) {
+      return `<tr class="${checked ? 'sel' : ''}" id="row-${d.id}">
+        <td><input type="checkbox" class="dcb" data-id="${d.id}" ${checked ? 'checked' : ''} onchange="toggleDrug(this)"></td>
+        <td><input class="dose-input" type="text" placeholder="Add medication…" style="font-weight:600" oninput="onCustomNameInput('${d.id}',this.value)"></td>
+        <td class="mlval"><span style="color:var(--muted)">—</span></td>
+        <td class="dval"><input class="dose-input" type="text" placeholder="dose"></td>
+        <td class="droute">${routeSel(d.route)}</td>
+        <td><input class="ti t-vol" placeholder="mL"></td>
+        <td>${timeCell}</td>
+        <td><input class="ti t-init" placeholder="init"></td>
+        <td><input class="ti t-check" placeholder="check"></td>
+        ${repeat ? repeatCellsHTML(d) : ''}
+      </tr>`;
+    }
+
+    return `<tr class="${checked ? 'sel' : ''}${dangerCls}" id="row-${d.id}">
+      <td><input type="checkbox" class="dcb" data-id="${d.id}" ${checked ? 'checked' : ''} onchange="toggleDrug(this)"></td>
+      <td><div class="dname">${d.name}</div><div class="dconc">${d.conc}</div></td>
+      <td class="mlval" id="ml-${d.id}">${renderVolume(d, weight)}</td>
+      <td class="dval">
+        <input class="dose-input" id="dose-${d.id}" type="text" placeholder="${d.dose}" oninput="onDoseInput('${d.id}',this.value)">
+        ${d.note ? `<span class="dnote${d.danger ? ' danger' : ''}">${d.note}</span>` : ''}
+      </td>
+      <td class="droute">${routeSel(d.route)}</td>
+      <td><input class="ti t-vol" placeholder="mL"></td>
+      <td>${timeCell}</td>
+      <td><input class="ti t-init" placeholder="init"></td>
+      <td><input class="ti t-check" placeholder="check"></td>
+      ${repeat ? repeatCellsHTML(d) : ''}
+    </tr>`;
+  }).join('');
+}
+
+function onCustomNameInput(id, val) {
+  const d = findDrug(id);
+  if (d) d.name = val;
+}
+
+function currentRatePkg() {
+  const fl = DB[species].fluids;
+  return fluidPhase === 'first' ? fl.ratePkg1 : fl.ratePkgAfter;
+}
+
+function setFluidPhase(p) {
+  fluidPhase = p;
+  document.getElementById('btn-fp-first').classList.toggle('sp-active', p === 'first');
+  document.getElementById('btn-fp-after').classList.toggle('sp-active', p === 'after');
+  buildFluids();
+  updateVolumeCells();
+  calcNetIVF();
+}
+
+function buildFluids() {
+  const fl = DB[species].fluids;
+  const w  = weight;
+  const ratePkg = currentRatePkg();
+  const rate   = w > 0 ? f2(ratePkg * w) : '—';
+  const cryst  = w > 0 ? f2(fl.crystB * w) : '—';
+  const heta   = w > 0 ? f2(fl.hetaB * w) : '—';
+  const rNum   = w > 0 ? ratePkg * w : 0;
+  const macro  = w > 0 ? f2(rNum * 10 / 360) : '—';
+  const phaseLbl = fluidPhase === 'first' ? '1st hr' : 'after 1st hr';
+
+  document.getElementById('fluid-grid').innerHTML = `
+    <div class="fi"><div class="fi-lbl">Surgical Fluid Rate</div><div class="fi-val">${rate} <span style="font-size:0.78rem">mL/hr</span></div><div class="fi-sub">${ratePkg} mL/kg/hr (${phaseLbl}) · 1st hr ${fl.ratePkg1} → after ${fl.ratePkgAfter} mL/kg/hr</div></div>
+    <div class="fi"><div class="fi-lbl">Crystalloid Bolus</div><div class="fi-val">${cryst} <span style="font-size:0.78rem">mL</span></div><div class="fi-sub">${fl.crystB} mL/kg</div></div>
+    <div class="fi"><div class="fi-lbl">Hetastarch Bolus</div><div class="fi-val">${heta} <span style="font-size:0.78rem">mL</span></div><div class="fi-sub">${fl.hetaB} mL/kg</div></div>
+    <div class="fi"><div class="fi-lbl">Macrodrip (10 gtt/mL)</div><div class="fi-val">${macro} <span style="font-size:0.78rem">gtt/10 s</span></div><div class="fi-sub">at ${ratePkg} mL/kg/hr</div></div>`;
+  document.getElementById('fluid-note').textContent = fl.note + ' Total fluids (maintenance + all CRIs) must not exceed the surgical rate above.';
+}
+
+// ══ Update helpers ════════════════════════════════════════════════════════
+
+function findDrug(id) {
+  return [...DB[species].preproc, ...DB[species].premed, ...DB[species].induct].find(d => d.id === id);
+}
+
+function parseDoseLow(str) {
+  const m = str.match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function onDoseInput(id, val) {
+  const d = findDrug(id);
+  if (!d) return;
+  const el = document.getElementById('ml-' + id);
+  if (!el) return;
+  const num = parseFloat(val);
+  if (!isNaN(num) && num > 0 && weight > 0) {
+    const refMlpkg = d.mLpkg !== undefined ? d.mLpkg : d.mLpkgL;
+    const refDose  = parseDoseLow(d.dose);
+    if (refMlpkg != null && refDose) {
+      const mL = num * (refMlpkg / refDose) * weight;
+      el.innerHTML = `<strong>${f2(mL)}</strong> <span class="ml-u">mL</span>`;
+    }
+  } else {
+    el.innerHTML = renderVolume(d, weight);
+  }
+}
+
+function updateVolumeCells() {
+  [...DB[species].preproc, ...DB[species].premed, ...DB[species].induct]
+    .forEach(d => {
+      const el = document.getElementById('ml-' + d.id);
+      if (!el) return;
+      const inp = document.getElementById('dose-' + d.id);
+      if (inp && inp.value) {
+        onDoseInput(d.id, inp.value);
+      } else {
+        el.innerHTML = renderVolume(d, weight);
+      }
+    });
+
+  const etEl = document.getElementById('et-display');
+  etEl.placeholder = weight > 0 ? etTube(weight, species) : '—';
+
+  document.getElementById('rate-display').textContent = weight > 0
+    ? f2(currentRatePkg() * weight) + ' mL/hr' : '—';
+
+  buildFluids();
+}
+
+// ══ Repeat / Next-Due tracking ════════════════════════════════════════════
+
+function addHoursToTime(hhmm, hours) {
+  const parts = hhmm.split(':').map(Number);
+  if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+  let totalMin = parts[0] * 60 + parts[1] + Math.round(hours * 60);
+  totalMin = ((totalMin % 1440) + 1440) % 1440;
+  const hh = Math.floor(totalMin / 60), mm = totalMin % 60;
+  return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+}
+
+function onTimeOrRepeatChange(id) {
+  const timeEl = document.getElementById('time-' + id);
+  const repEl  = document.getElementById('rep-' + id);
+  const dueEl  = document.getElementById('due-' + id);
+  if (!timeEl || !repEl || !dueEl) return;
+  const t = timeEl.value;
+  const hrs = parseFloat(repEl.value);
+  if (!t || isNaN(hrs) || hrs <= 0) {
+    dueEl.textContent = '—';
+    dueEl.classList.remove('due-alert');
+    delete dueEl.dataset.due;
+    return;
+  }
+  const due = addHoursToTime(t, hrs);
+  dueEl.textContent = due;
+  dueEl.dataset.due = due;
+  checkOverdueEl(dueEl);
+}
+
+function checkOverdueEl(el) {
+  const dueStr = el.dataset.due;
+  if (!dueStr) return;
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const [dh, dm] = dueStr.split(':').map(Number);
+  const dueMin = dh * 60 + dm;
+  el.classList.toggle('due-alert', nowMin >= dueMin);
+}
+
+setInterval(() => {
+  document.querySelectorAll('.due-disp[data-due]').forEach(checkOverdueEl);
+}, 60000);
+
+// ══ CRI calculations ══════════════════════════════════════════════════════
+
+// Shared prep math: total amount over `hours` at the reference dose rate,
+// divided by concentration (per mL, matching dose-rate units) → drug volume;
+// remaining volume to fill the syringe (== hours, since ref. rate is 1 mL/hr) is saline.
+function criPrep(w, hours, concPerML, doseRatePerMin, doseRatePerHr) {
+  const ratePerHr = (doseRatePerHr != null) ? doseRatePerHr : doseRatePerMin * 60;
+  const totalAmt  = hours * w * ratePerHr;
+  const volumeML  = totalAmt / concPerML;
+  const salineML  = hours - volumeML;
+  return { volumeML, salineML };
+}
+
+function setPrep(key, res, syringeVol) {
+  st('vol-' + key, f2(res.volumeML) + ' mL');
+  st('nacl-' + key, res.salineML >= 0
+    ? f2(res.salineML) + ' mL'
+    : `<span style="color:var(--red)">exceeds ${syringeVol} mL — use larger syringe</span>`);
+}
+
+function updateCri() {
+  const w = weight;
+
+  if (w > 0) {
+    st('cr-fent', f2(w * 5) + '–' + f2(w * 10) + ' µg/hr');
+    st('cr-ket',  f2(w * 10) + '–' + f2(w * 20) + ' µg/min');
+    st('cr-lido', f2(w * 25) + '–' + f2(w * 50) + ' µg/min');
+    st('cr-dex',  f2(w * 1) + '–' + f2(w * 3) + ' µg/hr');
+    st('cr-meto', f2(w * 2 / 24 / 5) + ' mL/hr <small style="color:var(--muted)">(5 mg/mL)</small>');
+    st('cr-dobut', f3(w * 2 * 60 / 12500) + ' mL/hr <small style="color:var(--muted)">at ref. 2 µg/kg/min</small>');
+    st('cr-dopa',  f3(w * 2 * 60 / 40000) + ' mL/hr <small style="color:var(--muted)">at ref. 2 µg/kg/min</small>');
+
+    document.getElementById('r-meto').placeholder = f2(w * 2 / 24 / 5) + ' mL/hr';
+
+    setPrep('fent',  criPrep(w, 24, 50,    null, 1), 24);
+    setPrep('ket',   criPrep(w, 12, 100000, 2, null), 12);
+    setPrep('lido',  criPrep(w, 24, 20000,  null, 25), 24);
+    setPrep('dex',   criPrep(w, 24, 500,    null, 1), 24);
+    setPrep('dobut', criPrep(w, 12, 12500,  2, null), 12);
+    setPrep('dopa',  criPrep(w, 12, 40000,  2, null), 12);
+
+    // Combined Fentanyl + Ketamine CRI — single 30 mL syringe
+    // (1 mL/hr = fentanyl 1 µg/kg/hr + ketamine 2 µg/kg/min)
+    const fkFentVol = 0.6 * w;
+    const fkKetVol  = 0.036 * w;
+    const fkSaline  = 30 - fkFentVol - fkKetVol;
+    st('vol-fentket-f', f2(fkFentVol) + ' mL');
+    st('vol-fentket-k', f3(fkKetVol) + ' mL');
+    st('nacl-fentket', fkSaline >= 0
+      ? f2(fkSaline) + ' mL'
+      : '<span style="color:var(--red)">exceeds 30 mL — use larger syringe</span>');
+    st('bolus-vol-fentket', `F ${f2((5 * w) / 50)} mL + K ${f2((0.5 * w) / 100)} mL`);
+  } else {
+    st('cr-fent', '5–10 µg/kg/hr');
+    st('cr-ket',  '10–20 µg/kg/min');
+    st('cr-lido', '25–50 µg/kg/min');
+    st('cr-dex',  '1–3 µg/kg/hr');
+    st('cr-meto', '2 mg/kg/day');
+    st('cr-dobut', 'ref. 2 µg/kg/min');
+    st('cr-dopa',  'ref. 2 µg/kg/min');
+    document.getElementById('r-meto').placeholder = 'mL/hr';
+    ['fent','ket','lido','dex','dobut','dopa'].forEach(k => {
+      st('vol-' + k, '—'); st('nacl-' + k, '—');
+    });
+    st('vol-fentket-f', '—'); st('vol-fentket-k', '—'); st('nacl-fentket', '—'); st('bolus-vol-fentket', '—');
+  }
+
+  // Bolus recalculation (defaults pre-filled; recompute on weight/species change)
+  ['fent','ket','lido','dex'].forEach(calcBolus);
+
+  // Feline lidocaine CRI caution
+  const warn = document.getElementById('lido-feline-warn');
+  if (warn) warn.style.display = species === 'feline' ? 'block' : 'none';
+
+  calcFentUndiluted();
+  calcNetIVF();
+}
+
+// Fentanyl run undiluted at stock 50 µg/mL — skips dilution/prep entirely,
+// for patients that don't need it diluted into an extended syringe.
+function toggleFentUndiluted(checked) {
+  const calcRow = document.getElementById('fent-undiluted-calc');
+  if (calcRow) calcRow.style.display = checked ? 'flex' : 'none';
+  const prep = document.getElementById('prep-fent');
+  if (prep) {
+    const row = document.getElementById('cri-fent');
+    const isSel = row && row.classList.contains('sel');
+    prep.style.display = (isSel && !checked) ? 'table-row' : 'none';
+  }
+  calcFentUndiluted();
+}
+
+function calcFentUndiluted() {
+  const cb = document.getElementById('fent-undiluted-cb');
+  if (!cb || !cb.checked) return;
+  const doseEl = document.getElementById('fent-undiluted-dose');
+  const resultEl = document.getElementById('fent-undiluted-result');
+  const dose = parseFloat(doseEl.value);
+  if (isNaN(dose) || dose <= 0 || weight <= 0) { resultEl.textContent = '→ — mL/hr'; return; }
+  const mLhr = (dose * weight) / 50; // stock concentration, no dilution
+  resultEl.textContent = '→ ' + f2(mLhr) + ' mL/hr';
+  const runAt = document.getElementById('r-fent');
+  if (runAt) { runAt.value = f2(mLhr); calcNetIVF(); }
+}
+
+const BOLUS_CONC_MGML = { fent: 0.05, ket: 100, lido: 20, dex: 0.5 };
+const BOLUS_UNIT_MCG  = { fent: true, ket: false, lido: false, dex: true }; // true = dose entered in µg/kg
+
+function toggleBolusRow(key, checked) {
+  const row = document.getElementById('bolus-row-' + key);
+  if (row) row.style.display = checked ? 'flex' : 'none';
+  if (!checked) st('bolus-vol-' + key, '—');
+}
+
+function calcBolus(key) {
+  const inp = document.getElementById('bolus-dose-' + key);
+  const out = document.getElementById('bolus-vol-' + key);
+  if (!inp || !out) return;
+  const dose = parseFloat(inp.value);
+  if (isNaN(dose) || dose <= 0 || weight <= 0) { out.textContent = '—'; return; }
+  const concMgML = BOLUS_CONC_MGML[key];
+  const concPerUnit = BOLUS_UNIT_MCG[key] ? concMgML * 1000 : concMgML; // µg/mL or mg/mL to match dose unit
+  const mL = (dose * weight) / concPerUnit;
+  out.innerHTML = `<strong>${f2(mL)}</strong> mL`;
+}
+
+function toggleCri(key, checked) {
+  const row = document.getElementById('cri-' + key);
+  if (row) row.classList.toggle('sel', checked);
+  const prep = document.getElementById('prep-' + key);
+  if (prep) {
+    const undilutedCb = document.getElementById(key + '-undiluted-cb');
+    const suppressPrep = undilutedCb && undilutedCb.checked;
+    prep.style.display = (checked && !suppressPrep) ? 'table-row' : 'none';
+  }
+  calcNetIVF();
+}
+
+function calcNetIVF() {
+  const w  = weight;
+  const gross = w > 0 ? currentRatePkg() * w : 0;
+  const keys = ['fent','ket','fentket','lido','dex','meto','dobut','dopa'];
+  let totalCri = 0;
+  keys.forEach(k => {
+    const row = document.getElementById('cri-' + k);
+    if (!row || !row.classList.contains('sel')) return;
+    const inp = document.getElementById('r-' + k);
+    const v = inp ? parseFloat(inp.value) : NaN;
+    if (!isNaN(v) && v > 0) totalCri += v;
+  });
+
+  const summary = document.getElementById('ivf-summary');
+  if (!summary) return;
+  if (w <= 0) {
+    summary.textContent = 'Enter weight above to calculate fluid rate.';
+    return;
+  }
+  const net = gross - totalCri;
+  if (net < 0) {
+    summary.innerHTML = `<span><strong>Total IVF:</strong> ${f2(gross)} mL/hr</span><span>−</span><span><strong>Active CRIs:</strong> ${f2(totalCri)} mL/hr</span><span>=</span><span style="color:var(--red);font-weight:700">⚠ CRI exceeds fluid rate by ${f2(Math.abs(net))} mL/hr</span>`;
+  } else {
+    summary.innerHTML = `<span><strong>Total IVF:</strong> ${f2(gross)} mL/hr</span><span>−</span><span><strong>Active CRIs:</strong> ${f2(totalCri)} mL/hr</span><span>=</span><span style="color:var(--green);font-weight:700">Net crystalloid rate: ${f2(net)} mL/hr</span>`;
+  }
+}
+
+function rebuildAll() {
+  buildSelectTable('preproc-body', DB[species].preproc, { repeat: true });
+  buildSelectTable('premed-body',  DB[species].premed,  { repeat: true });
+  buildSelectTable('induct-body',  DB[species].induct);
+  updateVolumeCells();
+  updateCri();
+}
+
+// ══ Event handlers ════════════════════════════════════════════════════════
+
+function setSpecies(sp) {
+  species = sp;
+  document.getElementById('btn-canine').classList.toggle('sp-active', sp === 'canine');
+  document.getElementById('btn-feline').classList.toggle('sp-active', sp === 'feline');
+  Object.keys(sel).forEach(k => delete sel[k]);
+  rebuildAll();
+}
+
+function onWeightChange() {
+  weight = parseFloat(document.getElementById('weight').value) || 0;
+  updateVolumeCells();
+  updateCri();
+}
+
+function toggleDrug(cb) {
+  const id  = cb.dataset.id;
+  sel[id]   = cb.checked;
+  const row = document.getElementById('row-' + id);
+  if (row) row.classList.toggle('sel', cb.checked);
+}
+
+function setCPR(val) {
+  document.getElementById('btn-cpr').classList.toggle('cpr-active', val === 'CPR');
+  document.getElementById('btn-cpr').classList.remove('dnr-active');
+  document.getElementById('btn-dnr').classList.toggle('dnr-active', val === 'DNR');
+  document.getElementById('btn-dnr').classList.remove('cpr-active');
+}
+
+function toggleSec(id, show) {
+  document.getElementById(id).classList.toggle('sec-hidden', !show);
+}
+
+function onProcMri(checked) {
+  const d = document.getElementById('proc-mri-detail');
+  d.style.display = checked ? 'flex' : 'none';
+  if (!checked) document.getElementById('proc-mri-roi').value = '';
+}
+
+function onProcSurg(checked) {
+  const d = document.getElementById('proc-surg-detail');
+  d.style.display = checked ? 'flex' : 'none';
+  if (!checked) {
+    document.querySelectorAll('input[name="surg-type"]').forEach(r => r.checked = false);
+    document.getElementById('proc-pin-row').style.display = 'none';
+    document.querySelectorAll('input[name="marker-pin"]').forEach(r => r.checked = false);
+  }
+}
+
+function onSurgType() {
+  const hemi = document.getElementById('surg-hemi').checked;
+  const pin  = document.getElementById('proc-pin-row');
+  pin.style.display = hemi ? 'flex' : 'none';
+  if (!hemi) document.querySelectorAll('input[name="marker-pin"]').forEach(r => r.checked = false);
+}
+
+// ══ Filter toggle ═════════════════════════════════════════════════════════
+
+function toggleFilter(btn, tblId) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  const on = tbl.classList.toggle('filter-on');
+  btn.classList.toggle('on', on);
+  btn.textContent = on ? 'Show all' : 'Selected only';
+}
+
+// ══ Init ══════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pt_date').value = new Date().toISOString().slice(0, 10);
+  rebuildAll();
+});
+
+window.addEventListener('beforeprint', () => {
+  document.querySelectorAll('.drug-card').forEach(card => {
+    const hasSelected = card.querySelector('tr.sel');
+    card.classList.toggle('print-empty', !hasSelected);
+  });
+});
+
+window.addEventListener('afterprint', () => {
+  document.querySelectorAll('.drug-card').forEach(card => {
+    card.classList.remove('print-empty');
+  });
+});
+
+// ══ Handoff — Paste patient/anesthesia/IVC info copied from the MRI sheet ═══
+
+function sv(id, val) { const el = document.getElementById(id); if (el && val != null && val !== '') el.value = val; }
+
+function applyHandoffPaste() {
+  const status = document.getElementById('handoff-paste-status');
+  const raw = document.getElementById('handoff-paste-input').value.trim();
+  if (!raw) { status.style.color = 'var(--red)'; status.textContent = 'Paste the copied info first.'; return; }
+
+  let data;
+  try { data = JSON.parse(raw); } catch (e) {
+    status.style.color = 'var(--red)';
+    status.textContent = '⚠ Could not read that — make sure you copied from the MRI sheet.';
+    return;
+  }
+
+  sv('pt_name', data.pt_name); sv('pt_case', data.pt_case); sv('pt_dr', data.pt_dr); sv('pt_tech', data.pt_tech);
+  sv('pt_date', data.pt_date); sv('pt_asa', data.pt_asa); sv('pt_bw', data.pt_bw);
+  sv('pt_ivc', data.pt_ivc); sv('pt_cs', data.pt_cs); sv('pt_ctx', data.pt_ctx); sv('pt_ivf', data.pt_ivf); sv('pt_pain', data.pt_pain);
+  sv('vit_mm_pre', data.vit_mm); sv('vit_temp_pre', data.vit_temp_pre); sv('vit_hr_pre', data.vit_pulse_pre); sv('vit_rr_pre', data.vit_rr_pre);
+
+  if (data.species === 'canine' || data.species === 'feline') setSpecies(data.species);
+  if (data.weight) { document.getElementById('weight').value = data.weight; onWeightChange(); }
+  if (data.cpr_dnr === 'CPR' || data.cpr_dnr === 'DNR') setCPR(data.cpr_dnr);
+
+  status.style.color = 'var(--green)';
+  status.textContent = `✅ Loaded${data.pt_name ? ' — ' + data.pt_name : ''}`;
+  document.getElementById('handoff-paste-input').value = '';
+  setTimeout(() => toggleSec('handoff-paste-box', false), 1500);
+}
+
+// ══ Anesthesia Report ════════════════════════════════════════════════════
+
+function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+// Which structured drug rows belong in each report section (by row id).
+const RPT_PREMED_IDS  = ['pp_mar','pp_add','pm_meth','pm_butor','pm_fen','pm_mid','pm_dia','pm_dex','pm_ace'];
+const RPT_INDUCT_IDS  = ['in_prop','in_alf','in_ket','in_eto'];
+const RPT_INTRAOP_IDS = ['pp_panto','pp_cefa'];
+
+// Reads one drug-table row and returns {name, dose, route, time} or null if
+// there's nothing documented (no dose/volume/time recorded).
+function scrapeDrugRow(row) {
+  if (!row) return null;
+  const volEl   = row.querySelector('.t-vol');
+  const timeEl  = row.querySelector('.t-time');
+  const routeEl = row.querySelector('.route-sel');
+  const vol   = volEl  ? volEl.value.trim()  : '';
+  const time  = timeEl ? timeEl.value.trim() : '';
+  const route = routeEl ? routeEl.value : '';
+  const doseInputs = row.querySelectorAll('.dose-input');
+  const dnameEl = row.querySelector('.dname');
+  const dconcEl = row.querySelector('.dconc');
+
+  let name, dose;
+  if (dnameEl && dnameEl.textContent.trim()) {
+    name = dnameEl.textContent.trim();
+    const concStr = dconcEl ? dconcEl.textContent.trim() : '';
+    const m = concStr.match(/^([\d.]+)\s*([^\/]+)\/mL$/);
+    if (m) {
+      // Known concentration — dose is derived only from the actual volume given.
+      if (vol) {
+        const amt = parseFloat(vol) * parseFloat(m[1]);
+        dose = isNaN(amt) ? vol + ' mL' : amt.toFixed(2) + m[2].trim();
+      } else {
+        dose = '';
+      }
+    } else {
+      // No fixed concentration (e.g. antibiotics/NSAID list) — dose is free text.
+      const freeDose = doseInputs.length ? doseInputs[doseInputs.length - 1].value.trim() : '';
+      dose = freeDose || (vol ? vol + ' mL' : '');
+    }
+  } else {
+    // Fully custom row (Additional Medications): first input = name, second = dose.
+    name = doseInputs[0] ? doseInputs[0].value.trim() : '';
+    dose = doseInputs[1] ? doseInputs[1].value.trim() : (vol ? vol + ' mL' : '');
+  }
+
+  if (!name) return null;
+  if (!vol && !time && !dose) return null;
+  return { name, dose, route, time };
+}
+
+function formatDrugLine(d) {
+  return `${d.name}${d.dose ? ' ' + d.dose : ''}; route: ${d.route || '—'}; time: ${d.time || '—'}`;
+}
+
+function rptRowsFor(ids) {
+  return ids.map(id => scrapeDrugRow(document.getElementById('row-' + id))).filter(Boolean);
+}
+
+// CRI rows (Fentanyl/Ketamine/combined/Lidocaine/Dex/vasopressors) report as an ongoing rate.
+function scrapeCriLine(row) {
+  if (!row || !row.classList.contains('sel')) return null;
+  const key = row.id.replace(/^cri-/, '');
+  const rateEl = document.getElementById('r-' + key);
+  const timeEl = row.querySelector('.t-time');
+  const rate = rateEl ? rateEl.value.trim() : '';
+  const time = timeEl ? timeEl.value.trim() : '';
+  if (!rate && !time) return null;
+  const nameEl = row.querySelector('.dname');
+  const name = nameEl ? nameEl.textContent.trim() : key;
+  return `${name}${rate ? ' @ ' + rate + ' mL/hr' : ''}; route: IV; time: ${time || '—'}`;
+}
+
+function generateAnesthesiaReport() {
+  const lines = [];
+
+  lines.push('Pre-medications:');
+  const premed = rptRowsFor(RPT_PREMED_IDS);
+  if (premed.length) premed.forEach(d => lines.push(formatDrugLine(d)));
+  else lines.push('None recorded');
+  lines.push('');
+
+  lines.push('Induction:');
+  const ivcSel = document.getElementById('pt_ivc_placed');
+  const placed = !ivcSel || ivcSel.value === 'placed';
+  lines.push('IV Catheter ' + (placed ? 'placed' : 'not placed'));
+  if (placed) lines.push(`IVC size: ${gv('pt_ivc') || '—'}, location: ${gv('pt_cs') || '—'}`);
+  lines.push('');
+  rptRowsFor(RPT_INDUCT_IDS).forEach(d => lines.push(formatDrugLine(d)));
+  lines.push('');
+
+  lines.push('Maintenance Anesthesia:');
+  const etEl = document.getElementById('et-display');
+  const ett = (etEl && etEl.value.trim()) || (etEl && etEl.placeholder) || '—';
+  lines.push(`ETT size: ${ett} mm`);
+  lines.push('');
+  lines.push('Isoflurane and Oxygen (see anesthesia record for rate)');
+  lines.push('');
+
+  lines.push('Intra-Op:');
+  const fluidType = gv('pt_ivf');
+  const fluidRate = gv('pt_rate');
+  if (fluidType || fluidRate) lines.push(`${fluidType || 'IV fluids'} @ ${fluidRate || '—'} mL/hr`);
+  rptRowsFor(RPT_INTRAOP_IDS).forEach(d => lines.push(formatDrugLine(d)));
+  [...document.querySelectorAll('#abxnsaid-body tr')].map(scrapeDrugRow).filter(Boolean).forEach(d => lines.push(formatDrugLine(d)));
+  [...document.querySelectorAll('.cri-row')].map(scrapeCriLine).filter(Boolean).forEach(l => lines.push(l));
+  lines.push('');
+
+  lines.push('Medications/changes during procedure:');
+  const extra = [...document.querySelectorAll('#extra-body tr')].map(scrapeDrugRow).filter(Boolean);
+  if (extra.length) extra.forEach(d => lines.push(formatDrugLine(d)));
+  else lines.push('None');
+  lines.push('');
+
+  lines.push('Assessment of patient response to anesthesia:');
+  lines.push(gv('rpt-assess-text').trim() || '—');
+  lines.push('');
+
+  lines.push('Patient recovery:');
+  lines.push(gv('rpt-recovery-text').trim() || '—');
+
+  document.getElementById('rpt-output').value = lines.join('\n');
+}
+
+function copyAnesthesiaReport() {
+  const ta = document.getElementById('rpt-output');
+  const btn = document.getElementById('rpt-copy-btn');
+  if (!ta.value.trim()) { generateAnesthesiaReport(); }
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).catch(() => {});
+  }
+  const restore = () => { btn.textContent = '📋 Copy Report'; };
+  btn.textContent = ok ? '✅ Copied' : '⚠ Copy failed — try again';
+  setTimeout(restore, 2500);
+}
+</script>
+</body>
+</html>

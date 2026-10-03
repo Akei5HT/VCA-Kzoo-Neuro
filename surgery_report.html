@@ -183,22 +183,45 @@ header span { font-size: 0.8rem; opacity: 0.7; }
         </div>
       </div>
 
-      <div id="hemi-pin-fields" class="row row-3 mt">
-        <div class="field">
-          <label>Marker Pin Level</label>
-          <input type="text" id="hemi-pin-level" value="L4-5">
-        </div>
-        <div class="field">
-          <label>Spinous Process Clamped</label>
-          <input type="text" id="hemi-clamp" value="L4">
-        </div>
-        <div class="field">
-          <label>Foraminotomy</label>
-          <div class="toggle-group" id="hemi-foram-group">
-            <button class="toggle-btn active" onclick="toggleForam(this,'yes')">Yes</button>
-            <button class="toggle-btn" onclick="toggleForam(this,'no')">No</button>
+      <div id="hemi-pin-fields" class="mt">
+        <div class="row row-2">
+          <div class="field">
+            <label>Marker Pin</label>
+            <div class="check-group">
+              <label class="check-item"><input type="checkbox" id="hemi-pin-used" checked onchange="toggleHemiPinUsed()"> Marker pin placed</label>
+            </div>
           </div>
-          <input type="hidden" id="hemi-foram" value="yes">
+          <div class="field">
+            <label>Foraminotomy</label>
+            <div class="toggle-group" id="hemi-foram-group">
+              <button class="toggle-btn active" onclick="toggleForam(this,'yes')">Yes</button>
+              <button class="toggle-btn" onclick="toggleForam(this,'no')">No</button>
+            </div>
+            <input type="hidden" id="hemi-foram" value="yes">
+          </div>
+        </div>
+        <div id="hemi-pin-level-fields" class="row row-2 mt">
+          <div class="field">
+            <label>Marker Pin Level</label>
+            <input type="text" id="hemi-pin-level" value="L4-5">
+          </div>
+          <div class="field">
+            <label>Spinous Process Clamped</label>
+            <input type="text" id="hemi-clamp" value="L4">
+          </div>
+        </div>
+        <div id="hemi-foram-site-field" class="field mt">
+          <label>Foraminotomy Site</label>
+          <input type="text" id="hemi-foram-site" placeholder="e.g. L3-4 intervertebral foramen">
+        </div>
+        <div class="field mt">
+          <label class="check-item" style="font-weight:500;color:var(--text);cursor:pointer">
+            <input type="checkbox" id="hemi-fenestration" onchange="toggleHemiFenestration()"> Fenestration performed
+          </label>
+          <div id="hemi-fenestration-site-field" style="display:none;margin-top:8px">
+            <label>Fenestration Site(s)</label>
+            <input type="text" id="hemi-fenestration-sites" placeholder="e.g. L3-4, L4-5">
+          </div>
         </div>
       </div>
 
@@ -210,16 +233,6 @@ header span { font-size: 0.8rem; opacity: 0.7; }
         <div class="field">
           <label>Incision Over (vertebral span)</label>
           <input type="text" id="hemi-incision-over" value="L1 to L6">
-        </div>
-      </div>
-      <div class="row row-2 mt">
-        <div class="field">
-          <label>Epaxial Muscles Elevated From</label>
-          <input type="text" id="hemi-epaxial" value="L2, L3, L4, and L5 spinous processes">
-        </div>
-        <div class="field">
-          <label>Articular Facets Incised</label>
-          <input type="text" id="hemi-facets-incised" value="L2-3, L3-4, L4-5">
         </div>
       </div>
       <div class="row row-2 mt">
@@ -255,9 +268,9 @@ header span { font-size: 0.8rem; opacity: 0.7; }
         <div class="field">
           <label>SubQ Suture</label>
           <select id="hemi-subq-suture">
-            <option value="2-0 vicryl" selected>2-0 vicryl</option>
-            <option value="3-0 vicryl">3-0 vicryl</option>
-            <option value="0 vicryl">0 vicryl</option>
+            <option value="2-0 monocryl" selected>2-0 monocryl</option>
+            <option value="3-0 monocryl">3-0 monocryl</option>
+            <option value="0 monocryl">0 monocryl</option>
           </select>
         </div>
         <div class="field">
@@ -266,7 +279,8 @@ header span { font-size: 0.8rem; opacity: 0.7; }
             <option value="3-0 Ethilon in a Ford Interlocking pattern" selected>3-0 Ethilon — Ford Interlocking</option>
             <option value="2-0 Ethilon in a Ford Interlocking pattern">2-0 Ethilon — Ford Interlocking</option>
             <option value="2-0 Ethilon in a Ford Interlocking and cruciate pattern">2-0 Ethilon — Ford Interlocking + cruciate</option>
-            <option value="3-0 vicryl in an intradermal pattern and skin glue">3-0 vicryl intradermal + skin glue</option>
+            <option value="3-0 monocryl in an intradermal pattern and skin glue">3-0 monocryl intradermal + skin glue</option>
+            <option value="staples">Staples</option>
           </select>
         </div>
       </div>
@@ -459,8 +473,8 @@ header span { font-size: 0.8rem; opacity: 0.7; }
         <div class="field">
           <label>Fascia Suture</label>
           <select id="dl-fascia-suture">
-            <option value="3-0 vicryl" selected>3-0 vicryl</option>
-            <option value="2-0 vicryl">2-0 vicryl</option>
+            <option value="3-0 monocryl" selected>3-0 monocryl</option>
+            <option value="2-0 monocryl">2-0 monocryl</option>
             <option value="0 PDS">0 PDS</option>
             <option value="3-0 PDS">3-0 PDS</option>
           </select>
@@ -468,14 +482,14 @@ header span { font-size: 0.8rem; opacity: 0.7; }
         <div class="field">
           <label>SubQ Suture</label>
           <select id="dl-subq-suture">
-            <option value="3-0 vicryl" selected>3-0 vicryl</option>
-            <option value="2-0 vicryl">2-0 vicryl</option>
+            <option value="3-0 monocryl" selected>3-0 monocryl</option>
+            <option value="2-0 monocryl">2-0 monocryl</option>
           </select>
         </div>
         <div class="field">
           <label>Skin Closure</label>
           <select id="dl-skin-suture">
-            <option value="3-0 vicryl in an intradermal pattern and skin glue" selected>3-0 vicryl intradermal + skin glue</option>
+            <option value="3-0 monocryl in an intradermal pattern and skin glue" selected>3-0 monocryl intradermal + skin glue</option>
             <option value="3-0 Ethilon in a Ford Interlocking pattern">3-0 Ethilon — Ford Interlocking</option>
             <option value="3-0 Ethilon in a cruciate pattern">3-0 Ethilon — cruciate</option>
           </select>
@@ -632,6 +646,8 @@ function toggleSide(btn, groupId, value) {
 
 function toggleForam(btn, value) {
   toggleBtn(btn, 'hemi-foram-group', value);
+  const siteField = document.getElementById('hemi-foram-site-field');
+  if (siteField) siteField.style.display = value === 'yes' ? 'block' : 'none';
   updateHemiFindings();
 }
 
@@ -670,14 +686,10 @@ function autoFillHemiLevels() {
     document.getElementById('hemi-clamp').value     = lv.clamp;
     document.getElementById('hemi-incision-cm').value   = lv.icm;
     document.getElementById('hemi-incision-over').value = lv.iover;
-    document.getElementById('hemi-epaxial').value        = lv.epax;
-    document.getElementById('hemi-facets-incised').value = lv.fi;
     document.getElementById('hemi-facet-removed').value  = lv.fr;
   } else if (type === 'tl-nopin') {
     document.getElementById('hemi-incision-cm').value   = 8;
     document.getElementById('hemi-incision-over').value = lv.npi;
-    document.getElementById('hemi-epaxial').value        = lv.npe;
-    document.getElementById('hemi-facets-incised').value = lv.fr;
     document.getElementById('hemi-facet-removed').value  = lv.fr;
   }
   updateHemiFindings();
@@ -696,7 +708,7 @@ function updateHemiType() {
   htF.style.display  = 'none';
 
   if (type === 'lumbar-pin') {
-    pinF.style.display = 'grid';
+    pinF.style.display = 'block';
     disc.innerHTML = ['T13-L1','L1-2','L2-3','L3-4','L4-5','L5-6'].map((v,i) =>
       `<option value="${v}"${v==='L3-4'?' selected':''}>${v}</option>`).join('');
     fascia.value = '2-0 PDS';
@@ -711,12 +723,20 @@ function updateHemiType() {
       `<option value="${v}"${v==='T7-8'?' selected':''}>${v}</option>`).join('');
     document.getElementById('hemi-incision-cm').value    = 20;
     document.getElementById('hemi-incision-over').value  = 'T4 to T12';
-    document.getElementById('hemi-epaxial').value         = 'T4 to T11 spinous processes';
-    document.getElementById('hemi-facets-incised').value  = '';
     document.getElementById('hemi-facet-removed').value   = '';
     fascia.value = '0 PDS';
   }
   autoFillHemiLevels();
+}
+
+function toggleHemiPinUsed() {
+  const used = document.getElementById('hemi-pin-used').checked;
+  document.getElementById('hemi-pin-level-fields').style.display = used ? 'grid' : 'none';
+}
+
+function toggleHemiFenestration() {
+  const on = document.getElementById('hemi-fenestration').checked;
+  document.getElementById('hemi-fenestration-site-field').style.display = on ? 'block' : 'none';
 }
 
 function updateHemiFindings() {
@@ -777,8 +797,6 @@ function generateHemi() {
   const foram    = v('hemi-foram');
   const iCm      = v('hemi-incision-cm');
   const iOver    = v('hemi-incision-over');
-  const epax     = v('hemi-epaxial');
-  const facetsI  = v('hemi-facets-incised');
   const facetR   = v('hemi-facet-removed');
   const fascia   = v('hemi-fascia-suture');
   const subq     = v('hemi-subq-suture');
@@ -786,16 +804,22 @@ function generateHemi() {
   const findings = v('hemi-findings');
   const asstLine = asst ? ` and assisted by ${asst}` : '';
   const foramTxt = foram === 'yes' ? ' and foraminotomy' : '';
+  const skinClosureLine = /staple/i.test(skin) ? `The skin was closed with ${skin}` : `The skin was opposed with ${skin}`;
+  const routineApproach = 'A routine dorsolateral approach was performed.';
 
   const hdr = `OPERATIVE REPORT\nPatient: ${patient}\nDate: ${date}\nSurgeon: ${surgeon}${asstLine}\n`;
 
   let body = '';
 
   if (type === 'lumbar-pin') {
+    const pinUsed = document.getElementById('hemi-pin-used').checked;
     const pin   = v('hemi-pin-level');
     const clamp = v('hemi-clamp');
+    const foramSite = v('hemi-foram-site');
+    const pinLigSentence = pinUsed ? ` A spinal needle was aseptically placed in the interspinous ligament of ${pin} and confirmed with radiographs prior to surgery.` : '';
+    const clampSentence  = pinUsed ? ` Mosquito hemostats were used to clamp the ${clamp} dorsal spinous process. The marker pin was then removed.` : '';
     const foramSentence = foram === 'yes'
-      ? ' A House curette and rongeur were used to enlarge the hemilaminectomy window to perform a foraminotomy.'
+      ? ` A House curette and rongeur were used to enlarge the hemilaminectomy window to perform a foraminotomy${foramSite ? ' at ' + foramSite : ''}.`
       : '';
 
     body = `
@@ -803,13 +827,13 @@ Surgery performed: ${side} hemilaminectomy${foramTxt} performed by ${surgeon}${a
 
 Patient position: The patient was in sternal recumbency with the ${sideLo} side slightly rotated facing up.
 
-Approach: A spinal needle was aseptically placed in the interspinous ligament of ${pin} and confirmed with radiographs prior to surgery. A ${iCm} cm dorsal midline skin incision was made with #15 blade over ${iOver}, hemostasis was achieved with bipolar electrocautery. 3-0 vicryl and paper drape were used to sub-drape and cover the skin surface. Metzenbaum scissors were used to carry over the midline incision through the subcutaneous fat. Mosquito hemostats were used to clamp the ${clamp} dorsal spinous process. The marker pin was then removed. The thick lumbodorsal fascia was exposed. A #15 blade was used to make a small incision on the fascia. Mayo scissors were used to extend the fascia incision. The epaxial muscles were elevated from the ${epax} using freer periosteal elevators down to the depth of the lamina. The tendinous attachment of the multifidus muscle along the caudolateral aspect of each spinous process was released with Mayo scissors. The insertion of the epaxial muscles onto the ${sideLo} articular facets of ${facetsI} were incised using sharp dissection with bipolar electrocautery and Mayo scissors. With the articular facets exposed, Gelpi retractors were placed at the most cranial and caudal portions of the elevated muscles. The ${sideLo} ${facetR} articular facet was removed using rongeurs. A high speed burr was used to create the laminectomy defect including the cranial and caudal extent of the ${disc} disc space; the accessory process was removed. Various sizes of drill bits were used to create a laminectomy window. Once the inner cortical layer was visualized, careful drilling with intermittent assessment of inner cortical thickness was performed. House curette and nerve hook were used to dissect to the inner periosteum.${foramSentence}
+Approach:${pinLigSentence} A ${iCm} cm dorsal midline skin incision was made with #15 blade over ${iOver}, hemostasis was achieved with bipolar electrocautery. Towel clamps and sterile hand towels were used for sub-drape. Metzenbaum scissors were used to carry over the midline incision through the subcutaneous fat.${clampSentence} The thick lumbodorsal fascia was exposed. A #15 blade was used to make a small incision on the fascia. Mayo scissors were used to extend the fascia incision. ${routineApproach} The tendinous attachment of the multifidus muscle along the caudolateral aspect of each spinous process was released with Mayo scissors. With the articular facets exposed, Gelpi retractors were placed at the most cranial and caudal portions of the elevated muscles. The ${sideLo} ${facetR} articular facet was removed using rongeurs. A high speed burr was used to create the laminectomy defect including the cranial and caudal extent of the ${disc} disc space; the accessory process was removed. Various sizes of drill bits were used to create a laminectomy window. Once the inner cortical layer was visualized, careful drilling with intermittent assessment of inner cortical thickness was performed. House curette and nerve hook were used to dissect to the inner periosteum.${foramSentence}
 
 Findings: ${findings}
 
-Closure fascia: ${fascia} in a simple interrupted pattern
+Closure fascia: ${fascia} in a simple continuous pattern
 Closure subcutaneous layer: ${subq} in a simple continuous pattern with deep bites to the underlying fascia every other throw
-Closure skin: The skin was opposed with ${skin}`;
+Closure skin: ${skinClosureLine}`;
 
   } else if (type === 'tl-nopin') {
     const landmarks = v('hemi-tl-landmarks');
@@ -820,13 +844,13 @@ Surgery performed: ${side} ${disc} hemilaminectomy performed by ${surgeon}${asst
 
 Patient position: The patient was in sternal recumbency with the ${sideLo} side slightly rotated facing up.
 
-Approach: A ${iCm} cm dorsal midline skin incision was made with #15 blade over ${iOver}, hemostasis was achieved with bipolar electrocautery. 3-0 vicryl and paper drape were used to sub-drape and cover the skin surface. Metzenbaum scissors were used to carry over the midline incision through the subcutaneous fat. A new #15 blade was used to carefully incise along the ${sideLo} aspect of the dorsal spinous processes. The epaxial muscles were elevated from the ${epax} using freer periosteal elevators down to the depth of the lamina. The tendinous attachment of the multifidus muscle along the caudolateral aspect of each spinous process was released with Mayo scissors.${lmTxt} Gelpi retractors were used to retract the muscles and improve visualization. The ${sideLo} articular facets of ${facetR} were removed using rongeurs. A high speed burr was used to create the hemilaminectomy window. A House curette was used to trim the sharp edges of the window. Once the inner cortical layer was visualized, careful drilling with intermittent assessment of inner cortical thickness was performed. House curette and nerve hook were used to dissect to the inner periosteum.
+Approach: A ${iCm} cm dorsal midline skin incision was made with #15 blade over ${iOver}, hemostasis was achieved with bipolar electrocautery. Towel clamps and sterile hand towels were used for sub-drape. Metzenbaum scissors were used to carry over the midline incision through the subcutaneous fat. A new #15 blade was used to carefully incise along the ${sideLo} aspect of the dorsal spinous processes. ${routineApproach} The tendinous attachment of the multifidus muscle along the caudolateral aspect of each spinous process was released with Mayo scissors.${lmTxt} Gelpi retractors were used to retract the muscles and improve visualization. The ${sideLo} articular facets of ${facetR} were removed using rongeurs. A high speed burr was used to create the hemilaminectomy window. A House curette was used to trim the sharp edges of the window. Once the inner cortical layer was visualized, careful drilling with intermittent assessment of inner cortical thickness was performed. House curette and nerve hook were used to dissect to the inner periosteum.
 
 Findings: ${findings}
 
-Closure fascia: ${fascia} in a simple interrupted pattern
+Closure fascia: ${fascia} in a simple continuous pattern
 Closure subcutaneous layer: ${subq} in a simple continuous pattern with deep bites to the underlying fascia every other throw
-Closure skin: The skin was opposed with ${skin}`;
+Closure skin: ${skinClosureLine}`;
 
   } else if (type === 'high-thoracic') {
     const htLam = v('hemi-ht-lam') || disc;
@@ -836,14 +860,20 @@ Surgery performed: ${side} ${disc} hemilaminectomy performed by ${surgeon}${asst
 
 Patient position: The patient was in sternal recumbency with the ${sideLo} side slightly rotated facing up.
 
-Approach: A spinal needle was aseptically placed in the interspinous ligament and confirmed with radiographs prior to surgery. A ~${iCm} cm dorsal midline skin incision was made with #10 blade over ${iOver}. Hemostasis was achieved with bipolar electrocautery. 3-0 vicryl and paper drape were used to sub-drape and cover the skin surface. An incision was made in the tendinous raphe toward the ${sideLo} side. The trapezius, splenius, serratus dorsalis, and longissimus thoracis et lumborum muscles were separated from the midline by a combination of sharp and blunt dissection. The dorsal spinous processes came into view. The long spinal muscles and the multifidus muscles were elevated from the ${epax} deep down to the level of the lamina. The tendinous attachments and the muscles were released with Mayo scissors. The insertion of the epaxial muscles onto the ${sideLo} articular facets was incised using sharp dissection with bipolar electrocautery and Mayo scissors. Gelpi retractors were placed at the most cranial and caudal portions of the elevated muscles. A high speed burr was used to create a laminectomy defect at ${htLam}. Moderate sinus bleeding was addressed by the placement of small pieces of Vetspon. A House curette was used to trim the sharp edges of the window.
+Approach: A spinal needle was aseptically placed in the interspinous ligament and confirmed with radiographs prior to surgery. A ~${iCm} cm dorsal midline skin incision was made with #10 blade over ${iOver}. Hemostasis was achieved with bipolar electrocautery. Towel clamps and sterile hand towels were used for sub-drape. An incision was made in the tendinous raphe toward the ${sideLo} side. The trapezius, splenius, serratus dorsalis, and longissimus thoracis et lumborum muscles were separated from the midline by a combination of sharp and blunt dissection. The dorsal spinous processes came into view. ${routineApproach} The tendinous attachments and the muscles were released with Mayo scissors. Gelpi retractors were placed at the most cranial and caudal portions of the elevated muscles. A high speed burr was used to create a laminectomy defect at ${htLam}. Moderate sinus bleeding was addressed by the placement of small pieces of Vetspon. A House curette was used to trim the sharp edges of the window.
 
 Findings: ${findings}
 
-Closure deep fascia: ${fascia} in a simple interrupted pattern
+Closure deep fascia: ${fascia} in a simple continuous pattern
 Closure superficial fascia: ${fascia} in a simple continuous pattern
 Closure deep and superficial subcutaneous layer: ${subq} in a simple continuous pattern with deep bites to the underlying fascia every other throw
-Closure skin: The skin was opposed with ${skin}`;
+Closure skin: ${skinClosureLine}`;
+  }
+
+  if (document.getElementById('hemi-fenestration').checked) {
+    const fenSites = v('hemi-fenestration-sites') || disc;
+    const fenLine = `\n\nFenestration: The ${fenSites} intervertebral disc space(s) were fenestrated with a #11 blade from a dorsal approach.`;
+    body = body.replace(/\n\nClosure /, fenLine + '\n\nClosure ');
   }
 
   showOutput(hdr + body);
@@ -890,7 +920,7 @@ Details: The slot window was created using an air drill. The slot window was ${s
 Findings: ${findings}
 ${fenBlock}
 
-Closure muscle: The longus colli and sternohyoideus muscles were brought into apposition using 3-0 vicryl in a cruciate and then simple continuous pattern, respectively. Closure SubQ: 3-0 vicryl in a simple continuous pattern. Closure skin: 3-0 nylon in a Ford interlocking pattern.`;
+Closure muscle: The longus colli and sternohyoideus muscles were brought into apposition using 3-0 monocryl in a cruciate and then simple continuous pattern, respectively. Closure SubQ: 3-0 monocryl in a simple continuous pattern. Closure skin: 3-0 nylon in a Ford interlocking pattern.`;
 
   showOutput(hdr + body);
 }

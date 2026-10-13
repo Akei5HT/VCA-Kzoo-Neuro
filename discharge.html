@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discharge Summary Generator — VCA Kzoo Neuro</title>
+<style>
+:root {
+  --primary: #2c5f8a;
+  --accent: #4a9fd4;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --border: #d1d9e0;
+  --text: #1a2332;
+  --muted: #6b7c93;
+  --green: #27ae60;
+  --red: #c0392b;
+  --section-bg: #eef2f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--primary); color: white; padding: 14px 24px; }
+header h1 { font-size: 1rem; font-weight: 600; }
+header span { font-size: 0.8rem; opacity: 0.7; }
+.container { max-width: 900px; margin: 28px auto; padding: 0 16px 60px; }
+
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 12px 18px; font-weight: 600; font-size: 0.82rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.card-header .sub { font-size: 0.72rem; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+.card-body { padding: 18px; }
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 0.82rem; font-weight: 500; margin-bottom: 5px; color: var(--text); }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 0.88rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+.row { display: grid; gap: 12px; }
+.row-2 { grid-template-columns: 1fr 1fr; }
+.row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.mt { margin-top: 14px; }
+.hint { font-size: 0.76rem; color: var(--muted); margin-top: 4px; }
+
+.btn { padding: 9px 18px; border: none; border-radius: 7px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-secondary { background: var(--section-bg); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; margin-bottom: 20px; }
+.copy-ok { color: var(--green); font-size: 0.82rem; display: none; font-weight: 600; }
+
+.output-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 28px 32px; font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.9rem; line-height: 1.75; white-space: pre-wrap;
+  min-height: 400px; outline: none;
+}
+.output-box:focus { border-color: var(--accent); }
+
+/* Checklist sections */
+.sec-item { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+.sec-item:last-child { margin-bottom: 0; }
+.sec-head { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+.sec-head input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+.sec-desc { font-size: 0.76rem; color: var(--muted); margin: 4px 0 0 24px; line-height: 1.4; }
+
+/* Medications table */
+.med-tbl-wrap { max-height: 620px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+.med-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.med-table thead th { position: sticky; top: 0; background: var(--section-bg); padding: 8px 10px; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); z-index: 1; }
+.med-table td { padding: 8px 10px; border-bottom: 1px solid #f0f3f6; vertical-align: top; }
+.med-table tr.mrow.sel { background: #e8f4fd; }
+.med-group-row td { background: var(--section-bg); font-size: 0.72rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.4px; padding: 6px 10px; }
+.dname { font-weight: 600; font-size: 0.86rem; }
+.dconc { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.mfields { display: flex; flex-wrap: wrap; gap: 5px; }
+.mfields .mf { padding: 4px 6px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.78rem; font-family: inherit; background: var(--surface); min-width: 90px; }
+.mfields select.mf { min-width: 130px; }
+input.mcb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+.filter-row { padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; gap: 8px; align-items: center; }
+.filter-row input { flex: 1; padding: 6px 9px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.82rem; }
+
+@media print {
+  header, .actions, .card:not(#step-output-card) { display: none !important; }
+  #step-output-card { display: block !important; border: none; }
+  .output-box { border: none; padding: 0; font-size: 11pt; line-height: 1.6; }
+  body { background: white; }
+}
+@media (max-width: 640px) {
+  .row-2, .row-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Neurology Discharge Summary Generator</h1>
+  <span>VCA Kalamazoo Neurology</span>
+</header>
+<div class="container">
+
+<!-- PATIENT & VISIT -->
+<div class="card">
+  <div class="card-header">Patient &amp; Visit</div>
+  <div class="card-body">
+    <div class="row row-3">
+      <div class="field"><label>Pet Name</label><input type="text" id="pet-name" placeholder="e.g. Max"></div>
+      <div class="field"><label>Client Last Name</label><input type="text" id="client-name" placeholder="e.g. Smith"></div>
+      <div class="field"><label>Date</label><input type="date" id="visit-date"></div>
+    </div>
+    <div class="row row-3 mt">
+      <div class="field"><label>Pet Pronoun</label>
+        <select id="pet-sex">
+          <option value="m">He / Him / His</option>
+          <option value="f">She / Her / Hers</option>
+        </select>
+      </div>
+      <div class="field"><label>Attending Veterinarian</label><input type="text" id="attending-vet" value="Sandy Chen, BVM, DACVIM (Neurology)"></div>
+      <div class="field"><label>Referral / Primary Hospital</label><input type="text" id="referral-hospital" placeholder="e.g. Main Street Animal Hospital"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIAGNOSIS & SUMMARY -->
+<div class="card">
+  <div class="card-header">Neurologic Diagnosis &amp; Summary</div>
+  <div class="card-body">
+    <div class="field">
+      <label>Neurologic Diagnosis</label>
+      <textarea id="dx-diagnosis" placeholder="e.g. L3-4 intervertebral disc herniation with left-sided thoracolumbar myelopathy"></textarea>
+    </div>
+    <div class="field">
+      <label>Examination &amp; Diagnostic Results Showed…</label>
+      <textarea id="dx-findings" placeholder="Summary of exam / MRI / CSF / bloodwork findings"></textarea>
+    </div>
+    <div class="field">
+      <label>Options Discussed — Client Elected…</label>
+      <textarea id="dx-plan" placeholder="e.g. surgical decompression (hemilaminectomy) and medical management"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNS TO MONITOR -->
+<div class="card">
+  <div class="card-header">Signs to Monitor <span class="sub">— always included</span></div>
+  <div class="card-body">
+    <div class="field">
+      <label>Seizure Language to Include</label>
+      <select id="seizure-type">
+        <option value="">None (no seizure language)</option>
+        <option value="a generalized seizure (unconscious, paddling or rigidity, loss of bowel or bladder control, foaming, drooling, nonstop facial or body twitching, etc.)">Generalized seizure description</option>
+        <option value="worsening seizures (increase in frequency, duration, severity, or not returning to normal in between seizures)">Worsening seizures description</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- INSTRUCTION SECTIONS -->
+<div class="card">
+  <div class="card-header">Instruction Sections <span class="sub">— check which to include</span></div>
+  <div class="card-body">
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-anesthesia" checked> Post-Anesthesia Instructions</label>
+      <div class="sec-desc">Sedation, feeding, cough, GI upset following anesthesia.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-ivc"> IV Catheter / Blood Draw Bandage Note</label>
+      <div class="sec-desc">Reminder to remove limb bandage in 2-3 hours.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-overweight"> Overweight / Diet Note</label>
+      <div class="sec-desc">Added to the base Diet &amp; Feeding paragraph (always included).</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-exercise" checked> Exercise Restrictions (Standard, 4-week confinement)</label>
+      <div class="sec-desc">Kennel/playpen confinement, harness, short leash.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-lifelong"> Life-Long Exercise Restrictions</label>
+      <div class="sec-desc">No jumping on/off furniture, no stairs, no wrestling — permanent.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-return"> Return to Activity (after 4-week rest)</label>
+      <div class="sec-desc">Week 5/6 graduated walk schedule.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-slippery"> Slippery Surface Precautions</label>
+      <div class="sec-desc">Traction products, booties.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-vestibular"> Vestibular Disease Exercise Restriction</label>
+      <div class="sec-desc">Fall prevention, avoid hyperexcitement/abrupt visual changes.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-recumbency"> Recumbency Care</label>
+      <div class="sec-desc">Bedding, flipping q4-6h to prevent bed sores.</div>
+    </div>
+
+    <div class="sec-item">
+      <label class="sec-head"><input type="checkbox" id="sec-bladder"> Bladder Care</label>
+      <div class="sec-desc">Bladder expression, urinary/incontinence monitoring.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MEDICATIONS -->
+<div class="card">
+  <div class="card-header">Medications <span class="sub">— check all dispensed</span></div>
+  <div class="card-body" style="padding:0">
+    <div class="filter-row">
+      <input type="text" id="med-filter" placeholder="Filter medications…" oninput="filterMeds()">
+    </div>
+    <div class="med-tbl-wrap">
+      <table class="med-table">
+        <thead><tr><th style="width:30px"></th><th style="width:26%">Medication</th><th>Qty / Frequency / Notes</th></tr></thead>
+        <tbody id="med-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN & RECHECK -->
+<div class="card">
+  <div class="card-header">Plan &amp; Recheck</div>
+  <div class="card-body">
+    <div class="field">
+      <label>Pending Diagnostic Tests</label>
+      <textarea id="plan-pending" placeholder="e.g. urine culture pending"></textarea>
+    </div>
+
+    <div class="row row-3 mt">
+      <div class="field">
+        <label class="sec-head" style="font-size:0.82rem;font-weight:500"><input type="checkbox" id="plan-update-email" checked> Text/email update to owner</label>
+      </div>
+      <div class="field">
+        <label class="sec-head" style="font-size:0.82rem;font-weight:500"><input type="checkbox" id="plan-update-log"> Include monthly seizure log</label>
+      </div>
+      <div class="field">
+        <label>Update Timing</label>
+        <select id="plan-update-timing">
+          <option value="">—</option>
+          <option value="in 2 weeks">in 2 weeks</option>
+          <option value="in 1 month">in 1 month</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row row-2 mt">
+      <div class="field">
+        <label>Next Recheck</label>
+        <select id="plan-recheck">
+          <option value="2 weeks">2 weeks</option>
+          <option value="4 weeks">4 weeks</option>
+          <option value="3 months">3 months</option>
+          <option value="6 months">6 months</option>
+          <option value="1 year">1 year</option>
+          <option value="as needed">as needed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Next Bloodwork</label>
+        <input type="text" id="plan-bloodwork" placeholder="e.g. CBC/chem in 2 weeks">
+      </div>
+    </div>
+
+    <div class="field mt">
+      <label class="sec-head"><input type="checkbox" id="plan-followup"> Follow up with referral/primary hospital for…</label>
+      <input type="text" id="plan-followup-reason" placeholder="reason for follow-up" class="mt">
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn btn-primary" onclick="generateReport()">📝 Generate Discharge Summary</button>
+  <button class="btn btn-secondary" onclick="copyReport()">📋 Copy</button>
+  <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+  <span class="copy-ok" id="copy-ok">Copied!</span>
+</div>
+
+<div class="card" id="step-output-card">
+  <div class="card-header">Discharge Summary Output</div>
+  <div class="card-body">
+    <div class="output-box" id="output" contenteditable="true">Fill in the fields above and click “Generate Discharge Summary.”</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function checked(id) { const el = document.getElementById(id); return el ? el.checked : false; }
+
+function getPron() {
+  const sex = v('pet-sex') || 'm';
+  return sex === 'f'
+    ? { heshe: 'she', hisher: 'her', himher: 'her' }
+    : { heshe: 'he', hisher: 'his', himher: 'him' };
+}
+
+function fill(str) {
+  const name = v('pet-name') || '[PetName]';
+  const p = getPron();
+  return str
+    .split('{PetName}').join(name)
+    .split('{HeShe}').join(p.heshe)
+    .split('{HisHer}').join(p.hisher)
+    .split('{HimHer}').join(p.himher);
+}
+
+function fmtDate(raw) {
+  if (!raw) return '[DATE]';
+  const [y, m, d] = raw.split('-');
+  return `${parseInt(m,10)}/${parseInt(d,10)}/${y}`;
+}
+
+// ══ Medication catalog ═══════════════════════════════════════════════════
+// Each med: id, group (for section headers in the table), name, forms (display string),
+// fields (drives the input row — 'text' or 'select'), body(f) -> instructional text (uses {PetName}/{HeShe}/{HisHer}/{HimHer} tokens)
+
+const FREQ_STD = ['once daily','twice daily','three times a day','every 24 hours','every 12 hours','every 8 hours'];
+const FREQ_ANTIBIOTIC = ['once daily','twice daily','three times a day','every 24 hours','every 12 hours','every 8 hours'];
+
+function nsaidBody(f) {
+  return `- Give ${f.qty || '____'} by mouth ${f.freq}
+- This medication is a non-steroidal anti-inflammatory drug to reduce pain and inflammation
+- Side effects may include GI upset, GI ulcers, or liver/kidney dysfunction
+- IF YOU NOTE DARK TARRY/BLOODY STOOL OR VOMIT, stop this medication immediately and seek veterinary assistance
+- DO NOT administer any other steroidal (ie, prednisone, Medrol, dexamethasone), Tylenol, or NSAIDs (ie aspirin, galliprant, Metacam/meloxicam, deramaxx, piroxicam, previcox, etc) while they are on this medication
+- With long-term use urine and blood will need to be monitored by your primary veterinarian every 4-6 months`;
+}
+
+function opioidBody(f) {
+  return `- Give ${f.qty || '____'} by mouth up to 4 times a day as needed for pain
+- This opioid pain reliever may cause mild sedation or constipation
+- TRAMADOL/OPIOID DISCLAIMER: This is a controlled substance that has many benefits to your pet's health and treatment. Domestic animals rarely show adverse effects such as addiction or dependence, and we believe that the benefits far outweigh the potential adverse effects in this situation. Please secure this medication and dispose of any unused drug properly (i.e., in a pharmacy or veterinary office). We are allowed to dispense seven days' worth of medication. A physical in-person re-evaluation is required by law to determine if the patient needs continued Tramadol/Codeine beyond seven days.`;
+}
+
+function urethralBody(f) {
+  return `- Give ${f.qty || '____'} by mouth ${f.freq} until {PetName} is urinating on {HisHer} own
+- This medication decreases urethral tone to help with urination
+- You may discontinue this medicine once your pet is urinating voluntarily`;
+}
+
+function antibioticBody(f) {
+  return `- Give ${f.qty || '____'} by mouth ${f.freq}
+- Give this antibiotic with food, and please call if vomiting, diarrhea, or loss of appetite occur`;
+}
+
+const MEDS = [
+  { id:'pred', group:'Anti-Inflammatory / Steroid', name:'Prednisone', forms:'1mg / 2.5mg / 5mg / 10mg / 20mg tablet, 3mg per mL liquid',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_STD}, {key:'nextdose',type:'text',placeholder:'next dose due'} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- This steroid hormone is given at an anti-inflammatory immunosuppressive physiologic dose.
+- Do not give any other anti-inflammatory (aspirin, Rimadyl, Deramaxx, Metacam, etc.) medications while your pet is receiving prednisone.
+- Common side effects include increased hunger, thirst, frequent urination, and panting.
+- Please call if vomiting, diarrhea, or loss of appetite occurs.
+- Do not stop this medication abruptly
+- NEXT DOSE DUE ${f.nextdose||'____'}` },
+
+  { id:'carprofen', group:'NSAID', name:'Carprofen (Rimadyl)', forms:'25mg / 75mg / 100mg tablet/caplet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:['once daily','twice daily','three times a day']} ],
+    body: nsaidBody },
+  { id:'meloxicam', group:'NSAID', name:'Meloxicam (Metacam)', forms:'7.5mg tablet / 1.5mg per mL liquid / 0.5mg per mL liquid',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 0.5 mL'}, {key:'freq',type:'select',options:['once daily','twice daily','three times a day']} ],
+    body: nsaidBody },
+
+  { id:'diazepam-oral', group:'Muscle Relaxant / Anxiolytic', name:'Diazepam (oral)', forms:'2mg tablet / 5mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:['once daily','twice daily','up to three times a day','every 24 hours','every 12 hours','every 8 hours']} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- This medication is a muscle relaxant
+- We recommend every 8 hours for the first 5-7 days, and if {HeShe} remains comfortable, you may decrease to every 12 hours for another 5-7 days, and if {HeShe} remains comfortable, you may stop this medication*
+- This medication can be used to help with urination. Give 30 minutes before bladder expression
+- Side effects may include mild sedation and ataxia, especially within 30-90 minutes following a dose` },
+
+  { id:'tramadol', group:'Opioid Pain Reliever', name:'Tramadol', forms:'50mg tablet', fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ], body: opioidBody },
+  { id:'codeine', group:'Opioid Pain Reliever', name:'Codeine', forms:'15mg / 30mg tablet', fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ], body: opioidBody },
+  { id:'tylenol3', group:'Opioid Pain Reliever', name:'Tylenol-Codeine #3', forms:'30mg codeine / 300mg acetaminophen', fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ], body: opioidBody },
+  { id:'tylenol4', group:'Opioid Pain Reliever', name:'Tylenol-Codeine #4', forms:'60mg codeine / 600mg acetaminophen', fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ], body: opioidBody },
+
+  { id:'gabapentin', group:'Nerve Pain', name:'Gabapentin', forms:'50mg mini tablet / 100mg capsule / 300mg capsule / 600mg tablet / 50mg per mL liquid (no xylitol)',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'}, {key:'freq',type:'select',options:['once daily','twice daily','up to three times a day','as needed for pain']} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- We recommend 3 times a day for the first seven days, and if {HeShe} remains comfortable, you may decrease to twice a day for another 7 days, and you may stop this medication*
+- This medication is used to treat nerve root pain, may cause mild sedation for the first 2 weeks of therapy, and works better the longer it is given
+- Liver function should be monitored every six months if {PetName} receives this medication long-term` },
+
+  { id:'amantadine', group:'Chronic Pain', name:'Amantadine', forms:'50mg tablet / 100mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:['every 24 hours','every 12 hours','every 8 hours']} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- This medication is to reduce chronic pain and discomfort
+- Side effects may include agitation and gastrointestinal upset` },
+
+  { id:'trazodone', group:'Anxiolytic', name:'Trazodone', forms:'50mg tablet / 100mg tablet', fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ],
+    body: f => `- Give ${f.qty||'____'} by mouth up to 2-3 times a day for anxiety
+- This medication is being used to treat anxiety
+- Side effects may include mild sedation
+- Please note: when this medication is given concurrently with Tramadol, on rare occasions, there may be a synergistic effect that causes an adverse reaction called Serotonin Syndrome. If you note a very wobbly gait, if they are too weak to get up or move their head, are continuously vomiting or having diarrhea, have seizures, or any other concerning abnormalities, please stop this medication and the tramadol and seek veterinary assistance` },
+
+  { id:'prazosin', group:'Urethral Relaxant', name:'Prazosin (Minipress)', forms:'0.3mg / 0.5mg / 1mg / 2mg capsule',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'}, {key:'freq',type:'select',options:['every 12 hours','every 8 hours']} ], body: urethralBody },
+  { id:'tamsulosin', group:'Urethral Relaxant', name:'Tamsulosin (Flomax)', forms:'0.4mg capsule',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'}, {key:'freq',type:'select',options:['every 12 hours','every 8 hours']} ], body: urethralBody },
+
+  { id:'methocarbamol', group:'Muscle Relaxant / Anxiolytic', name:'Methocarbamol', forms:'500mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_STD} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- We recommend three times a day for the first 7 days, and if {HeShe} remains comfortable, you may decrease to twice a day for another seven days, and you may stop this medication*
+- This medication is a muscle relaxant
+- Side effects include sedation and ataxia` },
+
+  { id:'phenobarbital', group:'Anticonvulsant', name:'Phenobarbital', forms:'15/16.2/30/32.4/60/64.8/97.2/100mg tablet, 4mg per mL liquid',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:['every 24 hours','every 12 hours','every 8 hours']} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- After the 1st seizure of the day, once {PetName} can swallow, give an extra dose of phenobarbital by mouth. This means your pet will receive a total of three doses of phenobarbital on a seizure day.
+- This seizure medication usually causes sedation for the first 2 weeks of therapy as well as persistently increased hunger and thirst.
+- Rarely can liver and bone marrow side effects occur, so a complete blood count and chemistry panel should be performed after 2 weeks, 6 weeks, 3 months, and every 6 months of starting therapy.
+- Based on progress, Phenobarbital blood levels will be measured every 2 weeks to 6 months as appropriate.` },
+
+  { id:'kbr', group:'Anticonvulsant', name:'Potassium Bromide', forms:'250mg / 500mg tablet, 250mg per mL liquid',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:['once daily','twice daily','three times a day']} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq} with a full meal
+- This seizure medication causes sedation that lasts for about 2 weeks during initial loading, improves slightly, and then causes a second wave of sedation a month after the dose increase. The second phase of sedation lasts for about a month but then resolves.
+- Bromide can also cause increased hunger, thirst, more frequent urination, and a soft cough.
+- Please REMIND any veterinarian treating {PetName} that IV FLUIDS can significantly change the blood bromide levels
+- Kidney function should be measured every 6 months, and a bromide level should be measured at least bi-annually` },
+
+  { id:'zonisamide', group:'Anticonvulsant', name:'Zonisamide', forms:'25mg / 50mg / 100mg capsule',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'}, {key:'freq',type:'select',options:['every 24 hours','every 12 hours']} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- After the first seizure of the day, give a full extra dose to {PetName} as soon as {HeShe} can swallow. This means that {PetName} should receive 3 doses of zonisamide on a seizure day
+- This seizure medication usually causes sedation for the first 2 weeks of therapy as well as a 2-3 day decrease in appetite
+- Rarely, liver and bone marrow side effects can occur, so a complete blood count and chemistry panel should be performed after 2 weeks, 6 weeks, 3 months, and every 6 months of starting therapy
+- Zonisamide levels are occasionally measured to guide dose adjustments` },
+
+  { id:'leva-er', group:'Anticonvulsant', name:'Levetiracetam Extended-Release', forms:'500mg / 750mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ],
+    body: f => `- Give ${f.qty||'____'} by mouth every 12 hours (DO NOT SPLIT)
+- This seizure medication is generally well tolerated with mild sedation only occurring at higher doses
+- Because this medication is excreted by the kidneys, kidney function should be assessed every 6 months
+- Levetiracetam blood levels are occasionally measured to help guide therapeutic recommendations` },
+
+  { id:'leva-reg', group:'Anticonvulsant', name:'Levetiracetam Regular-Release', forms:'250/500/750/1000mg tablet, 100mg per mL liquid',
+    fields:[
+      {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'},
+      {key:'seizureCount',type:'select',options:['1st seizure','1st, 2nd, and 3rd seizures']},
+      {key:'extraForm',type:'select',options:['an extra dose of regular-release levetiracetam','an extra dose of extended-release levetiracetam (split tablets before giving)']}
+    ],
+    body: f => `- Give ${f.qty||'____'} by mouth every 8 hours
+- After the ${f.seizureCount} of the day, once your pet can swallow, give ${f.extraForm} by mouth.
+- This seizure medication is generally well tolerated with mild sedation only occurring at higher doses
+- Because this medication is excreted by the kidneys, kidney function should be assessed every 6 months
+- Levetiracetam blood levels are occasionally measured to help guide therapeutic recommendations` },
+
+  { id:'midazolam-in', group:'Rescue Seizure Medication', name:'Midazolam (intranasal)', forms:'5mg per mL',
+    fields:[ {key:'mL',type:'text',placeholder:'mL to draw up'} ],
+    body: f => `- Using a needle and syringe, carefully draw up ${f.mL||'____'} mL
+- Carefully remove the needle, attach the MAD mist device, and slowly instill it into alternating nostrils while holding {PetName}'s head at a 45-degree angle over 20 seconds. Keep their head elevated for an additional 40 seconds. It may be administered up to 3 times in 24 hours, at least 2 minutes apart, as needed for seizures
+- Expect sedation, delirium, and increased hunger for several hours after each dose
+- Use caution to avoid being bitten while giving this medication
+- Please keep us promptly updated on all of {PetName}'s seizures so that we have the information needed to authorize refills of this controlled substance` },
+
+  { id:'diazepam-rectal', group:'Rescue Seizure Medication', name:'Diazepam (rectal)', forms:'5mg per mL',
+    fields:[ {key:'mL',type:'text',placeholder:'mL to draw up'} ],
+    body: f => `- Using a needle and syringe, carefully draw up ${f.mL||'____'} mL. Carefully remove the needle, attach the white cannula, apply a small amount of lube to the cannula tip, and instill rectally, up to 3 times in 24 hours, at least 2 minutes apart, as needed for seizures.
+- Expect sedation, delirium, and increased hunger for several hours after each dose.
+- Please keep us promptly updated on all of {PetName}'s seizures so that we have the information needed to authorize refills of this controlled substance.` },
+
+  { id:'clorazepate', group:'Rescue Seizure Medication', name:'Clorazepate', forms:'7.5mg tablet', fields:[],
+    body: f => `- After the 1st seizure of the day, start giving 1 tablet by mouth every 8 hours for 72 hours
+- This is an anticonvulsant and anxiolytic medication
+- Side effects include sedation, ataxia, and hyperexcitability` },
+
+  { id:'clavamox', group:'Antibiotic', name:'Clavamox (Amoxicillin/Clavulanic Acid)', forms:'62.5/125/250/375mg tablet, 62.5mg per mL liquid',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_ANTIBIOTIC} ], body: antibioticBody },
+  { id:'baytril', group:'Antibiotic', name:'Baytril (Enrofloxacin)', forms:'22.7 / 68 / 136mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_ANTIBIOTIC} ], body: antibioticBody },
+  { id:'simplicef', group:'Antibiotic', name:'Simplicef (Cefpodoxime)', forms:'100mg / 200mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_ANTIBIOTIC} ], body: antibioticBody },
+  { id:'metronidazole', group:'Antibiotic', name:'Metronidazole (Flagyl)', forms:'250mg / 500mg tablet, 50mg per mL suspension',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_ANTIBIOTIC} ], body: antibioticBody },
+  { id:'clindamycin', group:'Antibiotic', name:'Clindamycin', forms:'25/75/150/300mg capsule, 25mg per mL liquid',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'}, {key:'freq',type:'select',options:FREQ_ANTIBIOTIC} ], body: antibioticBody },
+  { id:'doxycycline', group:'Antibiotic', name:'Doxycycline', forms:'100mg / 200mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_ANTIBIOTIC} ], body: antibioticBody },
+
+  { id:'meclizine', group:'Anti-Nausea / Vestibular', name:'Meclizine', forms:'12.5mg / 25mg / 50mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'}, {key:'freq',type:'select',options:FREQ_STD} ],
+    body: f => `- Give ${f.qty||'____'} by mouth ${f.freq}
+- This is an antiemetic/antihistamine primarily for motion sickness and vestibular disease
+- Adverse effects include sedation and rarely CNS stimulation
+- This medication is available from any pharmacy as "Antivert®, Dramamine® Less Drowsy Formula, Bonine®, Travel-Ease®, generic; (Rx and OTC)` },
+
+  { id:'cerenia', group:'Anti-Nausea / Vestibular', name:'Cerenia (Maropitant)', forms:'16mg / 24mg / 60mg / 160mg tablet',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 tablet'} ],
+    body: f => `- Give ${f.qty||'____'} by mouth once daily
+- This medication is an anti-emetic (NK1 receptor antagonist antiemetic)` },
+
+  { id:'omeprazole', group:'GI Protectant', name:'Omeprazole (Prilosec)', forms:'10mg capsule / 20mg tablet / 20mg capsule / 40mg capsule',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'} ],
+    body: f => `- Give ${f.qty||'____'} by mouth twice a day (every 12 hours)
+- This medication is a gastro protectant that may reduce the production of spinal fluid` },
+
+  { id:'melatonin', group:'Behavior / Sleep', name:'Melatonin (Regulin)', forms:'dose in mg (1-9 mg/dog, NOT mg/kg)',
+    fields:[ {key:'mg',type:'text',placeholder:'e.g. 3 mg'} ],
+    body: f => `- This is an oral pineal gland hormone to help with sleep disorders (eg, nocturnal activity) or phobias in dogs
+- Give ${f.mg||'____'} mg about 30 minutes before bedtime; this may be sufficient to help with night waking
+- The dose depends on the dog's size. A single dose from 1 to 9 mg/dog (NOT mg/kg), depending on the dog's size.
+- Adverse effects appear minimal in dogs and cats. Sleepiness might occur` },
+
+  { id:'cyclosporine', group:'Immunosuppressant', name:'Cyclosporine (Modified)', forms:'25mg / 50mg / 100mg capsule',
+    fields:[ {key:'qty',type:'text',placeholder:'qty e.g. 1 capsule'} ],
+    body: f => `- Give ${f.qty||'____'} capsule by mouth every 12 hours
+- This is an immunosuppressant - Occasionally, liver and bone marrow effects can be seen, so a CBC and small chemistry profile should be performed every 3-6 months
+- The medication may increase the risk for infection and with long-term use, may increase the risk of developing cancer
+- If stomach upset occurs after receiving this medication, freezing the capsules before administration can help` },
+
+  { id:'cytosar', group:'Chemotherapy', name:'Cytarabine Arabinoside (Cytosar)', forms:'in-clinic injectable — no take-home dose', fields:[],
+    body: f => `- This is a chemotherapy medication to decrease immune response
+- This medication is relatively well tolerated by dogs and cats
+- Side effects include bone marrow suppression. Some patients might show decreased appetite and not be as active for 1-2 days after treatment
+- Routine blood work (CBC and chemistry) is required once a month for at least the first 3 months` },
+
+  { id:'lomustine', group:'Chemotherapy', name:'Lomustine', forms:'capsule, dose varies',
+    fields:[ {key:'mg',type:'text',placeholder:'e.g. 50 mg'}, {key:'weeks',type:'text',placeholder:'every __ weeks'} ],
+    body: f => `- Give ${f.mg||'____'} mg capsule once every ${f.weeks||'____'} weeks
+- This is an oral antineoplastic (chemotherapy) drug
+- Mild side effects include anorexia, vomiting, diarrhea, alopecia
+- Long-term and more severe side effects include bone marrow suppression, liver and kidney dysfunction, and pulmonary infiltrates or fibrosis
+- NADIRs (the lowest WBC counts) in dogs occur ~1-3 weeks after treatment.
+- All bodily waste, blood, and vomit should be handled only while wearing disposable gloves for 72 hours
+- Please call urgently if you notice bleeding, bruising, fever (indicating an infection), lethargy, or yellowing of the skin, gums, or the whites of the eyes` },
+];
+
+// ══ Build medications table ═══════════════════════════════════════════════
+
+function buildMedTable() {
+  const body = document.getElementById('med-body');
+  let html = '';
+  let lastGroup = null;
+  MEDS.forEach(m => {
+    if (m.group !== lastGroup) {
+      html += `<tr class="med-group-row"><td colspan="3">${m.group}</td></tr>`;
+      lastGroup = m.group;
+    }
+    const fieldsHtml = m.fields.map(f => {
+      if (f.type === 'select') {
+        return `<select class="mf" data-id="${m.id}" data-key="${f.key}"><option value="">—</option>${f.options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;
+      }
+      return `<input class="mf" type="text" data-id="${m.id}" data-key="${f.key}" placeholder="${f.placeholder||''}">`;
+    }).join('');
+    html += `<tr class="mrow" id="mrow-${m.id}" data-search="${(m.name+' '+m.forms).toLowerCase()}">
+      <td><input type="checkbox" class="mcb" data-id="${m.id}" onchange="toggleMedRow('${m.id}',this.checked)"></td>
+      <td><div class="dname">${m.name}</div><div class="dconc">${m.forms}</div></td>
+      <td class="mfields">${fieldsHtml || '<span style="color:var(--muted);font-size:0.8rem">no dose fields — fixed instructions</span>'}</td>
+    </tr>`;
+  });
+  body.innerHTML = html;
+}
+
+function toggleMedRow(id, isChecked) {
+  const row = document.getElementById('mrow-' + id);
+  if (row) row.classList.toggle('sel', isChecked);
+}
+
+function filterMeds() {
+  const q = v('med-filter').toLowerCase();
+  document.querySelectorAll('#med-body tr.mrow').forEach(row => {
+    row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('#med-body tr.med-group-row').forEach(row => {
+    row.style.display = q ? 'none' : '';
+  });
+}
+
+// ══ Static section text blocks (tokens filled at generation time) ═════════
+
+const SEC = {
+  monitorBase: `Please continue to monitor {PetName} for signs of systemic disease such as vomiting, diarrhea, lethargy, inappetence, or dark tarry/bloody stool.
+
+Please also monitor {PetName} for any progressing signs of neurologic abnormalities. Signs can include changes in behavior, bumping into objects or blindness, circling/pacing constantly, getting stuck in corners or pressing {HisHer} head against objects, head tilt, head turn, abnormal eye movements, abnormal gait for a prolonged amount of time, dullness, __SEIZURE_CLAUSE__
+
+Please monitor {PetName} closely for any signs of persistent pain or having more trouble walking, such as walking very wobbly, walking on the knuckles of {HisHer} feet, constantly falling over, or if {HeShe} cannot stand up on {HisHer} own to walk, not moving {HisHer} tail, having fecal/urinary incontinence...etc. If you notice any of these signs, please call us to make a recheck appointment. If {HeShe} cannot get up or walk at all, please get in touch with us immediately to be seen on an emergency basis.`,
+
+  anesthesia: `{PetName} may appear more sedate, weak, or wobbly for up to 24 hours following an anesthetic episode. Offer 1/4 of {HisHer} normal food volume in 4 hours and offer small amounts of water at frequent intervals through the next 12 hours. Do not allow your pet to gorge during the next 12-24 hours, as transient nausea can occur following anesthesia during this period. It is crucial to keep {HisHer} away from steps and off furniture during the next 12-24 hours while {HeShe} fully recovers from {HisHer} recent anesthesia. Most animals return to their pre-anesthesia mobility within 24 hours of recovery from anesthesia procedures. A mild cough may sometimes occur due to tracheal irritation from intubation but should improve over 1-3 days. It is not uncommon for animals to have transient gastrointestinal disturbances following an anesthetic procedure. This most commonly presents as diarrhea or constipation. If {PetName} develops diarrhea, you may feed a bland diet such as Hill's i/d, Purina EN, or homemade boiled chicken and rice. Continue this diet until diarrhea resolves, then slowly transition back to the regular diet over several days. If the diarrhea is not improving or has not resolved after 2-3 days, please get in touch with your primary veterinarian. If {PetName} becomes constipated, please continue monitoring as it usually comes with time. Seek veterinary attention if you observe vomiting, straining to defecate without producing stool, inappetence, or if the abdomen seems painful.`,
+
+  ivc: `***{PetName} may have a bandage on a limb covering the site of a recent intravenous catheter or blood draw. Please remove this bandage in 2-3 hours to avoid complications to that limb.`,
+
+  dietBase: `{PetName} should continue {HisHer} regular diet and feeding schedule. Avoid treats and table scraps to help avoid causing an upset stomach while medications are given.`,
+
+  dietOverweight: `{PetName} is overweight and/or the medication(s) {PetName} is on (meds) can make {HimHer} want to eat more. Over-conditioned animals have higher risks of developing systemic diseases such as diabetes and other endocrine diseases. Please ensure {PetName} is not consuming more than they need in a day. Switching to low-calorie treats or prescription diets (Hill's metabolic, r/d, w/d...etc) might help. You can also give low-calorie treats such as cucumbers to help with {HisHer} hunger. Contact your primary care veterinarian for a long-term, healthy weight loss plan.`,
+
+  exercise: `{PetName} should be strictly confined to a kennel or playpen that is one body length wide and two body lengths long and should not be allowed to run, jump, walk around the house, or use stairs during this time. From now on, use a harness instead of a neck collar. When going outside, keep {HimHer} on a short leash, and only let {HimHer} slowly walk far enough for elimination purposes.
+
+Let {PetName} set {HisHer} own pace. Keep {HimHer} under close observation at home. From now on, use a chest harness instead of a neck collar. Do not leave {HimHer} unattended if {HeShe} has an episode or becomes disoriented. Patients with a seizure disorder should never be allowed to swim.`,
+
+  lifelong: `{PetName} should not be allowed to jump on or off furniture, do stairs, or wrestle with other animals. Try to keep all four feet on the ground.`,
+
+  returnToActivity: `After the 4 weeks of strict rest, if {PetName} is feeling well without pain, {HeShe} can slowly return to regular activity. For the first week after rest (week 5), please take {PetName} out for 5-minute walks twice daily (in addition to their potty breaks). We still recommend no stairs during this period, no jumping on and off furniture, no running, or rough play. If {HeShe} are doing well on the walks and are not painful, then the 6th week, {HeShe} can go for 10-minute walks twice daily. After this time, if {HeShe} is not painful or showing any signs as before, {HeShe} may return to more normal activity. Ideally, please prevent jumping on/off heights or running up/down long flights of stairs as much as possible to try and avoid any future disc herniations/injuries.`,
+
+  slippery: `Please try to keep {PetName} off of slippery surfaces. If {PetName} needs better traction, some products that help with paw slipping include Bio-Groom Show Foot Anti-slip Dog Spray, Dr. Buzby's Toe Grips, and Paw Friction. There are also a variety of paw pad traction stickers. Some stick better than others, and some dogs immediately remove the stickers. Experiment with several types until you find one that helps them. Keeping your floors as dust-free as possible will make these products more effective. Applying yoga mats, area rugs, or keeping {PetName} in a carpeted room will also help.
+If you feel {HeShe} is scuffing {HisHer} feet to the point that {HeShe} is causing abrasions, we recommend buying booties for {HisHer} at a pet store (ie petsmart). You can also find products online such as https://pawzdogboots.com/dog-boots/. Please remove booties when {PetName} is indoors to prevent disruption of limb circulation.`,
+
+  vestibular: `Keep {PetName} away from stairs and furniture from which {HeShe} may inadvertently fall as they are unsteady. Do not allow {HimHer} to roam the house or yard without direct supervision. Avoid hyperexcitement, as excitement can induce an increase in vertigo. Avoid abrupt changes in {HisHer} line of vision and sense of touch (examples: picking up off the ground quickly) as those changes will likely cause abrupt increases in their vertigo. Avoid thresholds as {HeShe} will increase vertigo due to dizziness-related depth perception issues. Try to keep {HimHer} in ambient or rooms with good lighting as dark environments also tend to exacerbate vertigo.`,
+
+  recumbency: `{PetName} should have thick cushioned bedding and be flipped side to side every 4 to 6 hours, if {HeShe} isn't doing this on {HisHer} own, to prevent bed sores. The flipping doesn't have to be done overnight while you are all sleeping. Please refer to the LIMITED MOBILITY handout for additional tips on how to keep {HimHer} safe and comfortable.`,
+
+  bladder: `Monitor {PetName}'s urination habits closely. If {PetName} is not urinating, gently palpate and express {HisHer} urinary bladder as shown, 1-2 times daily. Keep {HisHer} back legs and abdomen clean and dry. If {HeShe} has not urinated or you cannot express {HisHer} bladder for more than 24 hours, please get in touch with VSECK Neurology Service or your primary care veterinarian.
+
+Urinary problems are often observed following a spinal cord injury. They may consist of the following: dribbling, incontinence, difficulty urinating, strong-smelling urine, changes in urine color from yellow to dark yellow/red/brown, and abdominal pain. If any of these signs are observed, or if {HeShe} is not urinating at least twice daily, please get in touch with your primary care veterinarian or VSECK Neurology Service.
+
+Constipation does not happen very often with a paralyzed pet. Unfortunately or fortunately (depending on your frame of mind), feces usually finds its way out without any problems. A warm cloth can stimulate bowel movement by gently rubbing the perineal region.`,
+
+  goodrx: `To fill these prescriptions at the best price possible, we recommend going to "Goodrx.com", typing in the drug information as stated (drug name, drug size, and quantity), then on the left side, put in your zip code. This will give you the best price for the medication at the quantities listed below. Print out the coupon and go to that store to fill your prescription. Please be sure to call and ask if they will accept the coupon for a pet*`,
+
+  closing: `Please let us know if your pet is not doing well at home. If you would like your pet to be reevaluated and or if you would like to proceed with advanced diagnostics, please schedule an appointment at your convenience. Remember, we are here to address any questions or concerns.`,
+};
+
+// ══ Report generation ═══════════════════════════════════════════════════
+
+function generateReport() {
+  const petName = v('pet-name') || '[PetName]';
+  const clientName = v('client-name') || '[ClientLastName]';
+  const date = fmtDate(v('visit-date'));
+  const lines = [];
+
+  lines.push(`NEUROLOGY VISITING SUMMARY FOR ${petName} ${clientName} ON ${date}`);
+  lines.push('');
+  lines.push('NEUROLOGIC DIAGNOSIS:');
+  lines.push(v('dx-diagnosis') || '________');
+  lines.push('');
+  lines.push(`Thank you for bringing ${petName} to see us today. As discussed, ${petName}'s examination and diagnostic results showed ${v('dx-findings') || '________'}. We discussed options moving forward, and you elected ${v('dx-plan') || '________'}.`);
+  lines.push('');
+  lines.push(`It was nice seeing ${petName}. Please follow the instructions below.`);
+  lines.push('');
+
+  lines.push('SIGNS TO MONITOR');
+  const seizureVal = v('seizure-type');
+  const seizureClause = seizureVal
+    ? `if {HeShe} has ${seizureVal} or if {PetName} becomes non-responsive.`
+    : `if {PetName} becomes non-responsive.`;
+  lines.push(SEC.monitorBase.replace('__SEIZURE_CLAUSE__', seizureClause));
+  lines.push('');
+
+  if (checked('sec-anesthesia')) {
+    lines.push('POST-ANESTHESIA INSTRUCTIONS:');
+    lines.push(SEC.anesthesia);
+    lines.push('');
+  }
+
+  if (checked('sec-ivc')) {
+    lines.push(SEC.ivc);
+    lines.push('');
+  }
+
+  lines.push('DIET and FEEDING:');
+  lines.push(SEC.dietBase);
+  if (checked('sec-overweight')) {
+    lines.push('');
+    lines.push(SEC.dietOverweight);
+  }
+  lines.push('');
+
+  if (checked('sec-exercise')) {
+    lines.push('EXERCISE RESTRICTIONS:');
+    lines.push(SEC.exercise);
+    lines.push('');
+  }
+  if (checked('sec-lifelong')) {
+    lines.push('LIFE-LONG EXERCISE RESTRICTIONS:');
+    lines.push(SEC.lifelong);
+    lines.push('');
+  }
+  if (checked('sec-return')) {
+    lines.push('RETURN TO ACTIVITY');
+    lines.push(SEC.returnToActivity);
+    lines.push('');
+  }
+  if (checked('sec-slippery')) {
+    lines.push('SLIPPERY SURFACE');
+    lines.push(SEC.slippery);
+    lines.push('');
+  }
+  if (checked('sec-vestibular')) {
+    lines.push('VESTIBULAR DISEASE EXERCISE RESTRICTION');
+    lines.push(SEC.vestibular);
+    lines.push('');
+  }
+  if (checked('sec-recumbency')) {
+    lines.push('RECUMBENCY CARE:');
+    lines.push(SEC.recumbency);
+    lines.push('');
+  }
+  if (checked('sec-bladder')) {
+    lines.push('BLADDER CARE:');
+    lines.push(SEC.bladder);
+    lines.push('');
+  }
+
+  // Medications
+  const selectedMeds = MEDS.filter(m => {
+    const cb = document.querySelector(`.mcb[data-id="${m.id}"]`);
+    return cb && cb.checked;
+  });
+
+  lines.push('MEDICATIONS:');
+  if (selectedMeds.length) {
+    selectedMeds.forEach(m => {
+      const f = {};
+      m.fields.forEach(fld => {
+        const el = document.querySelector(`.mf[data-id="${m.id}"][data-key="${fld.key}"]`);
+        f[fld.key] = el ? el.value.trim() : '';
+      });
+      lines.push('');
+      lines.push(`${m.name} (${m.forms})`);
+      lines.push(m.body(f));
+    });
+    lines.push('');
+    lines.push('GOODRX:');
+    lines.push(SEC.goodrx);
+  } else {
+    lines.push('None prescribed at this visit.');
+  }
+  lines.push('');
+
+  lines.push('PLAN AND RECHECK INFORMATION:');
+  lines.push('Pending Diagnostic tests:');
+  lines.push(v('plan-pending') || 'None');
+  lines.push('');
+
+  if (checked('plan-update-email')) {
+    let upd = 'Please text/email with an update to Vseck.neuro@vca.com';
+    if (checked('plan-update-log')) upd += ' with monthly seizure log';
+    const timing = v('plan-update-timing');
+    if (timing) upd += ` ${timing}`;
+    lines.push(upd + '.');
+    lines.push('');
+  }
+
+  lines.push(`Next Recheck: ${petName}'s next recheck with VSECK Neurology is in ${v('plan-recheck') || 'as needed'}.`);
+  lines.push('');
+  lines.push('Next bloodwork:');
+  lines.push(v('plan-bloodwork') || 'None scheduled');
+  lines.push('');
+
+  const referral = v('referral-hospital') || '[ReferralPrimaryHospitalName]';
+  lines.push(`Blood work can be performed at ${referral} or you can make a technician appointment with VSECK Neurology for blood draw. If the blood works are performed at other clinic, please send results to Vseck.neuro@vca.com so we can monitor ${petName}'s progress.`);
+  lines.push('');
+
+  if (checked('plan-followup')) {
+    lines.push(`Please follow up with ${referral} for ${v('plan-followup-reason') || '________'}.`);
+    lines.push('');
+  }
+
+  lines.push(SEC.closing);
+  lines.push('');
+  lines.push('Attending Veterinarian:');
+  lines.push(v('attending-vet') || 'Sandy Chen, BVM, DACVIM (Neurology)');
+  lines.push('');
+  lines.push('');
+  lines.push('Client Signature: ___________________________________________________________________________  Date: ___________________');
+  lines.push('');
+  lines.push('Technician Signature: _______________________________________________________________________ Date: ___________________');
+
+  const finalText = fill(lines.join('\n'));
+  document.getElementById('output').textContent = finalText;
+}
+
+function copyReport() {
+  const box = document.getElementById('output');
+  if (!box.textContent.trim() || box.textContent.includes('Fill in the fields above')) generateReport();
+  const range = document.createRange();
+  range.selectNodeContents(box);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(box.textContent).catch(() => {});
+  }
+  const okEl = document.getElementById('copy-ok');
+  okEl.style.display = ok ? 'inline' : 'none';
+  setTimeout(() => { okEl.style.display = 'none'; }, 2000);
+}
+
+// ══ Init ══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('visit-date').value = new Date().toISOString().slice(0, 10);
+  buildMedTable();
+});
+</script>
+</body>
+</html>

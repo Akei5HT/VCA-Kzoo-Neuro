@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neuro Exam — VCA Kalamazoo</title>
+<style>
+:root {
+  --primary: #2c5f8a; --accent: #4a9fd4; --bg: #f5f7fa;
+  --surface: #ffffff; --border: #d1d9e0; --text: #1a2332;
+  --muted: #6b7c93; --green: #27ae60; --section-bg: #eef2f7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+header { background: var(--primary); color: white; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { font-size: 1rem; font-weight: 600; }
+header span { font-size: 0.8rem; opacity: 0.7; }
+.container { max-width: 880px; margin: 24px auto; padding: 0 16px 60px; }
+
+.card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 18px; overflow: hidden; }
+.card-header { background: var(--section-bg); padding: 10px 18px; font-weight: 600; font-size: 0.78rem; color: var(--primary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.4px; }
+.card-body { padding: 18px; }
+
+.field { margin-bottom: 13px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 5px; }
+.field input, .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 0.86rem; font-family: inherit; background: var(--surface); color: var(--text); transition: border-color 0.15s; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 58px; }
+.row { display: grid; gap: 12px; }
+.r2 { grid-template-columns: 1fr 1fr; }
+.r3 { grid-template-columns: 1fr 1fr 1fr; }
+.r4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.xtable { width: 100%; border-collapse: collapse; }
+.xtable th { background: var(--section-bg); font-size: 0.76rem; padding: 7px 10px; text-align: center; color: var(--primary); font-weight: 600; border: 1px solid var(--border); }
+.xtable th:first-child { text-align: left; width: 150px; }
+.xtable td { padding: 5px 7px; border: 1px solid var(--border); font-size: 0.8rem; vertical-align: middle; }
+.xtable td:first-child { font-weight: 500; color: var(--muted); }
+.xtable select, .xtable input { width: 100%; padding: 5px 6px; border: 1px solid var(--border); border-radius: 5px; font-size: 0.78rem; font-family: inherit; background: var(--surface); color: var(--text); }
+.xtable input:focus { outline: none; border-color: var(--accent); }
+
+.btn { padding: 9px 20px; border: none; border-radius: 7px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #245079; }
+.btn-secondary { background: var(--section-bg); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-success { background: var(--green); color: white; }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+.copy-ok { color: var(--green); font-size: 0.82rem; display: none; }
+
+.output-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; font-family: Georgia, serif; font-size: 0.92rem; line-height: 1.8; white-space: pre-wrap; min-height: 120px; max-height: 480px; overflow-y: auto; }
+
+.section-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; margin-top: 28px; }
+.section-title:first-child { margin-top: 0; }
+.section-sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 14px; }
+.hidden { display: none !important; }
+
+@media(max-width:600px){ .r2,.r3,.r4{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header>
+  <div><h1>Neurological Examination</h1><span>Objective findings only</span></div>
+  <span>VCA Kalamazoo</span>
+</header>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════
+       GENERAL PHYSICAL EXAMINATION
+  ═══════════════════════════════════════ -->
+  <div class="section-title">General Physical Examination</div>
+  <div class="section-sub">Blank fields are omitted from the generated note.</div>
+
+  <div class="card">
+    <div class="card-header">General Physical Exam</div>
+    <div class="card-body">
+      <div class="row r2" style="margin-bottom:12px">
+        <div class="field"><label>EENT</label>
+          <input type="text" id="gpe_eent" list="eent-list" placeholder="Select or type…">
+          <datalist id="eent-list">
+            <option>Within normal limits</option>
+            <option>Ocular discharge</option>
+            <option>Nasal discharge</option>
+            <option>Ear discharge — left</option>
+            <option>Ear discharge — right</option>
+            <option>Ear erythema</option>
+            <option>Conjunctival hyperemia</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Lymphatic</label>
+          <input type="text" id="gpe_lymph" list="lymph-list" placeholder="Select or type…">
+          <datalist id="lymph-list">
+            <option>Within normal limits</option>
+            <option>Submandibular lymphadenopathy</option>
+            <option>Prescapular lymphadenopathy</option>
+            <option>Popliteal lymphadenopathy</option>
+            <option>Generalized lymphadenopathy</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="row r2" style="margin-bottom:12px">
+        <div class="field"><label>Heart / Lung</label>
+          <input type="text" id="gpe_hl" list="hl-list" placeholder="Select or type…">
+          <datalist id="hl-list">
+            <option>Within normal limits</option>
+            <option>Heart murmur grade I–II/VI</option>
+            <option>Heart murmur grade III/VI</option>
+            <option>Heart murmur grade IV–V/VI</option>
+            <option>Arrhythmia</option>
+            <option>Crackles</option>
+            <option>Wheezes</option>
+            <option>Increased bronchovesicular sounds</option>
+            <option>Muffled heart sounds</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Abdomen</label>
+          <input type="text" id="gpe_abd" list="abd-list" placeholder="Select or type…">
+          <datalist id="abd-list">
+            <option>Within normal limits</option>
+            <option>Cranial abdominal mass</option>
+            <option>Hepatomegaly</option>
+            <option>Splenomegaly</option>
+            <option>Pain on palpation</option>
+            <option>Ascites</option>
+            <option>Tense abdomen</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="row r3">
+        <div class="field"><label>Musculoskeletal</label>
+          <input type="text" id="gpe_msk" list="msk-list" placeholder="Select or type…">
+          <datalist id="msk-list">
+            <option>Within normal limits</option>
+            <option>Muscle atrophy — hindlimbs</option>
+            <option>Muscle atrophy — forelimbs</option>
+            <option>Generalized muscle atrophy</option>
+            <option>Joint effusion</option>
+            <option>Orthopedic pain</option>
+            <option>Lameness</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Dermatologic</label>
+          <input type="text" id="gpe_derm" list="derm-list" placeholder="Select or type…">
+          <datalist id="derm-list">
+            <option>Within normal limits</option>
+            <option>Alopecia</option>
+            <option>Erythema</option>
+            <option>Scaling / seborrhea</option>
+            <option>Masses / nodules</option>
+            <option>Excoriations</option>
+            <option>Jaundice</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Urogenital</label>
+          <input type="text" id="gpe_ug" list="ug-list" placeholder="Select or type…">
+          <datalist id="ug-list">
+            <option>Within normal limits</option>
+            <option>Vulvar discharge</option>
+            <option>Preputial discharge</option>
+            <option>Prostatomegaly</option>
+            <option>Distended bladder</option>
+            <option>Mammary masses</option>
+          </datalist>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       NEUROLOGICAL EXAMINATION
+  ═══════════════════════════════════════ -->
+  <div class="section-title">Neurological Examination</div>
+  <div class="section-sub">Blank fields are omitted from the generated note.</div>
+
+  <!-- Mentation & Posture -->
+  <div class="card">
+    <div class="card-header">Mentation & Posture</div>
+    <div class="card-body">
+      <div class="row r2">
+        <div class="field"><label>Mentation</label>
+          <input type="text" id="ex_mentation" list="mentation-list" placeholder="Select or type…">
+          <datalist id="mentation-list">
+            <option>Alert and responsive</option>
+            <option>Mildly depressed / quiet</option>
+            <option>Depressed</option>
+            <option>Obtunded</option>
+            <option>Stuporous</option>
+            <option>Comatose</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Posture</label>
+          <input type="text" id="ex_posture" list="posture-list" placeholder="Select or type…">
+          <datalist id="posture-list">
+            <option>Normal</option>
+            <option>Head tilt — left</option>
+            <option>Head tilt — right</option>
+            <option>Wide-based stance</option>
+            <option>Schiff-Sherrington posture</option>
+            <option>Decerebrate rigidity</option>
+            <option>Decerebellate rigidity</option>
+            <option>Pleurothotonus</option>
+          </datalist>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gait -->
+  <div class="card">
+    <div class="card-header">Gait</div>
+    <div class="card-body">
+      <div class="row r3">
+        <div class="field"><label>Gait</label>
+          <input type="text" id="ex_gait" list="gait-list" placeholder="Select or type…">
+          <datalist id="gait-list">
+            <option>Normal gait</option>
+            <option>Ambulatory paraparesis</option>
+            <option>Non-ambulatory paraparesis</option>
+            <option>Paraplegia</option>
+            <option>Ambulatory tetraparesis</option>
+            <option>Non-ambulatory tetraparesis</option>
+            <option>Tetraplegia</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Ataxia</label>
+          <input type="text" id="ex_ataxia" list="ataxia-list" placeholder="Select or type…">
+          <datalist id="ataxia-list">
+            <option>Mild ataxia</option>
+            <option>Moderate ataxia</option>
+            <option>Severe ataxia</option>
+            <option>Vestibular ataxia</option>
+            <option>Cerebellar ataxia</option>
+            <option>Proprioceptive ataxia</option>
+            <option>Mixed ataxia</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Limbs affected</label>
+          <input type="text" id="ex_limbs" list="limbs-list" placeholder="Select or type…">
+          <datalist id="limbs-list">
+            <option>All four limbs</option>
+            <option>Hindlimbs only</option>
+            <option>Forelimbs only</option>
+            <option>Right limbs</option>
+            <option>Left limbs</option>
+            <option>Right hindlimb only</option>
+            <option>Left hindlimb only</option>
+            <option>Right forelimb only</option>
+            <option>Left forelimb only</option>
+          </datalist>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Postural Reactions -->
+  <div class="card">
+    <div class="card-header">Postural Reactions</div>
+    <div class="card-body">
+      <table class="xtable">
+        <thead><tr><th>Test</th><th>LF</th><th>RF</th><th>LH</th><th>RH</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Hopping</td>
+            <td><input type="text" id="hop_lf" list="pr-opts" placeholder="—"></td>
+            <td><input type="text" id="hop_rf" list="pr-opts" placeholder="—"></td>
+            <td><input type="text" id="hop_lh" list="pr-opts" placeholder="—"></td>
+            <td><input type="text" id="hop_rh" list="pr-opts" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td>Placing</td>
+            <td><input type="text" id="plc_lf" list="pr-opts" placeholder="—"></td>
+            <td><input type="text" id="plc_rf" list="pr-opts" placeholder="—"></td>
+            <td><input type="text" id="plc_lh" list="pr-opts" placeholder="—"></td>
+            <td><input type="text" id="plc_rh" list="pr-opts" placeholder="—"></td>
+          </tr>
+        </tbody>
+      </table>
+      <datalist id="pr-opts">
+        <option>Normal</option>
+        <option>Delayed</option>
+        <option>Absent</option>
+        <option>NT</option>
+      </datalist>
+    </div>
+  </div>
+
+  <!-- Spinal Reflexes -->
+  <div class="card">
+    <div class="card-header">Spinal Reflexes</div>
+    <div class="card-body">
+      <table class="xtable" style="margin-bottom:10px">
+        <thead><tr><th>Reflex</th><th>Left</th><th>Right</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Patellar (HL)</td>
+            <td><input type="text" id="ref_pat_l" list="reflex-opts" placeholder="—"></td>
+            <td><input type="text" id="ref_pat_r" list="reflex-opts" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td>Withdrawal (HL)</td>
+            <td><input type="text" id="ref_wd_hl_l" list="reflex-opts" placeholder="—"></td>
+            <td><input type="text" id="ref_wd_hl_r" list="reflex-opts" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td>Withdrawal (FL)</td>
+            <td><input type="text" id="ref_wd_fl_l" list="reflex-opts" placeholder="—"></td>
+            <td><input type="text" id="ref_wd_fl_r" list="reflex-opts" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td>Biceps (FL)</td>
+            <td><input type="text" id="ref_bic_l" list="reflex-opts" placeholder="—"></td>
+            <td><input type="text" id="ref_bic_r" list="reflex-opts" placeholder="—"></td>
+          </tr>
+          <tr>
+            <td>Triceps (FL)</td>
+            <td><input type="text" id="ref_tri_l" list="reflex-opts" placeholder="—"></td>
+            <td><input type="text" id="ref_tri_r" list="reflex-opts" placeholder="—"></td>
+          </tr>
+        </tbody>
+      </table>
+      <datalist id="reflex-opts">
+        <option>Normal</option>
+        <option>Reduced</option>
+        <option>Absent</option>
+        <option>Exaggerated</option>
+        <option>Clonus</option>
+        <option>NT</option>
+      </datalist>
+      <div class="row r3">
+        <div class="field"><label>Perineal reflex</label>
+          <input type="text" id="ref_perineal" list="perineal-opts" placeholder="Select or type…">
+          <datalist id="perineal-opts">
+            <option>Normal</option>
+            <option>Reduced</option>
+            <option>Absent</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Anal tone</label>
+          <input type="text" id="ref_anal" list="anal-opts" placeholder="Select or type…">
+          <datalist id="anal-opts">
+            <option>Normal</option>
+            <option>Reduced</option>
+            <option>Absent</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Cutaneous trunci</label>
+          <input type="text" id="ref_ct" list="ct-opts" placeholder="Select or type…">
+          <datalist id="ct-opts">
+            <option>Intact bilaterally</option>
+            <option>Absent left side</option>
+            <option>Absent right side</option>
+            <option>Absent bilaterally</option>
+            <option>Cutoff at (specify in notes)</option>
+          </datalist>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cranial Nerves -->
+  <div class="card">
+    <div class="card-header">Cranial Nerves</div>
+    <div class="card-body">
+      <div class="row r2" style="margin-bottom:12px">
+        <div class="field"><label>Overall cranial nerves</label>
+          <input type="text" id="cn_overall" list="cn-overall-opts" placeholder="Select or type…" oninput="toggleCNDetail()">
+          <datalist id="cn-overall-opts">
+            <option>Within normal limits</option>
+            <option>Abnormal — see below</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Menace response</label>
+          <input type="text" id="cn_menace" list="cn-menace-opts" placeholder="Select or type…">
+          <datalist id="cn-menace-opts">
+            <option>Intact bilaterally</option>
+            <option>Absent — left eye</option>
+            <option>Absent — right eye</option>
+            <option>Absent bilaterally</option>
+            <option>Reduced — left eye</option>
+            <option>Reduced — right eye</option>
+          </datalist>
+        </div>
+      </div>
+      <div id="cn_detail" class="hidden">
+        <div class="row r2" style="margin-bottom:12px">
+          <div class="field"><label>PLR (II, III)</label>
+            <input type="text" id="cn_plr" list="cn-plr-opts" placeholder="Select or type…">
+            <datalist id="cn-plr-opts">
+              <option>Normal bilaterally</option>
+              <option>Miosis — left</option>
+              <option>Miosis — right</option>
+              <option>Miosis — bilateral</option>
+              <option>Mydriasis — left</option>
+              <option>Mydriasis — right</option>
+              <option>Mydriasis — bilateral</option>
+              <option>Anisocoria</option>
+            </datalist>
+          </div>
+          <div class="field"><label>Facial sensation (V)</label>
+            <input type="text" id="cn_v" list="cn-v-opts" placeholder="Select or type…">
+            <datalist id="cn-v-opts">
+              <option>Normal bilaterally</option>
+              <option>Reduced — left</option>
+              <option>Reduced — right</option>
+              <option>Absent — left</option>
+              <option>Absent — right</option>
+            </datalist>
+          </div>
+        </div>
+        <div class="row r2" style="margin-bottom:12px">
+          <div class="field"><label>Facial symmetry (VII)</label>
+            <input type="text" id="cn_vii" list="cn-vii-opts" placeholder="Select or type…">
+            <datalist id="cn-vii-opts">
+              <option>Normal</option>
+              <option>Paresis — left</option>
+              <option>Paresis — right</option>
+              <option>Paralysis — left</option>
+              <option>Paralysis — right</option>
+            </datalist>
+          </div>
+          <div class="field"><label>Vestibular / nystagmus (VIII)</label>
+            <input type="text" id="cn_viii" list="cn-viii-opts" placeholder="Select or type…">
+            <datalist id="cn-viii-opts">
+              <option>Normal</option>
+              <option>Nystagmus — horizontal</option>
+              <option>Nystagmus — vertical</option>
+              <option>Nystagmus — rotary</option>
+              <option>Positional nystagmus</option>
+            </datalist>
+          </div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Swallow / gag (IX, X)</label>
+            <input type="text" id="cn_ix" list="cn-ix-opts" placeholder="Select or type…">
+            <datalist id="cn-ix-opts">
+              <option>Normal</option>
+              <option>Reduced</option>
+              <option>Absent</option>
+              <option>Dysphagia present</option>
+            </datalist>
+          </div>
+          <div class="field"><label>Tongue / jaw tone (V, XII)</label>
+            <input type="text" id="cn_xii" list="cn-xii-opts" placeholder="Select or type…">
+            <datalist id="cn-xii-opts">
+              <option>Normal</option>
+              <option>Jaw weakness / drop jaw</option>
+              <option>Tongue paresis</option>
+              <option>Tongue atrophy</option>
+            </datalist>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>CN notes (optional)</label><textarea id="cn_notes" placeholder="e.g., left Horner's syndrome, strabismus..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Deep Pain, Spinal Palpation & Bladder -->
+  <div class="card">
+    <div class="card-header">Deep Pain, Spinal Palpation & Bladder</div>
+    <div class="card-body">
+      <div class="row r3" style="margin-bottom:13px">
+        <div class="field"><label>Deep pain — hindlimbs</label>
+          <input type="text" id="ex_dp_hl" list="dp-hl-opts" placeholder="Select or type…">
+          <datalist id="dp-hl-opts">
+            <option>Present bilaterally</option>
+            <option>Present — left only</option>
+            <option>Present — right only</option>
+            <option>Absent bilaterally</option>
+            <option>Absent — left</option>
+            <option>Absent — right</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Deep pain — forelimbs</label>
+          <input type="text" id="ex_dp_fl" list="dp-fl-opts" placeholder="Select or type…">
+          <datalist id="dp-fl-opts">
+            <option>Present bilaterally</option>
+            <option>Present — left only</option>
+            <option>Present — right only</option>
+            <option>Absent bilaterally</option>
+            <option>Absent — left</option>
+            <option>Absent — right</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Bladder</label>
+          <input type="text" id="ex_bladder" list="bladder-opts" placeholder="Select or type…">
+          <datalist id="bladder-opts">
+            <option>Normal voluntary urination</option>
+            <option>Distended — expressing manually</option>
+            <option>Distended — unable to express</option>
+            <option>Urinary incontinence</option>
+            <option>In-dwelling catheter</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="row r2">
+        <div class="field"><label>Spinal palpation</label>
+          <input type="text" id="ex_palpation" list="palpation-opts" placeholder="Select or type…">
+          <datalist id="palpation-opts">
+            <option>No pain elicited</option>
+            <option>Cervical pain</option>
+            <option>Cervicothoracic pain</option>
+            <option>Thoracolumbar pain</option>
+            <option>Lumbosacral pain</option>
+            <option>Multiple sites — see notes</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Muscle atrophy</label>
+          <input type="text" id="ex_atrophy" list="atrophy-opts" placeholder="Select or type…">
+          <datalist id="atrophy-opts">
+            <option>None</option>
+            <option>Mild — hindlimbs</option>
+            <option>Moderate — hindlimbs</option>
+            <option>Severe — hindlimbs</option>
+            <option>Mild — forelimbs</option>
+            <option>Focal (specify in notes)</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Additional exam notes</label><textarea id="ex_notes" placeholder="Cutaneous trunci cutoff level, specific pain localization, other findings..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="card">
+    <div class="card-header">Generated Objective Section</div>
+    <div class="card-body">
+      <div class="output-box" id="out-exam"></div>
+      <div class="actions">
+        <button class="btn btn-success" onclick="buildOutput()">Generate</button>
+        <button class="btn btn-primary" onclick="buildOutput(); copyOut()">Copy to Clipboard</button>
+        <span class="copy-ok" id="cp-ok">Copied!</span>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v  = id => { const e = $(id); return e ? e.value.trim() : ''; };
+
+function toggleCNDetail() {
+  $('cn_detail').classList.toggle('hidden', v('cn_overall') !== 'Abnormal — see below');
+}
+
+function buildOutput() {
+  const line = (label, val) => val ? `${label}: ${val}\n` : '';
+
+  let out = 'OBJECTIVE:\n';
+
+  // General physical exam
+  const gpeFields = [
+    ['EENT', 'gpe_eent'], ['Lymphatic', 'gpe_lymph'], ['Heart/Lung', 'gpe_hl'],
+    ['Abdomen', 'gpe_abd'], ['Musculoskeletal', 'gpe_msk'],
+    ['Dermatologic', 'gpe_derm'], ['Urogenital', 'gpe_ug']
+  ];
+  const gpeLines = gpeFields.map(([label, id]) => v(id) ? `  ${label}: ${v(id)}` : '').filter(Boolean);
+  if (gpeLines.length) {
+    out += 'General physical exam:\n' + gpeLines.join('\n') + '\n';
+  }
+
+  // Neuro exam
+  out += '\nNeurological exam:\n';
+  out += line('Mentation', v('ex_mentation'));
+  out += line('Posture', v('ex_posture'));
+  out += line('Gait', v('ex_gait'));
+  out += line('Ataxia', v('ex_ataxia'));
+  if (v('ex_limbs')) out += line('Limbs affected', v('ex_limbs'));
+
+  // Postural reactions
+  const hop = [['LF',v('hop_lf')],['RF',v('hop_rf')],['LH',v('hop_lh')],['RH',v('hop_rh')]].filter(x=>x[1]).map(x=>`${x[0]}: ${x[1]}`).join(' | ');
+  if (hop) out += `Hopping: ${hop}\n`;
+  const plc = [['LF',v('plc_lf')],['RF',v('plc_rf')],['LH',v('plc_lh')],['RH',v('plc_rh')]].filter(x=>x[1]).map(x=>`${x[0]}: ${x[1]}`).join(' | ');
+  if (plc) out += `Placing: ${plc}\n`;
+
+  // Spinal reflexes
+  const refs = [
+    ['Patellar', v('ref_pat_l'), v('ref_pat_r')],
+    ['Withdrawal HL', v('ref_wd_hl_l'), v('ref_wd_hl_r')],
+    ['Withdrawal FL', v('ref_wd_fl_l'), v('ref_wd_fl_r')],
+    ['Biceps', v('ref_bic_l'), v('ref_bic_r')],
+    ['Triceps', v('ref_tri_l'), v('ref_tri_r')],
+  ].filter(([,l,r]) => l || r);
+  if (refs.length) {
+    out += 'Spinal reflexes:\n';
+    refs.forEach(([name,l,r]) => out += `  ${name}: L ${l||'—'} | R ${r||'—'}\n`);
+  }
+  if (v('ref_perineal')) out += `  Perineal: ${v('ref_perineal')}\n`;
+  if (v('ref_anal')) out += `  Anal tone: ${v('ref_anal')}\n`;
+  if (v('ref_ct')) out += `  Cutaneous trunci: ${v('ref_ct')}\n`;
+
+  // Cranial nerves
+  if (v('cn_overall') === 'Within normal limits') {
+    out += 'Cranial nerves: Within normal limits\n';
+  } else if (v('cn_overall') === 'Abnormal — see below') {
+    out += 'Cranial nerves:\n';
+    if (v('cn_menace')) out += `  Menace: ${v('cn_menace')}\n`;
+    if (v('cn_plr'))    out += `  PLR: ${v('cn_plr')}\n`;
+    if (v('cn_v'))      out += `  CN V (facial sensation): ${v('cn_v')}\n`;
+    if (v('cn_vii'))    out += `  CN VII (facial symmetry): ${v('cn_vii')}\n`;
+    if (v('cn_viii'))   out += `  CN VIII (vestibular): ${v('cn_viii')}\n`;
+    if (v('cn_ix'))     out += `  CN IX/X (swallow/gag): ${v('cn_ix')}\n`;
+    if (v('cn_xii'))    out += `  CN V/XII (jaw/tongue): ${v('cn_xii')}\n`;
+  } else if (v('cn_overall')) {
+    out += line('Cranial nerves', v('cn_overall'));
+    if (v('cn_menace')) out += line('Menace response', v('cn_menace'));
+  } else if (v('cn_menace')) {
+    out += line('Menace response', v('cn_menace'));
+  }
+  if (v('cn_notes')) out += `  CN notes: ${v('cn_notes')}\n`;
+
+  out += line('Deep pain (HL)', v('ex_dp_hl'));
+  out += line('Deep pain (FL)', v('ex_dp_fl'));
+  out += line('Bladder', v('ex_bladder'));
+  out += line('Spinal palpation', v('ex_palpation'));
+  out += line('Muscle atrophy', v('ex_atrophy'));
+  if (v('ex_notes')) out += `Additional findings: ${v('ex_notes')}\n`;
+
+  $('out-exam').textContent = out;
+  return out;
+}
+
+function copyOut() {
+  const text = $('out-exam').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const ok = $('cp-ok'); ok.style.display = 'inline';
+    setTimeout(() => ok.style.display = 'none', 2000);
+  });
+}
+
+function clearAll() {
+  if (!confirm('Clear all fields?')) return;
+  document.querySelectorAll('input[type=text]').forEach(i => i.value = '');
+  document.querySelectorAll('textarea').forEach(t => t.value = '');
+  $('out-exam').textContent = '';
+  $('cn_detail').classList.add('hidden');
+}
+</script>
+</body>
+</html>

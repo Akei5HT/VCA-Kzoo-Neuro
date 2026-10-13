@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neuro Post-Op Treatment Sheet</title>
+<style>
+:root{--p:#2c5f8a;--ac:#e8f0f8;--bg:#f4f6f9;--sf:#fff;--bd:#ccd5e0;--tx:#1a2634;--mu:#6b7a8d;--sel:#d4edda;--selb:#3d9a5a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:15px;color:var(--tx);background:var(--bg);}
+header{background:var(--p);color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+header h1{font-size:.95rem;font-weight:700;}
+.wbar{display:flex;align-items:center;gap:8px;}
+.wbar label{color:#fff;font-weight:600;font-size:13px;white-space:nowrap;}
+.wbar input[type=number]{padding:4px 8px;border-radius:4px;border:none;width:80px;font-size:14px;font-weight:700;}
+.pbtn{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:13px;}
+.pbtn:hover{background:rgba(255,255,255,.3);}
+.prhd{display:none;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:6px;margin:8px 14px;padding:10px 12px;}
+.cardtitle{font-size:.82rem;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--bd);}
+.pir{display:flex;gap:8px 14px;flex-wrap:wrap;margin-bottom:5px;}
+.fg{display:flex;flex-direction:column;gap:2px;flex:1;min-width:110px;}
+.fg.w2{flex:2;}.fg.w3{flex:3;}
+.fg label{font-size:.68rem;color:var(--mu);font-weight:600;text-transform:uppercase;}
+.fg input,.fg select,.fg textarea{border:none;border-bottom:1.5px solid var(--bd);background:transparent;font-size:13px;padding:2px 0;color:var(--tx);width:100%;outline:none;}
+.fg textarea{border:1px solid var(--bd);border-radius:3px;padding:4px;resize:vertical;min-height:34px;}
+.fg input:focus,.fg select:focus{border-bottom-color:var(--p);}
+.cprg{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.cprl{display:flex;align-items:center;gap:4px;font-weight:700;font-size:13px;border:2px solid var(--bd);border-radius:4px;padding:3px 9px;cursor:pointer;}
+.cprl input{width:14px;height:14px;cursor:pointer;}
+.sr{display:flex;gap:8px;flex-wrap:wrap;}
+.si{flex:1;min-width:155px;border:1px solid var(--bd);border-radius:4px;padding:6px 8px;}
+.sih{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px;margin-bottom:4px;}
+.sih input[type=checkbox]{width:14px;height:14px;}
+.ssub{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.ssub .fg{min-width:60px;}
+.ssub .fg label{font-size:.62rem;}
+.twoc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 14px 8px;}
+.pnl{background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;}
+.pnlt{font-size:.78rem;font-weight:700;color:var(--p);text-transform:uppercase;margin-bottom:6px;border-bottom:1px solid var(--bd);padding-bottom:3px;}
+.vt{width:100%;border-collapse:collapse;font-size:12px;}
+.vt th{background:var(--ac);color:var(--p);font-size:.66rem;text-transform:uppercase;padding:3px 6px;border:1px solid var(--bd);text-align:left;}
+.vt td{padding:3px 6px;border:1px solid var(--bd);}
+.vt tr.sh td{background:#edf2f7;font-weight:700;color:var(--p);font-size:.68rem;text-transform:uppercase;}
+.vt select{border:none;background:transparent;font-size:11px;color:var(--tx);width:100%;cursor:pointer;outline:none;}
+.vnote{border:none!important;background:transparent!important;font-size:11px;width:100%;padding:0!important;outline:none;}
+.crit{width:100%;border-collapse:collapse;font-size:12px;}
+.crit th{background:var(--ac);color:var(--p);font-size:.66rem;text-transform:uppercase;padding:3px 5px;border:1px solid var(--bd);text-align:left;}
+.crit td{padding:3px 5px;border:1px solid var(--bd);vertical-align:middle;}
+.ri{width:65px;border:none;border-bottom:1px solid var(--bd);background:transparent;font-size:11px;text-align:center;color:var(--tx);outline:none;}
+.cr{font-size:11px;color:var(--p);font-weight:600;}
+.ckl{display:flex;align-items:center;gap:4px;font-size:12px;}
+.cri-row.active{background:var(--sel);}
+.cri-row.active td{border-color:var(--selb);}
+.prep-row td{padding:0!important;border-top:none!important;}
+.prep-box{background:#f0faf3;border:1px solid var(--selb);border-top:none;border-radius:0 0 5px 5px;padding:7px 10px;margin-bottom:2px;}
+.prep-title{font-size:11px;font-weight:700;color:var(--selb);display:block;margin-bottom:5px;letter-spacing:.2px;}
+.prep-steps{display:flex;flex-wrap:wrap;gap:6px 20px;}
+.prep-step{display:flex;align-items:center;gap:6px;}
+.prep-label{font-size:11px;color:var(--mu);}
+.prep-val{font-size:12px;font-weight:700;color:var(--p);}
+.prep-note{font-size:10.5px;color:var(--mu);margin-top:5px;font-style:italic;}
+@media print{
+.prep-row[style*="display:none"]{display:none!important;}
+.prep-box{font-size:7.5px;padding:4px 6px;}
+.prep-title{font-size:7.5px;}
+.prep-label{font-size:7px;}
+.prep-val{font-size:8px;}
+.prep-note{font-size:7px;}
+}
+.mwrap{margin:0 14px 8px;}
+.mt{width:100%;border-collapse:collapse;font-size:13px;}
+.mt th{background:var(--p);color:#fff;padding:4px 5px;text-align:left;font-size:.66rem;text-transform:uppercase;border:1px solid #1a4a70;}
+.mt td{padding:3px 5px;border:1px solid var(--bd);vertical-align:middle;}
+.mt tr.sh td{background:var(--ac);font-weight:700;color:var(--p);font-size:.68rem;text-transform:uppercase;padding:2px 6px;}
+.mt tr.mr:hover{background:#f0f5fc;}
+.mt tr.mr.active{background:var(--sel);}
+.mt tr.mr.active td{border-color:var(--selb);}
+.mt.filter-on tr.mr:not(.active){display:none;}
+.rt,.fq,.fm-sel{border:none;background:transparent;font-size:11px;color:var(--tx);width:100%;cursor:pointer;outline:none;}
+.dc{min-width:80px;}
+.dv{font-weight:700;color:var(--p);font-size:10.5px;}
+.dvol{font-size:9px;color:var(--mu);}
+.dnote{font-size:9px;color:#888;}
+.ni{border:none!important;background:transparent!important;font-size:11px;width:100%;outline:none;}
+.ng{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 14px 8px;}
+.np{background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;}
+.np label{display:block;font-size:.78rem;font-weight:700;color:var(--p);text-transform:uppercase;margin-bottom:4px;}
+.np textarea{width:100%;height:90px;border:1px solid var(--bd);border-radius:3px;padding:4px;font-size:12px;resize:vertical;}
+.chkl{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;}
+.chkl label{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;}
+.chkl input[type=checkbox]{width:13px;height:13px;}
+.inf{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;}
+.inf input{border:none;border-bottom:1.5px solid var(--bd);width:80px;font-size:12px;padding:1px 0;background:transparent;}
+.chkl-item{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;}
+.chkl-item input[type=checkbox]{width:13px;height:13px;}
+.qty-disp{font-size:10px;color:var(--p);margin-top:2px;min-height:12px;}
+.qty-disp{display:flex;align-items:center;flex-wrap:wrap;gap:3px;}
+.qty-in{width:38px;border:none;border-bottom:1px solid var(--bd);background:transparent;font-size:11px;font-weight:700;color:var(--p);text-align:center;padding:0;outline:none;}
+.qty-in.manual{background:#fff7d6;}
+.qty-mg{color:var(--mu);}
+.qty-mg.off{color:#c0392b;font-weight:700;}
+.qty-reset{background:none;border:none;color:var(--mu);cursor:pointer;font-size:11px;padding:0 2px;line-height:1;}
+@media print{.qty-in{border:none;background:transparent!important;width:auto;max-width:30px;}}
+.filter-btn{font-size:11px;padding:2px 10px;border:1px solid var(--bd);border-radius:4px;background:var(--sf);color:var(--mu);cursor:pointer;font-weight:600;white-space:nowrap;transition:all .15s;}
+.filter-btn.on{background:var(--p);color:#fff;border-color:var(--p);}
+@media print{
+@page{size:A4 portrait;margin:5mm 6mm;}
+header,.pbtn,.no-print{display:none!important;}
+.prhd{display:flex!important;align-items:center;justify-content:space-between;border-bottom:2px solid var(--p);padding-bottom:4px;margin-bottom:5px;}
+body{background:#fff;font-size:8px;}
+.card{margin:2px 0;padding:4px 6px;border-radius:3px;}
+.cardtitle{font-size:.56rem;margin-bottom:3px;padding-bottom:2px;}
+.pir{gap:3px 8px;margin-bottom:2px;}
+.fg input,.fg select{font-size:8px;}
+.fg label{font-size:.5rem;}
+.fg textarea{min-height:24px;font-size:8px;}
+.sr{gap:5px;}
+.si{padding:4px 5px;}
+.sih{font-size:9px;margin-bottom:2px;}
+.ssub .fg label{font-size:.48rem;}
+.twoc{margin:2px 0 3px;gap:4px;}
+.pnl{padding:4px 5px;}
+.pnlt{font-size:.56rem;margin-bottom:3px;}
+.vt,.crit,.mt{font-size:7.5px;}
+.vt th,.vt td,.crit th,.crit td,.mt th,.mt td{padding:1.5px 3px;}
+.mt tr.sh td{font-size:.54rem;padding:1.5px 4px;}
+.dv{font-size:8px;}.dvol{font-size:7px;}.dnote{font-size:7px;}
+.mwrap{margin:2px 0 3px;}
+.ng{margin:2px 0 3px;gap:4px;}
+.np{padding:4px 5px;}
+.np textarea{height:55px;font-size:7.5px;}
+.np label{font-size:.56rem;margin-bottom:2px;}
+.chkl label{font-size:8px;}
+.cr{font-size:8px;}.ckl{font-size:8px;}.ri{font-size:8px;width:45px;}
+.fm-sel{font-size:7.5px;}
+.mt tr.mr:not(.active){display:none!important;}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>&#9829;&nbsp;VCA Neuro &mdash; Post-Op Treatment Sheet</h1>
+<div class="wbar">
+<label for="wt">Body Weight (kg)</label>
+<input type="number" id="wt" min="0" step="0.1" placeholder="e.g. 25" oninput="recalc()">
+<button class="pbtn" onclick="window.print()">&#128438;&nbsp;Print / PDF</button>
+</div>
+</header>
+<div class="prhd"><div style="display:flex;align-items:center;gap:10px;"><img src="data:image/jpeg;base64,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" alt="VCA" style="height:34px;width:auto;"><div>
+<div style="font-size:.8rem;font-weight:700;color:var(--p);">Neuro Post-Op Treatment Sheet</div>
+<div style="font-size:.58rem;color:#555;">VCA Vet Specialty &amp; Emergency Center of Kalamazoo</div>
+</div></div>
+<div style="text-align:right;font-size:.6rem;color:#444;">5348 S Westnedge Ave, Portage, MI 49002<br>(269) 381-5228</div>
+</div>
+<div class="card">
+<div class="cardtitle">Patient Information</div>
+<div class="pir">
+  <div class="fg w3"><label>Patient Name</label><input type="text" id="pt-name" placeholder="Last, First"></div>
+  <div class="fg"><label>Case #</label><input type="text" id="pt-case"></div>
+  <div class="fg"><label>Date</label><input type="text" id="pt-date"></div>
+  <div class="fg"><label>Admit / Transfer Time</label><input type="text" id="pt-time" placeholder="00:00"></div>
+  <div class="cprg">
+    <label class="cprl" id="cpr-lbl"><input type="checkbox" id="cpr-cb" onchange="toggleCPR()"> CPR</label>
+    <label class="cprl" id="dnr-lbl"><input type="checkbox" id="dnr-cb" onchange="toggleDNR()"> DNR</label>
+  </div>
+</div>
+<div class="pir">
+  <div class="fg"><label>Attending Doctor</label><input type="text" id="dr-attend" value="Dr. Chen"></div>
+  <div class="fg"><label>Service</label><input type="text" value="Neurology" readonly style="color:var(--p);font-weight:600;"></div>
+</div>
+<div class="pir" style="margin-top:4px;">
+  <div class="fg w3"><label>Main Problem(s) / Procedure</label>
+    <textarea id="main-prob" rows="2" placeholder="e.g. T3-L3 myelopathy, Hemilaminectomy L3-L4 ..."></textarea></div>
+  <div class="fg no-print"><label>Body Weight (kg)</label>
+    <div id="wt-disp" style="font-size:15px;font-weight:700;color:var(--p);padding:4px 0;">&#8212; kg</div></div>
+</div>
+</div>
+<div class="card">
+<div class="cardtitle">Status</div>
+<div class="sr">
+  <div class="si">
+    <div class="sih"><input type="checkbox"> IV Catheter</div>
+    <div class="ssub">
+      <div class="fg"><label>Size</label><input type="text" placeholder="20G"></div>
+      <div class="fg"><label>Location</label><input type="text" placeholder="R cephalic"></div>
+      <div class="fg"><label>Date Placed</label><input type="text"></div>
+      <div class="fg"><label>Status</label><select><option>In place</option><option>Already placed</option><option>ICU to place</option></select></div>
+    </div>
+  </div>
+  <div class="si">
+    <div class="sih"><input type="checkbox"> Urinary Catheter</div>
+    <div class="ssub">
+      <div class="fg"><label>Size</label><input type="text"></div>
+      <div class="fg"><label>Date Placed</label><input type="text"></div>
+      <div class="fg"><label>Quantify UOP</label><select><option>Yes</option><option>No</option></select></div>
+      <div class="fg"><label>Cath Type</label><select><option>Indwelling</option><option>Intermittent</option><option>Remove</option></select></div>
+    </div>
+  </div>
+  <div class="si">
+    <div class="sih"><input type="checkbox"> NG / Nasoesophageal Tube</div>
+    <div class="ssub">
+      <div class="fg"><label>Size</label><input type="text"></div>
+      <div class="fg"><label>Type</label><select><option>NG</option><option>Nasoesophageal</option></select></div>
+      <div class="fg"><label>Date Placed</label><input type="text"></div>
+      <div class="fg"><label>Replace if dislodged</label><select><option>Yes</option><option>No</option></select></div>
+    </div>
+  </div>
+  <div class="si">
+    <div class="sih"><input type="checkbox"> Oxygen Support</div>
+    <div class="ssub">
+      <div class="fg"><label>Type</label><select><option>Nasal O&#8322; cannula</option><option>Flow-by O&#8322;</option><option>Oxygen cage</option><option>Mask</option></select></div>
+      <div class="fg"><label>Flow Rate</label><input type="text" placeholder="L/min"></div>
+      <div class="fg"><label>Target SpO&#8322;</label><input type="text" placeholder="&gt;95%"></div>
+      <div class="fg"><label>Notes</label><input type="text"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="twoc">
+<div class="pnl"><div class="pnlt">Vitals &amp; Care Frequency</div><table class="vt"><thead><tr><th>Parameter</th><th>Frequency</th><th>Notes</th></tr></thead><tbody><tr class="sh"><td colspan="3">Vitals</td></tr>
+<tr><td>Temp (&deg;F)</td><td><select><option>q1h</option><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>Pulse (bpm)</td><td><select><option>q1h</option><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>RR / Resp Effort</td><td><select><option>q1h</option><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>MM / CRT</td><td><select><option>q1h</option><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>LOC / Neuro checks</td><td><select><option>q1h</option><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>Weight (kg)</td><td><select><option>q12h</option><option selected>q24h</option><option>q48h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>UOP / Ucath care</td><td><select><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr class="sh"><td colspan="3">Diet</td></tr>
+<tr><td>Food</td><td><select><option>ad lib</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>NPO</option></select></td><td><input type="text" class="vnote" placeholder="type / amount"></td></tr>
+<tr><td>Water</td><td><select><option selected>ad lib</option><option>q4h</option><option>q6h</option><option>NPO</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr class="sh"><td colspan="3">Nursing Care</td></tr>
+<tr><td>Post-op ice (incision)</td><td><select><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>N/A</option></select></td><td><input type="text" class="vnote" placeholder="15 min per side"></td></tr>
+<tr><td>pROM</td><td><select><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>N/A</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>Muscle massage</td><td><select><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>N/A</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>Rotate recumbency</td><td><select><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>N/A</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>Walk / Sling / Carry</td><td><select><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>N/A</option></select></td><td><input type="text" class="vnote" placeholder="sling / carry / assisted"></td></tr>
+<tr><td>Laser therapy</td><td><select><option selected>q24h</option><option>q48h</option><option>q72h</option><option>N/A</option></select></td><td><input type="text" class="vnote"></td></tr>
+<tr><td>Other</td><td><input type="text" class="vnote"></td><td><input type="text" class="vnote"></td></tr>
+</tbody></table></div>
+<div class="pnl"><div class="pnlt">IV Fluids &amp; CRI</div>
+<table class="crit">
+<thead><tr><th style="width:20px;">&#10003;</th><th>Drug / Fluid</th><th>Rate</th><th>Run at (mL/hr)</th><th>Add-ons / Notes</th></tr></thead>
+<tbody>
+<tr class="cri-row" id="cri-plas">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-plas')"></td>
+  <td>
+    <select id="ivf-type-sel" onchange="calcNetIVF()" style="border:none;background:transparent;font-size:11px;font-weight:700;color:var(--tx);cursor:pointer;outline:none;width:100%;">
+      <option>Plasmalyte</option>
+      <option>LRS</option>
+      <option>0.9% NaCl</option>
+    </select>
+  </td>
+  <td>
+    <select id="ivf-rate-sel" onchange="calcNetIVF()" style="border:none;background:transparent;font-size:10px;color:var(--p);font-weight:600;cursor:pointer;outline:none;">
+      <option value="40">40 mL/kg/day</option>
+      <option value="60">60 mL/kg/day</option>
+    </select>
+    <div class="cr" id="cr-plas" style="margin-top:2px;">—</div>
+  </td>
+  <td>
+    <div style="font-size:9px;color:var(--mu);">Gross rate:</div>
+    <span class="cr" id="plas-gross">—</span>
+    <div style="font-size:9px;color:var(--mu);margin-top:3px;">Net (minus CRIs):</div>
+    <span id="net-ivf-rate" style="font-size:11px;font-weight:700;color:var(--selb);">—</span>
+  </td>
+  <td>
+    <label class="ckl"><input type="checkbox" id="kcl-cb" checked onchange="toggleKCl(this)">&nbsp;KCl 20 mEq/L</label>
+    <div id="kcl-vol" style="display:flex;align-items:center;gap:4px;margin-top:3px;font-size:10px;">
+      <span style="color:var(--mu);">Vol added:</span>
+      <input type="text" placeholder="mL" style="width:45px;border:none;border-bottom:1px solid var(--bd);font-size:10px;background:transparent;text-align:center;outline:none;">
+      <span style="color:var(--mu);">mL</span>
+    </div>
+  </td>
+</tr>
+<tr class="cri-row" id="cri-fent">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-fent','prep-fent')"></td>
+  <td>Fentanyl CRI</td>
+  <td><span class="cr" id="cr-fent">3&ndash;5 mcg/kg/hr</span></td>
+  <td><input class="ri" type="text" id="r-fent" placeholder="1 mL/hr" oninput="calcNetIVF()"></td>
+  <td><input type="text" class="ni" placeholder="notes"></td>
+</tr>
+<tr id="prep-fent" class="prep-row" style="display:none;">
+  <td></td>
+  <td colspan="4">
+    <div class="prep-box">
+      <span class="prep-title">&#9000; Fentanyl CRI Prep &mdash; 24 h syringe (24 mL total, run at 1 mL/hr)</span>
+      <div class="prep-steps">
+        <div class="prep-step">
+          <span class="prep-label">Fentanyl (50 mcg/mL):</span>
+          <span class="prep-val" id="fent-vol">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">0.9% NaCl to add:</span>
+          <span class="prep-val" id="fent-nacl">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">Total syringe volume:</span>
+          <span class="prep-val">24 mL</span>
+        </div>
+        <div class="prep-step" style="border-left:3px solid var(--selb);padding-left:6px;margin-left:4px;">
+          <span class="prep-label">Run at:</span>
+          <span class="prep-val" style="color:var(--selb);">1 mL/hr = 1 mcg/kg/hr</span>
+        </div>
+      </div>
+      <div class="prep-note" id="fent-total-dose">&mdash;</div>
+    </div>
+  </td>
+</tr>
+<tr class="cri-row" id="cri-ket">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-ket','prep-ket')"></td>
+  <td>Ketamine CRI</td>
+  <td><span class="cr" id="cr-ket">2&ndash;5 mcg/kg/min</span></td>
+  <td><input class="ri" type="text" id="r-ket" placeholder="1 mL/hr" oninput="calcNetIVF()"></td>
+  <td><input type="text" class="ni" placeholder="notes"></td>
+</tr>
+<tr id="prep-ket" class="prep-row" style="display:none;">
+  <td></td>
+  <td colspan="4">
+    <div class="prep-box">
+      <span class="prep-title">&#9000; Ketamine CRI Prep &mdash; 12 h syringe (12 mL total, run at 1 mL/hr)</span>
+      <div class="prep-steps">
+        <div class="prep-step">
+          <span class="prep-label">Ketamine (100 mg/mL):</span>
+          <span class="prep-val" id="ket-vol">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">0.9% NaCl to add:</span>
+          <span class="prep-val" id="ket-nacl">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">Total syringe volume:</span>
+          <span class="prep-val">12 mL</span>
+        </div>
+        <div class="prep-step" style="border-left:3px solid var(--selb);padding-left:6px;margin-left:4px;">
+          <span class="prep-label">Run at:</span>
+          <span class="prep-val" style="color:var(--selb);">1 mL/hr = 2 mcg/kg/min</span>
+        </div>
+      </div>
+      <div class="prep-note" id="ket-total-dose">&mdash;</div>
+    </div>
+  </td>
+</tr>
+<tr class="cri-row" id="cri-fentket">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-fentket','prep-fentket')"></td>
+  <td>Fentanyl + Ketamine CRI <span class="dnote" style="font-size:9px;color:var(--mu);">combined syringe</span></td>
+  <td><span class="cr" id="cr-fentket">3&ndash;2&ndash;1 mL/hr taper</span></td>
+  <td><input class="ri" type="text" id="r-fentket" placeholder="1 mL/hr" oninput="calcNetIVF()"></td>
+  <td><input type="text" class="ni" placeholder="notes"></td>
+</tr>
+<tr id="prep-fentket" class="prep-row" style="display:none;">
+  <td></td>
+  <td colspan="4">
+    <div class="prep-box">
+      <span class="prep-title">&#9000; Fentanyl + Ketamine CRI Prep &mdash; combined 30 mL syringe (run at 1 mL/hr = Fentanyl 1 mcg/kg/hr + Ketamine 2 mcg/kg/min)</span>
+      <div class="prep-steps">
+        <div class="prep-step">
+          <span class="prep-label">Fentanyl (50 mcg/mL):</span>
+          <span class="prep-val" id="fentket-vol-f">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">Ketamine (100 mg/mL):</span>
+          <span class="prep-val" id="fentket-vol-k">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">0.9% NaCl to add:</span>
+          <span class="prep-val" id="fentket-nacl">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">Total syringe volume:</span>
+          <span class="prep-val">30 mL</span>
+        </div>
+        <div class="prep-step" style="border-left:3px solid var(--selb);padding-left:6px;margin-left:4px;">
+          <span class="prep-label">Post-op taper:</span>
+          <span class="prep-val" style="color:var(--selb);">3 mL/hr &times;2h (F3/K6) &rarr; 2 mL/hr &times;6h (F2/K4) &rarr; 1 mL/hr &times;2h (F1/K2)</span>
+        </div>
+      </div>
+      <div class="prep-note" id="fentket-total-dose">&mdash;</div>
+    </div>
+  </td>
+</tr>
+<tr class="cri-row" id="cri-lido">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-lido','prep-lido')"></td>
+  <td>Lidocaine CRI</td>
+  <td><span class="cr" id="cr-lido">25 mcg/kg/hr</span></td>
+  <td><input class="ri" type="text" id="r-lido" placeholder="1 mL/hr" oninput="calcNetIVF()"></td>
+  <td><input type="text" class="ni" placeholder="notes"></td>
+</tr>
+<tr id="prep-lido" class="prep-row" style="display:none;">
+  <td></td>
+  <td colspan="4">
+    <div class="prep-box">
+      <span class="prep-title">&#9000; Lidocaine CRI Prep &mdash; 24 h syringe (24 mL total, run at 1 mL/hr)</span>
+      <div class="prep-steps">
+        <div class="prep-step">
+          <span class="prep-label">Lidocaine (20 mg/mL):</span>
+          <span class="prep-val" id="lido-vol">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">0.9% NaCl to add:</span>
+          <span class="prep-val" id="lido-nacl">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">Total syringe volume:</span>
+          <span class="prep-val">24 mL</span>
+        </div>
+        <div class="prep-step" style="border-left:3px solid var(--selb);padding-left:6px;margin-left:4px;">
+          <span class="prep-label">Run at:</span>
+          <span class="prep-val" style="color:var(--selb);">1 mL/hr = 25 mcg/kg/hr</span>
+        </div>
+      </div>
+      <div class="prep-note" id="lido-total-dose">&mdash;</div>
+    </div>
+  </td>
+</tr>
+<tr class="cri-row" id="cri-dex">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-dex','prep-dex')"></td>
+  <td>Dexdomitor CRI</td>
+  <td><span class="cr" id="cr-dex">1&ndash;3 mcg/kg/hr</span></td>
+  <td><input class="ri" type="text" id="r-dex" placeholder="1 mL/hr" oninput="calcNetIVF()"></td>
+  <td><input type="text" class="ni" placeholder="notes"></td>
+</tr>
+<tr id="prep-dex" class="prep-row" style="display:none;">
+  <td></td>
+  <td colspan="4">
+    <div class="prep-box">
+      <span class="prep-title">&#9000; Dexdomitor CRI Prep &mdash; 24 h syringe (24 mL total, run at 1 mL/hr)</span>
+      <div class="prep-steps">
+        <div class="prep-step">
+          <span class="prep-label">Dexdomitor (0.5 mg/mL):</span>
+          <span class="prep-val" id="dex-vol">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">0.9% NaCl to add:</span>
+          <span class="prep-val" id="dex-nacl">&mdash;</span>
+        </div>
+        <div class="prep-step">
+          <span class="prep-label">Total syringe volume:</span>
+          <span class="prep-val">24 mL</span>
+        </div>
+        <div class="prep-step" style="border-left:3px solid var(--selb);padding-left:6px;margin-left:4px;">
+          <span class="prep-label">Run at:</span>
+          <span class="prep-val" style="color:var(--selb);">1 mL/hr = 1 mcg/kg/hr</span>
+        </div>
+      </div>
+      <div class="prep-note" id="dex-total-dose">&mdash;</div>
+    </div>
+  </td>
+</tr>
+<tr class="cri-row" id="cri-meto">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-meto')"></td>
+  <td>Metoclopramide</td>
+  <td><span class="cr" id="cr-meto">2 mg/kg/day</span></td>
+  <td><input class="ri" type="text" id="r-meto" placeholder="mL/hr" oninput="calcNetIVF()"></td>
+  <td><span style="font-size:9px;color:var(--mu);">5 mg/mL; 24 h infusion</span></td>
+</tr>
+<tr class="cri-row" id="cri-other">
+  <td style="text-align:center"><input type="checkbox" onchange="toggleCri(this,'cri-other')"></td>
+  <td>Other CRI</td>
+  <td><input type="text" class="ni" placeholder="drug / dose"></td>
+  <td><input class="ri" type="text" id="r-other" oninput="calcNetIVF()" placeholder="mL/hr"></td>
+  <td><input type="text" class="ni" placeholder="notes"></td>
+</tr>
+<tr class="no-print" id="cri-add-btn-row">
+  <td colspan="5" style="padding:4px 6px;border:1px solid var(--bd);background:#fafcff;text-align:left;">
+    <button onclick="addCriRow()" style="background:none;border:1px dashed var(--bd);border-radius:4px;padding:3px 10px;font-size:10px;color:var(--mu);cursor:pointer;line-height:1.4;">&#43; Add CRI / Fluid</button>
+  </td>
+</tr>
+<tr id="net-ivf-row" style="background:#f0faf3;">
+  <td colspan="5" style="padding:5px 8px;border:1px solid var(--selb);">
+    <div style="display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;font-size:10.5px;">
+      <span style="font-weight:700;color:var(--p);">Fluid Summary:</span>
+      <span>Total IVF: <strong id="sum-gross">—</strong></span>
+      <span style="color:var(--mu);">&#8722;</span>
+      <span>Active CRIs: <strong id="sum-cri">—</strong></span>
+      <span style="color:var(--mu);">=</span>
+      <span>Net <span id="sum-ivf-type">IVF</span> rate: <strong id="sum-net" style="color:var(--selb);">—</strong></span>
+    </div>
+  </td>
+</tr>
+</tbody>
+</table>
+<div style="margin-top:8px;">
+  <div class="pnlt">Additional IV Orders / Notes</div>
+  <textarea style="width:100%;height:58px;border:1px solid var(--bd);border-radius:3px;padding:4px;font-size:11px;resize:vertical;" placeholder="Fluid bolus instructions, CRI preparation, monitoring thresholds..."></textarea>
+</div>
+</div>
+</div>
+<div class="mwrap">
+<div style="font-size:.82rem;font-weight:700;color:var(--p);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:10px;">Post-Op Medications <span style="font-size:.72rem;font-weight:400;color:var(--mu);text-transform:none;">&#8212; enter weight above to auto-calculate doses</span><button class="filter-btn no-print" onclick="toggleFilter(this,'med-tbl')">Selected only</button></div>
+<table class="mt" id="med-tbl">
+<thead><tr>
+<th style="width:20px;">&#10003;</th>
+<th>Drug (dose/kg)</th>
+<th style="min-width:80px;">Low (mg)</th>
+<th style="min-width:80px;">High (mg)</th>
+<th style="min-width:130px;">Formulation</th>
+<th style="width:80px;">Route</th>
+<th style="width:72px;">Freq</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr class="sh"><td colspan="8">NSAIDs</td></tr>
+<tr class="mr" id="row-m_carp"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_carp')"></td><td>Carprofen</td><td class="dc"><span class="dv" id="dlo-m_carp">2.2 mg/kg</span><div class="dvol" id="vlo-m_carp"></div></td><td class="dc"><span class="dv" id="dhi-m_carp">&mdash;</span><div class="dvol" id="vhi-m_carp"></div></td><td><select class="fm-sel"><option selected>25 mg tab</option><option>75 mg tab</option><option>100 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_carpinj"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_carpinj')"></td><td>Carprofen <span class="dnote">Injectable</span></td><td class="dc"><span class="dv" id="dlo-m_carpinj">2.2 mg/kg</span><div class="dvol" id="vlo-m_carpinj"></div></td><td class="dc"><span class="dv" id="dhi-m_carpinj">4.4 mg/kg</span><div class="dvol" id="vhi-m_carpinj"></div></td><td><select class="fm-sel"><option selected>50 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option>IV</option><option>IV slow</option><option selected>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_mel"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_mel')"></td><td>Meloxicam</td><td class="dc"><span class="dv" id="dlo-m_mel">0.1 mg/kg</span><div class="dvol" id="vlo-m_mel"></div></td><td class="dc"><span class="dv" id="dhi-m_mel">0.2 mg/kg</span><div class="dvol" id="vhi-m_mel"></div></td><td><select class="fm-sel"><option selected>1.5 mg/mL oral liquid</option><option>7.5 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="sh"><td colspan="8">Steroids / Immunosuppressants</td></tr>
+<tr class="mr" id="row-m_dsp"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_dsp')"></td><td>Dexamethasone SP</td><td class="dc"><span class="dv" id="dlo-m_dsp">0.07 mg/kg</span><div class="dvol" id="vlo-m_dsp"></div></td><td class="dc"><span class="dv" id="dhi-m_dsp">0.14 mg/kg</span><div class="dvol" id="vhi-m_dsp"></div></td><td><select class="fm-sel"><option>4 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option selected>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_pred"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_pred')"></td><td>Prednisone</td><td class="dc"><span class="dv" id="dlo-m_pred">0.5 mg/kg</span><div class="dvol" id="vlo-m_pred"></div></td><td class="dc"><span class="dv" id="dhi-m_pred">1.0 mg/kg</span><div class="dvol" id="vhi-m_pred"></div></td><td><select class="fm-sel"><option selected>1 mg tab</option><option>5 mg tab</option><option>10 mg tab</option><option>20 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_predl"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_predl')"></td><td>Prednisolone</td><td class="dc"><span class="dv" id="dlo-m_predl">0.5 mg/kg</span><div class="dvol" id="vlo-m_predl"></div></td><td class="dc"><span class="dv" id="dhi-m_predl">1.0 mg/kg</span><div class="dvol" id="vhi-m_predl"></div></td><td><select class="fm-sel"><option selected>5 mg tab</option><option>10 mg tab</option><option>20 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="sh"><td colspan="8">Neuro &amp; Pain</td></tr>
+<tr class="mr" id="row-m_gab"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_gab')"></td><td>Gabapentin</td><td class="dc"><span class="dv" id="dlo-m_gab">10 mg/kg</span><div class="dvol" id="vlo-m_gab"></div></td><td class="dc"><span class="dv" id="dhi-m_gab">15 mg/kg</span><div class="dvol" id="vhi-m_gab"></div></td><td><select class="fm-sel"><option selected>100 mg cap</option><option>300 mg cap</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_tram"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_tram')"></td><td>Tramadol</td><td class="dc"><span class="dv" id="dlo-m_tram">2 mg/kg</span><div class="dvol" id="vlo-m_tram"></div></td><td class="dc"><span class="dv" id="dhi-m_tram">4 mg/kg</span><div class="dvol" id="vhi-m_tram"></div></td><td><select class="fm-sel"><option>50 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_tyc"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_tyc')"></td><td>Tylenol+Codeine (codeine dose) <span class="dnote">Dog only</span></td><td class="dc"><span class="dv" id="dlo-m_tyc">1 mg/kg</span><div class="dvol" id="vlo-m_tyc"></div></td><td class="dc"><span class="dv" id="dhi-m_tyc">2 mg/kg</span><div class="dvol" id="vhi-m_tyc"></div></td><td><select class="fm-sel"><option selected>30 mg codeine tab</option><option>60 mg codeine tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_aman"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_aman')"></td><td>Amantadine</td><td class="dc"><span class="dv" id="dlo-m_aman">3 mg/kg</span><div class="dvol" id="vlo-m_aman"></div></td><td class="dc"><span class="dv" id="dhi-m_aman">5 mg/kg</span><div class="dvol" id="vhi-m_aman"></div></td><td><select class="fm-sel"><option selected>100 mg tab</option><option>50 mg/5 mL liquid</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_trazo"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_trazo')"></td><td>Trazodone</td><td class="dc"><span class="dv" id="dlo-m_trazo">&mdash;</span><div class="dvol" id="vlo-m_trazo"></div></td><td class="dc"><span class="dv" id="dhi-m_trazo">&mdash;</span><div class="dvol" id="vhi-m_trazo"></div></td><td><select class="fm-sel"><option selected>50 mg tab</option><option>100 mg tab</option><option>150 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_diaz"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_diaz')"></td><td>Diazepam</td><td class="dc"><span class="dv" id="dlo-m_diaz">0.25 mg/kg</span><div class="dvol" id="vlo-m_diaz"></div></td><td class="dc"><span class="dv" id="dhi-m_diaz">0.5 mg/kg</span><div class="dvol" id="vhi-m_diaz"></div></td><td><select class="fm-sel"><option selected>2 mg tab</option><option>5 mg tab</option></select></td><td><select class="rt"><option>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option selected>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_praz"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_praz')"></td><td>Prazosin <span class="dnote">Dog only</span></td><td class="dc"><span class="dv" id="dlo-m_praz">0.067 mg/kg</span><div class="dvol" id="vlo-m_praz"></div></td><td class="dc"><span class="dv" id="dhi-m_praz">&mdash;</span><div class="dvol" id="vhi-m_praz"></div></td><td><select class="fm-sel"><option selected>1 mg cap</option><option>2 mg cap</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="sh"><td colspan="8">Antibiotics</td></tr>
+<tr class="mr" id="row-m_cefz"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_cefz')"></td><td>Cefazolin</td><td class="dc"><span class="dv" id="dlo-m_cefz">22 mg/kg</span><div class="dvol" id="vlo-m_cefz"></div></td><td class="dc"><span class="dv" id="dhi-m_cefz">&mdash;</span><div class="dvol" id="vhi-m_cefz"></div></td><td><select class="fm-sel"><option>100 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option selected>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_unas"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_unas')"></td><td>Unasyn</td><td class="dc"><span class="dv" id="dlo-m_unas">30 mg/kg</span><div class="dvol" id="vlo-m_unas"></div></td><td class="dc"><span class="dv" id="dhi-m_unas">&mdash;</span><div class="dvol" id="vhi-m_unas"></div></td><td><select class="fm-sel"><option>100 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option selected>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_ceph"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_ceph')"></td><td>Cephalexin</td><td class="dc"><span class="dv" id="dlo-m_ceph">22 mg/kg</span><div class="dvol" id="vlo-m_ceph"></div></td><td class="dc"><span class="dv" id="dhi-m_ceph">30 mg/kg</span><div class="dvol" id="vhi-m_ceph"></div></td><td><select class="fm-sel"><option selected>250 mg cap</option><option>500 mg cap</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_simp"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_simp')"></td><td>Simplicef</td><td class="dc"><span class="dv" id="dlo-m_simp">5 mg/kg</span><div class="dvol" id="vlo-m_simp"></div></td><td class="dc"><span class="dv" id="dhi-m_simp">10 mg/kg</span><div class="dvol" id="vhi-m_simp"></div></td><td><select class="fm-sel"><option selected>100 mg tab</option><option>200 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_clav"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_clav')"></td><td>Clavamox</td><td class="dc"><span class="dv" id="dlo-m_clav">13.75 mg/kg</span><div class="dvol" id="vlo-m_clav"></div></td><td class="dc"><span class="dv" id="dhi-m_clav">&mdash;</span><div class="dvol" id="vhi-m_clav"></div></td><td><select class="fm-sel"><option selected>62.5 mg/mL oral liquid</option><option>125 mg tab</option><option>250 mg tab</option><option>375 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="sh"><td colspan="8">GI / Gastroprotectants</td></tr>
+<tr class="mr" id="row-m_fam"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_fam')"></td><td>Famotidine</td><td class="dc"><span class="dv" id="dlo-m_fam">0.5 mg/kg</span><div class="dvol" id="vlo-m_fam"></div></td><td class="dc"><span class="dv" id="dhi-m_fam">&mdash;</span><div class="dvol" id="vhi-m_fam"></div></td><td><select class="fm-sel"><option selected>10 mg tab</option><option>20 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_marsc"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_marsc')"></td><td>Maropitant (injectable)</td><td class="dc"><span class="dv" id="dlo-m_marsc">1 mg/kg</span><div class="dvol" id="vlo-m_marsc"></div></td><td class="dc"><span class="dv" id="dhi-m_marsc">&mdash;</span><div class="dvol" id="vhi-m_marsc"></div></td><td><select class="fm-sel"><option>10 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option selected>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_marpo"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_marpo')"></td><td>Maropitant (oral)</td><td class="dc"><span class="dv" id="dlo-m_marpo">2 mg/kg</span><div class="dvol" id="vlo-m_marpo"></div></td><td class="dc"><span class="dv" id="dhi-m_marpo">4 mg/kg</span><div class="dvol" id="vhi-m_marpo"></div></td><td><select class="fm-sel"><option selected>16 mg tab</option><option>24 mg tab</option><option>60 mg tab</option><option>160 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_ery"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_ery')"></td><td>Erythromycin <span class="dnote">GI motility</span></td><td class="dc"><span class="dv" id="dlo-m_ery">0.5 mg/kg</span><div class="dvol" id="vlo-m_ery"></div></td><td class="dc"><span class="dv" id="dhi-m_ery">1.0 mg/kg</span><div class="dvol" id="vhi-m_ery"></div></td><td><select class="fm-sel"><option>250 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_ome"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_ome')"></td><td>Omeprazole <span class="dnote">Oral</span></td><td class="dc"><span class="dv" id="dlo-m_ome">1 mg/kg</span><div class="dvol" id="vlo-m_ome"></div></td><td class="dc"><span class="dv" id="dhi-m_ome">&mdash;</span><div class="dvol" id="vhi-m_ome"></div></td><td><select class="fm-sel"><option selected>10 mg cap</option><option>20 mg cap</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_panto"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_panto')"></td><td>Pantoprazole <span class="dnote">Injectable</span></td><td class="dc"><span class="dv" id="dlo-m_panto">1 mg/kg</span><div class="dvol" id="vlo-m_panto"></div></td><td class="dc"><span class="dv" id="dhi-m_panto">&mdash;</span><div class="dvol" id="vhi-m_panto"></div></td><td><select class="fm-sel"><option>4 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option selected>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option selected>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_caprodog"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_caprodog')"></td><td>Capromorelin (Entyce) <span class="dnote">Dog: 3 mg/kg q24h</span></td><td class="dc"><span class="dv" id="dlo-m_caprodog">&mdash;</span><div class="dvol" id="vlo-m_caprodog"></div></td><td class="dc"><span class="dv" id="dhi-m_caprodog">&mdash;</span><div class="dvol" id="vhi-m_caprodog"></div></td><td><select class="fm-sel"><option selected>30 mg/mL oral liquid</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_caprocat"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_caprocat')"></td><td>Capromorelin (Entyce) <span class="dnote">Cat: 2 mg/kg q24h</span></td><td class="dc"><span class="dv" id="dlo-m_caprocat">&mdash;</span><div class="dvol" id="vlo-m_caprocat"></div></td><td class="dc"><span class="dv" id="dhi-m_caprocat">&mdash;</span><div class="dvol" id="vhi-m_caprocat"></div></td><td><select class="fm-sel"><option selected>30 mg/mL oral liquid</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option selected>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="sh"><td colspan="8">Injectable Analgesia</td></tr>
+<tr class="mr" id="row-m_hm"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_hm')"></td><td>Hydromorphone</td><td class="dc"><span class="dv" id="dlo-m_hm">0.05 mg/kg</span><div class="dvol" id="vlo-m_hm"></div></td><td class="dc"><span class="dv" id="dhi-m_hm">0.1 mg/kg</span><div class="dvol" id="vhi-m_hm"></div></td><td><select class="fm-sel"><option>2 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option selected>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_meth"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_meth')"></td><td>Methadone</td><td class="dc"><span class="dv" id="dlo-m_meth">0.1 mg/kg</span><div class="dvol" id="vlo-m_meth"></div></td><td class="dc"><span class="dv" id="dhi-m_meth">0.2 mg/kg</span><div class="dvol" id="vhi-m_meth"></div></td><td><select class="fm-sel"><option>10 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option selected>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option selected>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_ketbol"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_ketbol')"></td><td>Ketamine (bolus) <span class="dnote">Bolus only</span></td><td class="dc"><span class="dv" id="dlo-m_ketbol">0.5 mg/kg</span><div class="dvol" id="vlo-m_ketbol"></div></td><td class="dc"><span class="dv" id="dhi-m_ketbol">1.0 mg/kg</span><div class="dvol" id="vhi-m_ketbol"></div></td><td><select class="fm-sel"><option>100 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option>IV</option><option selected>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option selected>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_ace"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_ace')"></td><td>Acepromazine <span class="dnote">Max 3 mg total</span></td><td class="dc"><span class="dv" id="dlo-m_ace">0.01 mg/kg</span><div class="dvol" id="vlo-m_ace"></div></td><td class="dc"><span class="dv" id="dhi-m_ace">0.02 mg/kg</span><div class="dvol" id="vhi-m_ace"></div></td><td><select class="fm-sel"><option>10 mg/mL injection</option></select></td><td><select class="rt"><option>PO</option><option selected>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option selected>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="sh"><td colspan="8">Cat Only</td></tr>
+<tr class="mr" id="row-m_mirt"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_mirt')"></td><td>Mirtazapine (cat) <span class="dnote">Cat: 3.75 mg/dose</span></td><td class="dc"><span class="dv" id="dlo-m_mirt">Cat: 3.75 mg/dose</span><div class="dvol" id="vlo-m_mirt"></div></td><td class="dc"><span class="dv" id="dhi-m_mirt">&mdash;</span><div class="dvol" id="vhi-m_mirt"></div></td><td><select class="fm-sel"><option selected>7.5 mg tab</option><option>15 mg tab</option><option>30 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option selected>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="mr" id="row-m_cyp"><td style="text-align:center"><input type="checkbox" onchange="toggleRow(this,'m_cyp')"></td><td>Cyproheptadine (cat) <span class="dnote">Cat: 2-4 mg/dose</span></td><td class="dc"><span class="dv" id="dlo-m_cyp">Cat: 2-4 mg/dose</span><div class="dvol" id="vlo-m_cyp"></div></td><td class="dc"><span class="dv" id="dhi-m_cyp">&mdash;</span><div class="dvol" id="vhi-m_cyp"></div></td><td><select class="fm-sel"><option>4 mg tab</option></select></td><td><select class="rt"><option selected>PO</option><option>IV</option><option>IV slow</option><option>SC</option><option>IM</option><option>SC/IV</option><option>IV/SC</option><option>IV/PO</option><option>PO/IV</option><option>OTM</option><option>CRI</option></select></td><td><select class="fq"><option>q2h</option><option>q4h</option><option>q6h</option><option selected>q8h</option><option>q12h</option><option>q24h</option><option>q48h</option><option>q72h</option><option>prn</option><option>SID</option><option>BID</option><option>TID</option><option>QID</option></select></td><td><input type="text" class="ni" placeholder="notes"></td></tr>
+<tr class="no-print" id="med-add-btn-row">
+  <td colspan="8" style="padding:4px 6px;border:1px solid var(--bd);background:#fafcff;">
+    <button onclick="addMedRow()" style="background:none;border:1px dashed var(--bd);border-radius:4px;padding:3px 10px;font-size:10px;color:var(--mu);cursor:pointer;line-height:1.4;">&#43; Add Medication</button>
+  </td>
+</tr>
+</tbody></table></div>
+<div class="ng">
+<div class="np"><label>Pending Diagnostics</label>
+<textarea placeholder="Blood work, imaging, cultures, other tests pending..."></textarea></div>
+<div class="np"><label>Rounds Note / Plans</label>
+<textarea placeholder="Assessment, plan, goals of care, owner communication..."></textarea></div>
+</div>
+<div class="card">
+<div class="cardtitle">Handoff Checklist</div>
+<div class="chkl">
+
+  <!-- Row 1: always-visible items -->
+  <label><input type="checkbox"> Charges input complete &nbsp;
+    <span style="color:var(--mu);font-size:10px;">Date:</span>
+    <input type="text" style="border:none;border-bottom:1px solid var(--bd);width:75px;font-size:11px;background:transparent;padding:0 3px;" placeholder="date completed">
+  </label>
+  <label><input type="checkbox"> TGH date:&nbsp;<input type="text" style="border:none;border-bottom:1px solid var(--bd);width:75px;font-size:11px;background:transparent;padding:0 2px;" placeholder="date"></label>
+
+  <!-- Discharge by -->
+  <div style="width:100%;margin:7px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <span style="font-weight:700;font-size:11.5px;color:var(--tx);">Discharge by:</span>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;cursor:pointer;">
+      <input type="radio" name="dc-by" value="er" onchange="onDcBy(this)" style="width:13px;height:13px;"> ER
+    </label>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;cursor:pointer;">
+      <input type="radio" name="dc-by" value="neuro" onchange="onDcBy(this)" style="width:13px;height:13px;"> Neuro
+    </label>
+  </div>
+
+  <!-- ER discharge task list (shown only when "ER" selected) -->
+  <div id="er-chkl" style="display:none;width:100%;border-top:1px solid var(--bd);padding-top:6px;margin-top:2px;">
+    <div style="font-size:.6rem;color:var(--mu);font-weight:700;text-transform:uppercase;margin-bottom:5px;letter-spacing:.4px;">ER Discharge Tasks</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 18px;">
+      <label class="chkl-item"><input type="checkbox"> Discharge summary</label>
+      <label class="chkl-item"><input type="checkbox"> Neuro phone discharge</label>
+      <label class="chkl-item"><input type="checkbox"> TGH medications</label>
+      <label class="chkl-item"><input type="checkbox"> Care instructions given</label>
+      <label class="chkl-item"><input type="checkbox"> Recheck scheduled</label>
+    </div>
+  </div>
+
+  <div class="inf" style="margin-top:6px;width:100%;">Dr. initial:&nbsp;<input type="text" placeholder="______"></div>
+</div>
+</div>
+<br>
+<script>
+const MEDS=[{id:"m_carp",dL:2.2,dH:null,conc:null},{id:"m_carpinj",dL:2.2,dH:4.4,conc:50},{id:"m_mel",dL:0.1,dH:0.2,conc:null},{id:"m_dsp",dL:0.07,dH:0.14,conc:4},{id:"m_pred",dL:0.5,dH:1.0,conc:null},{id:"m_predl",dL:0.5,dH:1.0,conc:null},{id:"m_gab",dL:10,dH:15,conc:null},{id:"m_tram",dL:2,dH:4,conc:null},{id:"m_tyc",dL:1,dH:2,conc:null},{id:"m_aman",dL:3,dH:5,conc:null},{id:"m_trazo",dL:5,dH:7,conc:null},{id:"m_diaz",dL:0.25,dH:0.5,conc:null},{id:"m_praz",dL:0.067,dH:null,conc:null},{id:"m_cefz",dL:22,dH:null,conc:100},{id:"m_unas",dL:30,dH:null,conc:100},{id:"m_ceph",dL:22,dH:30,conc:null},{id:"m_simp",dL:5,dH:10,conc:null},{id:"m_clav",dL:13.75,dH:null,conc:null},{id:"m_fam",dL:0.5,dH:null,conc:null},{id:"m_marsc",dL:1,dH:null,conc:10},{id:"m_marpo",dL:2,dH:4,conc:null},{id:"m_ery",dL:0.5,dH:1.0,conc:null},{id:"m_ome",dL:1,dH:null,conc:null},{id:"m_panto",dL:1,dH:null,conc:4},{id:"m_caprodog",dL:3,dH:null,conc:30},{id:"m_caprocat",dL:2,dH:null,conc:30},{id:"m_hm",dL:0.05,dH:0.1,conc:2},{id:"m_meth",dL:0.1,dH:0.2,conc:10},{id:"m_ketbol",dL:0.5,dH:1.0,conc:100},{id:"m_ace",dL:0.01,dH:0.02,conc:10},{id:"m_mirt",dL:null,dH:null,conc:null},{id:"m_cyp",dL:null,dH:null,conc:null}];
+function f1(n){return n.toFixed(1);}
+function f2(n){return n.toFixed(2);}
+function f3(n){return n.toFixed(3);}
+function gel(id){return document.getElementById(id);}
+function st(id,h){var e=gel(id);if(e)e.innerHTML=h;}
+
+var customCriIds=[];
+var customMedCount=0;
+
+function addCriRow(){
+  var n=Date.now();
+  customCriIds.push(n);
+  var id='cri-custom-'+n;
+  var rid='r-custom-'+n;
+  var addBtnRow=gel('cri-add-btn-row');
+  var tr=document.createElement('tr');
+  tr.className='cri-row';
+  tr.id=id;
+  tr.innerHTML=
+    '<td style="text-align:center"><input type="checkbox" onchange="var r=gel(\''+id+'\');if(r)r.classList.toggle(\'active\',this.checked);calcNetIVF();"></td>'+
+    '<td><input type="text" class="ni" placeholder="Drug / fluid name" style="font-weight:600;width:100%;"></td>'+
+    '<td><input type="text" class="ni" placeholder="dose / rate"></td>'+
+    '<td><input class="ri" type="text" id="'+rid+'" placeholder="mL/hr" oninput="calcNetIVF()"></td>'+
+    '<td><div style="display:flex;align-items:center;gap:4px;"><input type="text" class="ni" placeholder="notes" style="flex:1;">'+
+    '<button onclick="removeCriRow(this,\''+id+'\','+n+')" style="flex-shrink:0;background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;line-height:1;padding:0 2px;" title="Remove">&times;</button></div></td>';
+  addBtnRow.parentNode.insertBefore(tr, addBtnRow);
+}
+
+function removeCriRow(btn, id, n){
+  var tr=gel(id);
+  if(tr) tr.remove();
+  customCriIds=customCriIds.filter(function(x){return x!==n;});
+  calcNetIVF();
+}
+
+function addMedRow(){
+  customMedCount++;
+  var n=customMedCount;
+  var tbody=document.querySelector('.mt tbody');
+  // Ensure "Other" section header exists
+  if(!gel('med-other-sect')){
+    var sh=document.createElement('tr');
+    sh.className='sh';
+    sh.id='med-other-sect';
+    sh.innerHTML='<td colspan="8">Other</td>';
+    var addBtn=gel('med-add-btn-row');
+    tbody.insertBefore(sh, addBtn);
+  }
+  var id='row-custom-med-'+n;
+  var rtOpts=['PO','IV','IV slow','SC','IM','SC/IV','IV/SC','IV/PO','PO/IV','OTM','CRI'].map(function(r){return '<option>'+r+'</option>';}).join('');
+  var fqOpts=['q2h','q4h','q6h','q8h','q12h','q24h','prn','other'].map(function(f){return '<option>'+f+'</option>';}).join('');
+  var tr=document.createElement('tr');
+  tr.className='mr';
+  tr.id=id;
+  tr.innerHTML=
+    '<td style="text-align:center"><input type="checkbox" onchange="var r=gel(\''+id+'\');if(r)r.classList.toggle(\'active\',this.checked);"></td>'+
+    '<td><input type="text" class="ni" placeholder="Drug name" style="font-weight:600;width:100%;"></td>'+
+    '<td class="dc"><input type="text" class="ni dv" placeholder="— mg" style="width:100%;"></td>'+
+    '<td class="dc"><input type="text" class="ni dv" placeholder="— mg" style="width:100%;"></td>'+
+    '<td><input type="text" class="ni" placeholder="formulation / strength"></td>'+
+    '<td><select class="rt">'+rtOpts+'</select></td>'+
+    '<td><select class="fq">'+fqOpts+'</select></td>'+
+    '<td><div style="display:flex;align-items:center;gap:4px;"><input type="text" class="ni" placeholder="notes" style="flex:1;">'+
+    '<button onclick="var e=gel(\''+id+'\');if(e)e.remove();" style="flex-shrink:0;background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;line-height:1;padding:0 2px;" title="Remove">&times;</button></div></td>';
+  var addBtn=gel('med-add-btn-row');
+  tbody.insertBefore(tr, addBtn);
+}
+
+function recalc(){
+  var w=parseFloat((gel('wt')||{}).value)||0;
+  var wd=gel('wt-disp');
+  if(wd) wd.textContent=w>0?w+' kg':'\u2014 kg';
+  MEDS.forEach(function(d){
+    if(d.dL===null&&d.dH===null) return;
+    var elo=gel('dlo-'+d.id),ehi=gel('dhi-'+d.id);
+    var eloV=gel('vlo-'+d.id),ehiV=gel('vhi-'+d.id);
+    if(w>0&&d.dL!==null){
+      var lo=d.dL*w;
+      if(elo) elo.textContent=f1(lo)+' mg';
+      if(eloV) eloV.textContent=d.dL+' mg/kg'+(d.conc?' / '+f2(lo/d.conc)+' mL':'');
+    } else {
+      if(elo) elo.textContent='—';
+      if(eloV) eloV.textContent=d.dL!==null?d.dL+' mg/kg':'';
+    }
+    if(w>0&&d.dH!==null){
+      var hi=d.dH*w;
+      if(ehi) ehi.textContent=f1(hi)+' mg';
+      if(ehiV) ehiV.textContent=d.dH+' mg/kg'+(d.conc?' / '+f2(hi/d.conc)+' mL':'');
+    } else {
+      if(ehi) ehi.textContent='—';
+      if(ehiV) ehiV.textContent=d.dH!==null?d.dH+' mg/kg':'';
+    }
+  });
+  if(w>0){
+    // Fentanyl prep: 24h x wt x 1 mcg/kg/hr / 50 mcg/mL = drug mL; NaCl = 24 - drug mL
+    var fentTotalMcg=24*w*1;
+    var fentVolMl=fentTotalMcg/50;
+    var fentNacl=24-fentVolMl;
+    st('fent-vol', f2(fentVolMl)+' mL');
+    st('fent-nacl', fentNacl>=0 ? f2(fentNacl)+' mL' : '<span style="color:#c0392b">exceeds 24 mL \u2014 use larger syringe</span>');
+    st('fent-total-dose','Total fentanyl: '+Math.round(fentTotalMcg)+' mcg &nbsp;\u2502&nbsp; Fentanyl '+f2(fentVolMl)+' mL + NaCl '+(fentNacl>=0?f2(fentNacl):'\u2014')+' mL \u2192 24 mL syringe \u2192 run at 1 mL/hr = 1 mcg/kg/hr');
+    // Ketamine prep: 12h x wt x 2 mcg/kg/min x 60min = total mcg; /100,000 mcg per mL (100mg/mL) = drug mL; NaCl = 12 - drug mL
+    var ketTotalMcg=12*w*2*60;
+    var ketVolMl=ketTotalMcg/100000;
+    var ketNacl=12-ketVolMl;
+    st('ket-vol',  f3(ketVolMl)+' mL');
+    st('ket-nacl', ketNacl>=0 ? f2(ketNacl)+' mL' : '<span style="color:#c0392b">exceeds 12 mL \u2014 use larger syringe</span>');
+    st('ket-total-dose','Total ketamine: '+Math.round(ketTotalMcg)+' mcg ('+f2(ketTotalMcg/1000)+' mg) &nbsp;\u2502&nbsp; Ketamine '+f3(ketVolMl)+' mL + NaCl '+(ketNacl>=0?f2(ketNacl):'\u2014')+' mL \u2192 12 mL syringe \u2192 run at 1 mL/hr = 2 mcg/kg/min');
+    // Combined Fentanyl + Ketamine CRI: single 30 mL syringe (1 mL/hr = F 1 mcg/kg/hr + K 2 mcg/kg/min)
+    var fkFentVol=0.6*w;
+    var fkKetVol=0.036*w;
+    var fkSaline=30-fkFentVol-fkKetVol;
+    st('fentket-vol-f', f2(fkFentVol)+' mL');
+    st('fentket-vol-k', f3(fkKetVol)+' mL');
+    st('fentket-nacl', fkSaline>=0 ? f2(fkSaline)+' mL' : '<span style="color:#c0392b">exceeds 30 mL \u2014 use larger syringe</span>');
+    st('fentket-total-dose','Fentanyl '+f2(fkFentVol)+' mL + Ketamine '+f3(fkKetVol)+' mL + NaCl '+(fkSaline>=0?f2(fkSaline):'\u2014')+' mL \u2192 30 mL syringe. Loading dose: fentanyl 5 mcg/kg ('+f2((5*w)/50)+' mL) + ketamine 0.5 mg/kg ('+f2((0.5*w)/100)+' mL) IV.');
+    // Lidocaine prep: 24h x wt x 25 mcg/kg/hr = total mcg; /20,000 mcg per mL (20mg/mL) = drug mL; NaCl = 24 - drug mL
+    var lidoTotalMcg=24*w*25;
+    var lidoVolMl=lidoTotalMcg/20000;
+    var lidoNacl=24-lidoVolMl;
+    st('lido-vol',  f2(lidoVolMl)+' mL');
+    st('lido-nacl', lidoNacl>=0 ? f2(lidoNacl)+' mL' : '<span style="color:#c0392b">exceeds 24 mL \u2014 use larger syringe</span>');
+    st('lido-total-dose','Total lidocaine: '+Math.round(lidoTotalMcg)+' mcg ('+f2(lidoTotalMcg/1000)+' mg) &nbsp;\u2502&nbsp; Lidocaine '+f2(lidoVolMl)+' mL + NaCl '+(lidoNacl>=0?f2(lidoNacl):'\u2014')+' mL \u2192 24 mL syringe \u2192 run at 1 mL/hr = 25 mcg/kg/hr');
+    // Dexdomitor prep: 24h x wt x 1 mcg/kg/hr = total mcg; /500 mcg per mL (0.5mg/mL) = drug mL; NaCl = 24 - drug mL
+    var dexTotalMcg=24*w*1;
+    var dexVolMl=dexTotalMcg/500;
+    var dexNacl=24-dexVolMl;
+    st('dex-vol',  f2(dexVolMl)+' mL');
+    st('dex-nacl', dexNacl>=0 ? f2(dexNacl)+' mL' : '<span style="color:#c0392b">exceeds 24 mL — use larger syringe</span>');
+    st('dex-total-dose','Total Dexdomitor: '+Math.round(dexTotalMcg)+' mcg ('+f2(dexTotalMcg/1000)+' mg) &nbsp;│&nbsp; Dexdomitor '+f2(dexVolMl)+' mL + NaCl '+(dexNacl>=0?f2(dexNacl):'—')+' mL → 24 mL syringe → run at 1 mL/hr = 1 mcg/kg/hr');
+    // Qty display for all oral meds
+    MEDS.forEach(function(d){calcQty(d.id);});
+    calcNetIVF();
+    st('cr-fent',f1(w*3)+'\u2013'+f1(w*5)+' mcg/hr');
+    st('cr-ket', f1(w*2)+'\u2013'+f1(w*5)+' mcg/min');
+    st('cr-lido',f1(w*25)+'\u2013'+f1(w*50)+' mcg/min');
+    st('cr-dex', f1(w*1)+'\u2013'+f1(w*3)+' mcg/hr');
+    st('cr-meto',f2(w*2/24/5)+' mL/hr <small style="color:var(--mu)">(5 mg/mL soln)</small>');
+  } else {
+    calcNetIVF();
+    st('cr-fent','3\u20135 mcg/kg/hr');
+    st('cr-ket', '2\u20135 mcg/kg/min');
+    st('cr-lido','25\u201350 mcg/kg/min');
+    st('cr-dex', '1\u20133 mcg/kg/hr');
+    st('cr-meto','2 mg/kg/day');
+    st('fent-vol','\u2014'); st('fent-nacl','\u2014'); st('fent-total-dose','Enter weight above to calculate prep');
+    st('ket-vol','\u2014');  st('ket-nacl','\u2014');  st('ket-total-dose','Enter weight above to calculate prep');
+    st('fentket-vol-f','\u2014'); st('fentket-vol-k','\u2014'); st('fentket-nacl','\u2014'); st('fentket-total-dose','Enter weight above to calculate prep');
+    st('lido-vol','\u2014'); st('lido-nacl','\u2014'); st('lido-total-dose','Enter weight above to calculate prep');
+    st('dex-vol','\u2014');  st('dex-nacl','\u2014');  st('dex-total-dose','Enter weight above to calculate prep');
+    MEDS.forEach(function(d){calcQty(d.id);});
+  }
+}
+
+function toggleRow(cb,id){
+  var row=document.getElementById('row-'+id);
+  if(!row)return;
+  if(cb.checked)row.classList.add('active');
+  else row.classList.remove('active');
+}
+
+function toggleCri(cb,id,prepId){
+  var row=document.getElementById(id);
+  if(row) row.classList.toggle('active',cb.checked);
+  if(prepId){
+    var prep=document.getElementById(prepId);
+    if(prep) prep.style.display=cb.checked?'table-row':'none';
+  }
+  calcNetIVF();
+}
+
+function calcNetIVF(){
+  var w=parseFloat((gel('wt')||{}).value)||0;
+  var ratePerKg=parseFloat((gel('ivf-rate-sel')||{value:'40'}).value)||40;
+  var ivfType=(gel('ivf-type-sel')||{value:'Plasmalyte'}).value||'Plasmalyte';
+  var grossMlHr=w>0?ratePerKg*w/24:0;
+
+  // Update gross display
+  st('cr-plas', w>0?'= '+f1(grossMlHr)+' mL/hr':'— mL/hr');
+  st('plas-gross', w>0?f1(grossMlHr)+' mL/hr':'—');
+  st('sum-ivf-type', ivfType);
+
+  // Sum active CRI run-at rates
+  var criRateIds=['fent','ket','fentket','lido','dex','meto','other'];
+  var totalCri=0;
+  criRateIds.forEach(function(id){
+    var row=gel('cri-'+id);
+    var active=row&&(row.classList.contains('active')||id==='other'&&row.classList.contains('active'));
+    if(!active) return;
+    var inp=gel('r-'+id);
+    var v=inp?parseFloat(inp.value):NaN;
+    if(!isNaN(v)&&v>0) totalCri+=v;
+  });
+  // Sum custom CRI rows
+  customCriIds.forEach(function(n){
+    var row=gel('cri-custom-'+n);
+    if(!row||!row.classList.contains('active')) return;
+    var inp=gel('r-custom-'+n);
+    var v=inp?parseFloat(inp.value):NaN;
+    if(!isNaN(v)&&v>0) totalCri+=v;
+  });
+
+  var net=grossMlHr-totalCri;
+  // Update net display in LRS row
+  if(w===0){
+    st('net-ivf-rate','—');
+    st('sum-gross','—'); st('sum-cri','—'); st('sum-net','—');
+  } else if(net<0){
+    st('net-ivf-rate','<span style="color:#c0392b;font-weight:700;">&#9888; CRI exceeds rate by '+f1(Math.abs(net))+' mL/hr</span>');
+    st('sum-gross',f1(grossMlHr)+' mL/hr');
+    st('sum-cri',f1(totalCri)+' mL/hr');
+    st('sum-net','<span style="color:#c0392b;">&#8722;'+f1(Math.abs(net))+' mL/hr &#9888;</span>');
+  } else {
+    st('net-ivf-rate',f1(net)+' mL/hr');
+    st('sum-gross',f1(grossMlHr)+' mL/hr');
+    st('sum-cri',totalCri>0?f1(totalCri)+' mL/hr':'0 mL/hr');
+    st('sum-net',f1(net)+' mL/hr');
+  }
+}
+
+function onDcBy(radio){
+  var er=document.getElementById('er-chkl');
+  if(er) er.style.display=radio.value==='er'?'block':'none';
+}
+
+function toggleKCl(cb){
+  var d=document.getElementById('kcl-vol');
+  if(d) d.style.display=cb.checked?'flex':'none';
+}
+
+function toggleCPR(){
+  var cb=gel('cpr-cb'),lbl=gel('cpr-lbl');
+  var dnr=gel('dnr-cb'),dnrL=gel('dnr-lbl');
+  if(cb.checked){dnr.checked=false;lbl.style.cssText='border-color:#27ae60;background:#e8f8ed;';dnrL.style.cssText='';}
+  else{lbl.style.cssText='';}
+}
+function toggleDNR(){
+  var cb=gel('dnr-cb'),lbl=gel('dnr-lbl');
+  var cpr=gel('cpr-cb'),cprL=gel('cpr-lbl');
+  if(cb.checked){cpr.checked=false;lbl.style.cssText='border-color:#c0392b;background:#fde8e8;color:#c0392b;font-weight:900;';cprL.style.cssText='';}
+  else{lbl.style.cssText='';}
+}
+
+var now=new Date();
+var di=gel('pt-date'); if(di)di.value=now.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'numeric'});
+var ti=gel('pt-time'); if(ti)ti.value=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+// ---- FREQ CLEANUP: remove unwanted options from all .fq selects ----
+var REMOVE_FQ=['q48h','q72h','SID','BID','TID','QID'];
+document.querySelectorAll('select.fq').forEach(function(sel){
+  Array.from(sel.options).forEach(function(opt){
+    if(REMOVE_FQ.indexOf(opt.text)!==-1) sel.removeChild(opt);
+  });
+  // add 'other' if not present
+  if(!Array.from(sel.options).some(function(o){return o.text==='other';})){
+    var o=document.createElement('option'); o.text='other'; sel.appendChild(o);
+  }
+});
+
+// ---- QTY DISPLAY: parse formulation strength, show # tabs/caps/mL ----
+function parseForm(s){
+  var mSolid=s.match(/^([\d.]+)\s*mg\s+(tab|cap)/i);
+  if(mSolid) return {strength:parseFloat(mSolid[1]),unit:mSolid[2]};
+  var mLiq=s.match(/^([\d.]+)\s*mg\/mL\s*(oral|liquid|susp)?/i);
+  if(mLiq) return {strength:parseFloat(mLiq[1]),unit:'mL'};
+  return null;
+}
+
+function parseQty(v){
+  // accepts 1, 0.5, .25, 1/2, 1 1/2, ½, ¼, ¾
+  v=String(v||'').trim().replace(/½/g,' 1/2').replace(/¼/g,' 1/4').replace(/¾/g,' 3/4').trim();
+  if(!v) return null;
+  var m=v.match(/^(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?$/);
+  if(!m||(!m[1]&&!m[2])) return null;
+  var n=m[1]?parseFloat(m[1]):0;
+  if(m[2]){ if(+m[3]===0) return null; n+=parseInt(m[2],10)/parseInt(m[3],10); }
+  return n;
+}
+
+function calcQty(mid){
+  var w=parseFloat((gel('wt')||{}).value)||0;
+  var sel=gel('fm-'+mid);
+  var qtyEl=gel('qty-'+mid);
+  if(!sel||!qtyEl){return;}
+  var d=MEDS.filter(function(m){return m.id===mid;})[0];
+  if(!d) return;
+  var form=parseForm(sel.value);
+  if(!form){qtyEl.style.display='none';return;}
+  qtyEl.style.display='';
+  var inp=gel('qin-'+mid);
+  gel('qunit-'+mid).textContent=form.unit;
+  // suggestion: largest whole cap / quarter tab / 0.1 mL that stays within range (else nearest)
+  if(inp.dataset.manual!=='1'){
+    var hiMg=w?(d.dH!==null?d.dH*w:(d.dL!==null?d.dL*w:null)):null;
+    var loMg=w&&d.dL!==null?d.dL*w:null;
+    var step=/cap/i.test(form.unit)?1:(form.unit==='mL'?(hiMg&&hiMg/form.strength<1?0.01:0.1):0.25);
+    var sug=null;
+    if(hiMg){
+      sug=Math.floor(hiMg/form.strength/step+1e-9)*step;
+      if(!sug||(loMg!==null&&sug*form.strength<loMg*0.995)){
+        // nothing fits: take the count just below or just above, whichever lands closer to the range
+        var dn=Math.max(step,sug), up=dn+step, lo=loMg!==null?loMg:hiMg;
+        sug=(lo-dn*form.strength)<=(up*form.strength-hiMg)?dn:up;
+      }
+      sug=+sug.toFixed(2);
+    }
+    inp.value=sug?String(sug):'';
+  }
+  inp.classList.toggle('manual',inp.dataset.manual==='1');
+  gel('qreset-'+mid).style.display=inp.dataset.manual==='1'?'':'none';
+  var mgEl=gel('qmg-'+mid);
+  var q=parseQty(inp.value);
+  if(q===null){mgEl.textContent='';mgEl.classList.remove('off');return;}
+  var mg=q*form.strength;
+  var txt='= '+(+mg.toFixed(2))+' mg';
+  var off=false;
+  if(w){
+    var mgkg=mg/w;
+    txt+=' ('+(+mgkg.toFixed(2))+' mg/kg)';
+    // range drugs: flag outside lo–hi; single-dose drugs: flag if >25% off (allows rounding to a real tab size)
+    var lo=d.dH!==null?d.dL:d.dL*0.75, hi=d.dH!==null?d.dH:d.dL*1.25;
+    if(d.dL!==null&&(mgkg<lo*0.995||mgkg>hi*1.005)) off=true;
+  }
+  mgEl.textContent=txt;
+  mgEl.classList.toggle('off',off);
+  mgEl.title=off?(d.dH!==null?'Outside listed dose range':'More than 25% from listed dose'):'';
+}
+
+
+// Initialize dose columns: show — until weight is entered; mg/kg in small ref text
+MEDS.forEach(function(d){
+  if(d.dL===null&&d.dH===null) return;
+  var lo=gel('dlo-'+d.id); if(lo) lo.textContent='—';
+  var hi=gel('dhi-'+d.id); if(hi) hi.textContent='—';
+  var loV=gel('vlo-'+d.id); if(loV) loV.textContent=d.dL!==null?d.dL+' mg/kg':'';
+  var hiV=gel('vhi-'+d.id); if(hiV) hiV.textContent=d.dH!==null?d.dH+' mg/kg':'';
+});
+
+// Wire up formulation selects: assign id + qty div + onchange
+MEDS.forEach(function(d){
+  var row=gel('row-'+d.id);
+  if(!row) return;
+  var fmCell=row.cells[4];
+  if(!fmCell) return;
+  var sel=fmCell.querySelector('select');
+  if(!sel) return;
+  sel.id='fm-'+d.id;
+  var qty=document.createElement('div');
+  qty.id='qty-'+d.id;
+  qty.className='qty-disp';
+  qty.innerHTML='<span>Give</span><input type="text" inputmode="decimal" class="qty-in" id="qin-'+d.id+'" placeholder="#" title="Number of tabs/caps/mL to give (e.g. 1, 0.5, 1 1/2)">'+
+    '<span id="qunit-'+d.id+'"></span><button class="qty-reset no-print" id="qreset-'+d.id+'" title="Reset to calculated amount" style="display:none">&#8634;</button>'+
+    '<span class="qty-mg" id="qmg-'+d.id+'"></span>';
+  fmCell.appendChild(qty);
+  var inp=gel('qin-'+d.id);
+  inp.oninput=function(){inp.dataset.manual=inp.value.trim()?'1':'';calcQty(d.id);};
+  gel('qreset-'+d.id).onclick=function(){inp.dataset.manual='';calcQty(d.id);};
+  // new strength = new tab count, so drop any manual entry
+  sel.onchange=function(){inp.dataset.manual='';calcQty(d.id);};
+});
+
+recalc();
+
+function toggleFilter(btn, tblId) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  const on = tbl.classList.toggle('filter-on');
+  btn.classList.toggle('on', on);
+  btn.textContent = on ? 'Show all' : 'Selected only';
+}
+
+window.addEventListener('beforeprint',function(){
+  document.querySelectorAll('#med-tbl tbody tr.sh').forEach(function(sh){
+    var next=sh.nextElementSibling,has=false;
+    while(next&&!next.classList.contains('sh')){
+      if(next.classList.contains('mr')&&next.classList.contains('active'))has=true;
+      next=next.nextElementSibling;
+    }
+    sh.style.display=has?'':'none';
+  });
+});
+window.addEventListener('afterprint',function(){
+  document.querySelectorAll('#med-tbl tbody tr.sh').forEach(function(sh){sh.style.display='';});
+});
+</script>
+</body>
+</html>

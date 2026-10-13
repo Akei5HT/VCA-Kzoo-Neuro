@@ -3,9 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VCA Neuro Tools</title>
-<meta http-equiv="refresh" content="0; url=Neuro_tool.html">
-<style>body{font-family:Arial,sans-serif;background:#fff;color:#1f5673;padding:24px;}</style>
+<title>VCA Kalamazoo Neurology</title>
+<style>
+:root{--p:#00539b;--ac:#e8f1fa;--bg:#f4f6f9;--sf:#fff;--bd:#ccd5e0;--tx:#1a2634;--mu:#5b6876}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',"Helvetica Neue",Arial,sans-serif;color:var(--tx);background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--sf);border-bottom:3px solid var(--p);padding:18px 20px}
+.hwrap{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:16px}
+header img{height:46px;width:auto}
+header h1{font-size:1.25rem;color:var(--p)}
+header .sub{font-size:.8rem;color:var(--mu);margin-top:2px}
+main{flex:1;width:100%;max-width:900px;margin:0 auto;padding:40px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-content:start}
+a.tile{display:flex;flex-direction:column;gap:10px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:28px 26px;text-decoration:none;color:inherit;transition:box-shadow .15s,border-color .15s,transform .1s}
+a.tile:hover,a.tile:focus-visible{border-color:var(--p);box-shadow:0 4px 18px rgba(0,83,155,.15);transform:translateY(-2px);outline:none}
+.icon{width:52px;height:52px;border-radius:12px;background:var(--ac);display:grid;place-items:center}
+.icon svg{width:28px;height:28px;stroke:var(--p);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.t{font-size:1.45rem;font-weight:700;color:var(--p)}
+.who{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu)}
+.d{font-size:.92rem;color:var(--mu);line-height:1.45}
+.go{margin-top:auto;padding-top:6px;font-weight:600;color:var(--p)}
+footer{text-align:center;font-size:.75rem;color:var(--mu);padding:18px 20px 28px}
+@media (max-width:640px){main{grid-template-columns:1fr;padding:24px 16px}}
+</style>
 </head>
-<body><p>Opening <a href="Neuro_tool.html">VCA Neuro Tools</a>&hellip;</p></body>
+<body>
+<header><div class="hwrap">
+<img src="data:image/png;base64,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" alt="VCA Animal Hospitals">
+<div><h1>Kalamazoo Neurology</h1><div class="sub">VCA Veterinary Specialty &amp; Emergency Center of Kalamazoo</div></div>
+</div></header>
+<main>
+<a class="tile" href="Neuro_tool.html">
+<div class="icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+<div class="who">For staff</div>
+<div class="t">Neuro Tools</div>
+<div class="d">Exam, discharge, ICU admit &amp; transfer, treatment sheets, anesthesia drug sheets, MRI protocol planner and surgery tools.</div>
+<div class="go">Open Neuro Tools &rarr;</div>
+</a>
+<a class="tile" href="handouts/index.html">
+<div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M8 9h2"/></svg></div>
+<div class="who">For pet owners</div>
+<div class="t">Client Info</div>
+<div class="d">Printable one-page handouts on neurological conditions, tests and home care, plus our specialist referral directory.</div>
+<div class="go">Open Client Info &rarr;</div>
+</a>
+</main>
+<footer>5348 S. Westnedge Ave., Portage, MI 49002 &middot; (269) 381-5228 &middot; vseck.neuro@vca.com</footer>
+</body>
 </html>

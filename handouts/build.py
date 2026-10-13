@@ -157,7 +157,7 @@ def render_page(meta, body_html):
 """
 
 
-def render_index(items):
+def render_index(items, directory=None):
     by_cat = {}
     for meta in items:
         by_cat.setdefault(meta["category"], []).append(meta)
@@ -177,6 +177,18 @@ def render_index(items):
                 f'<a class="pdf" href="pdf/{m["slug"]}.pdf" download>Download PDF</a></div></div>'
             )
         sections.append(f'<section><h2>{html.escape(cat)}</h2><div class="grid">{"".join(cards)}</div></section>')
+    if directory:
+        names = ", ".join(d["name"] for d in directory["departments"])
+        pages = directory.get("pages")
+        info = f"{pages} page{'s' if pages != 1 else ''} · PDF" if pages else "PDF"
+        sections.insert(0,
+            f'<section><h2>Referral Directory</h2><div class="grid">'
+            f'<div class="card" data-q="{html.escape(("specialist referral directory " + names).lower())}">'
+            f'<div class="t">{html.escape(directory["title"])}</div>'
+            f'<div class="m">{html.escape(names)} · {info}</div>'
+            f'<div class="links"><a href="specialists.html">View / Print</a>'
+            f'<a class="pdf" href="pdf/specialists.pdf" download>Download PDF</a></div></div>'
+            f'</div></section>')
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,6 +210,103 @@ const q=document.getElementById('q');
 q.addEventListener('input',()=>{{const v=q.value.trim().toLowerCase();
 document.querySelectorAll('.card').forEach(c=>c.style.display=!v||c.dataset.q.includes(v)?'':'none');
 document.querySelectorAll('section').forEach(s=>s.style.display=[...s.querySelectorAll('.card')].some(c=>c.style.display!=='none')?'':'none');}});
+</script>
+</body>
+</html>
+"""
+
+
+DIRECTORY_CSS = """
+.jump{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.jump a{font-size:9pt;padding:3px 9px;border:1px solid var(--rule);border-radius:12px;color:var(--brand);text-decoration:none}
+.search{width:100%;padding:7px 10px;font:inherit;border:1px solid var(--rule);border-radius:6px;margin:0 0 10px}
+.intro{color:var(--muted);margin:0 0 8px}
+.dept{break-inside:auto}
+.dept h2 .role{font-weight:400;color:var(--muted);font-size:9pt}
+.hosp{break-inside:avoid;padding:4px 0 5px;border-bottom:1px dotted var(--rule)}
+.hosp:last-child{border-bottom:0}
+.hosp .n{font-weight:700}
+.hosp .d{font-style:italic}
+.hosp a{color:inherit;text-decoration:none}
+.hosp a.tel{color:var(--brand);font-weight:600;white-space:nowrap}
+.hosp .note{color:var(--muted);font-size:8.5pt}
+@media screen{.hosp a.map{text-decoration:underline dotted;text-underline-offset:2px}}
+@media print{.jump,.search{display:none}}
+"""
+
+
+def tel(phone):
+    return "tel:+1" + re.sub(r"\D", "", phone)
+
+
+def maps(name, address):
+    from urllib.parse import quote
+    return "https://www.google.com/maps/search/?api=1&query=" + quote(f"{name}, {address}")
+
+
+def render_directory(data):
+    e = html.escape
+    jump, depts = [], []
+    for i, dept in enumerate(data["departments"]):
+        anchor = f"d{i}"
+        jump.append(f'<a href="#{anchor}">{e(dept["name"])}</a>')
+        rows = []
+        for h in dept["hospitals"]:
+            locs = [(h["address"], h["phone"])]
+            if h.get("address2"):
+                locs.append((h["address2"], h["phone2"]))
+            loc_html = "".join(
+                f'<div><a class="map" href="{e(maps(h["name"], a))}" target="_blank" rel="noopener">{e(a)}</a>'
+                f' &middot; <a class="tel" href="{tel(p)}">{e(p)}</a></div>'
+                for a, p in locs
+            )
+            note = f'<div class="note">{e(h["note"])}</div>' if h.get("note") else ""
+            q = " ".join([dept["name"], h["name"], h["doctors"], h["address"], h.get("address2", "")]).lower()
+            rows.append(
+                f'<div class="hosp" data-q="{e(q)}"><div class="n">{e(h["name"])}</div>'
+                f'<div class="d">{e(h["doctors"])}</div>{loc_html}{note}</div>'
+            )
+        depts.append(
+            f'<section class="dept" id="{anchor}"><h2>{e(dept["name"])} '
+            f'<span class="role">&middot; {e(dept["role"])}</span></h2>{"".join(rows)}</section>'
+        )
+    t = e(data["title"])
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{t}</title>
+<style>{PAGE_CSS}{DIRECTORY_CSS}</style>
+</head>
+<body>
+<div class="toolbar">
+  <a href="index.html">&larr; All handouts</a>
+  <button class="primary" onclick="window.print()">Print</button>
+  <a href="pdf/specialists.pdf" download>Download PDF</a>
+</div>
+<div class="sheet">
+<header>
+  <img src="assets/vca-logo.png" alt="VCA Animal Hospitals">
+  <div class="clinic"><b>{CLINIC}</b><br>Neurology Department</div>
+</header>
+<h1>{t}</h1>
+<p class="intro">{e(data["intro"])}</p>
+<nav class="jump">{"".join(jump)}</nav>
+<input class="search" id="q" type="search" placeholder="Search by specialty, hospital, doctor or city" aria-label="Search specialists">
+<div class="body">
+{"".join(depts)}
+</div>
+<footer>
+  <span>Compiled by {AUTHOR}</span>
+  <span>{ADDRESS} &middot; P {PHONE} &middot; {EMAIL} &middot; {WEB}</span>
+</footer>
+</div>
+<script>
+const q=document.getElementById('q');
+q.addEventListener('input',()=>{{const v=q.value.trim().toLowerCase();
+document.querySelectorAll('.hosp').forEach(h=>h.style.display=!v||h.dataset.q.includes(v)?'':'none');
+document.querySelectorAll('.dept').forEach(s=>s.style.display=[...s.querySelectorAll('.hosp')].some(h=>h.style.display!=='none')?'':'none');}});
 </script>
 </body>
 </html>
@@ -233,7 +342,22 @@ def main():
             from pypdf import PdfReader
             meta["pages"] = len(PdfReader(str(pdf_path)).pages)
         items.append(meta)
-    (ROOT / "index.html").write_text(render_index(items), encoding="utf-8")
+    directory = None
+    data_file = ROOT / "data" / "specialists.json"
+    if data_file.exists():
+        import json
+        directory = json.loads(data_file.read_text(encoding="utf-8"))
+        out = ROOT / "specialists.html"
+        pdf_path = PDF / "specialists.pdf"
+        if not only or "specialists" in only:
+            out.write_text(render_directory(directory), encoding="utf-8")
+        if want_pdf and (not only or "specialists" in only):
+            directory["pages"] = make_pdf(out, pdf_path)
+            print(f"{directory['pages']}p  specialists")
+        elif pdf_path.exists():
+            from pypdf import PdfReader
+            directory["pages"] = len(PdfReader(str(pdf_path)).pages)
+    (ROOT / "index.html").write_text(render_index(items, directory), encoding="utf-8")
     print(f"{len(items)} handouts -> index.html")
 
 

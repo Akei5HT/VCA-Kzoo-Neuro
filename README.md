@@ -7,3 +7,6 @@ https://akei5ht.github.io/VCA-Kzoo-Neuro/handouts/
 
 Edit the Markdown in `handouts/src/`, then rebuild with `python3 handouts/build.py`
 (needs pandoc, Google Chrome and `pypdf`). The build flags any handout over 2 pages.
+
+Specialist Referral Directory (`handouts/specialists.html`) is generated from
+`handouts/data/specialists.json` — edit hospitals/doctors/phones there and rebuild.

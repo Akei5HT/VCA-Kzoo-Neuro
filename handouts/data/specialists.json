@@ -1,0 +1,86 @@
+{
+  "title": "Specialist Referral Directory",
+  "intro": "Veterinary specialists outside neurology in Michigan and northern Indiana that we commonly refer to. Please call the hospital to confirm availability and whether a referral from your veterinarian is needed.",
+  "departments": [
+    {
+      "name": "Internal Medicine",
+      "role": "Internist",
+      "hospitals": [
+        {"name": "Animal Emergency and Specialty Hospital – Byron Center", "doctors": "Dr. Andrzej Ogrodny", "address": "6820 Edgeview Ave SW, Byron Center, MI", "phone": "(616) 537-1402"},
+        {"name": "BluePearl Pet Hospital – Grand Rapids", "doctors": "Dr. Yoojin Kim, Dr. Kristopher Sharpe", "address": "2500 East Paris Ave SE, Grand Rapids, MI", "phone": "(616) 284-5300"},
+        {"name": "Michigan State University College of Veterinary Medicine – Small Animal Clinic", "doctors": "Dr. Harry Cridge, Dr. Sara Jablonski, and others", "address": "736 Wilson Road, East Lansing, MI", "phone": "(517) 353-5420"},
+        {"name": "Oakland Veterinary Referral Services", "doctors": "Dr. Timothy Becker, Dr. Hannah Clark, Dr. Lauren Kustasz, and others", "address": "1400 S Telegraph Rd, Bloomfield Hills, MI", "phone": "(248) 334-6877"},
+        {"name": "Northeast Indiana Veterinary Emergency & Specialty Hospital", "doctors": "Dr. Amy Totten, Dr. Alexandra Wood", "address": "5818 Maplecrest Rd, Fort Wayne, IN", "phone": "(260) 426-1062"}
+      ]
+    },
+    {
+      "name": "Rehabilitation",
+      "role": "Rehab specialist",
+      "hospitals": [
+        {"name": "Stride and Mobility Center at Peaceful Moments Veterinary Care", "doctors": "Dr. Kelly Flanagan; Laura Mellinger, LVT, CCAT, CPEP", "address": "3431 E Kilgore Rd, Kalamazoo, MI", "phone": "(269) 808-6073"},
+        {"name": "Cascade Hospital for Animals", "doctors": "Dr. Gregory Paplawsky; Emily, LVT, Certified Canine Rehab", "address": "6730 Cascade Rd SE, Grand Rapids, MI", "phone": "(616) 949-0960"},
+        {"name": "Animal Rehabilitation Facility", "doctors": "Dr. Mary Cardeccia, Dr. Luiza Mariani", "address": "8040 4th St, Dexter, MI 48130", "phone": "(734) 253-2722"},
+        {"name": "Michiana Animal Rehab Services", "doctors": "Dr. Sara Granberg; Amber Sheppard", "address": "515 East Warren Street, Middlebury, IN", "phone": "(574) 825-9578"},
+        {"name": "Pawsitive Steps Rehabilitation and Sports Medicine", "doctors": "Dr. Tari Kern, Dr. Jenna MacDonell", "address": "1894 Star Batt Drive, Rochester Hills, MI", "phone": "(248) 564-0309"},
+        {"name": "St. Joe Center Veterinary Hospital", "doctors": "Dr. Cassie Schiller-Rauch", "address": "6358 St Joe Center Rd, Fort Wayne, IN", "phone": "(260) 485-1602"},
+        {"name": "Michigan State University College of Veterinary Medicine – Small Animal Clinic", "doctors": "Dr. Sarah Shull", "address": "736 Wilson Road, East Lansing, MI", "phone": "(517) 353-5420"}
+      ]
+    },
+    {
+      "name": "Behavior",
+      "role": "Behaviorist",
+      "hospitals": [
+        {"name": "Animal Behavior Consultants of Michigan", "doctors": "Dr. Jill Sackman", "address": "1430 Knapp St NE, Grand Rapids, MI", "phone": "(616) 264-2695", "note": "Closest location"},
+        {"name": "Oakland Veterinary Referral Services", "doctors": "Dr. Teresa DePorter, Dr. Adrienne Pesavento", "address": "1400 S Telegraph Rd, Bloomfield Hills, MI", "phone": "(248) 334-6877"},
+        {"name": "Bay Area Pet Hospital (Traverse City) or Animal Clinic of Holland", "doctors": "Dr. Stacy Zuverink", "address": "844 E Front St, Traverse City, MI", "phone": "(231) 922-0911", "address2": "1106 Washington Ave, Holland, MI", "phone2": "(616) 396-6543"},
+        {"name": "Purdue University College of Veterinary Medicine – Small Animal Hospital", "doctors": "Dr. Niwako Ogata", "address": "625 Harrison Street, West Lafayette, IN", "phone": "(765) 494-1107"},
+        {"name": "Kryder and Harr Animal Hospital", "doctors": "Dr. Mariah Covey", "address": "13471 SR 23, Granger, IN", "phone": "(574) 277-6533"}
+      ]
+    },
+    {
+      "name": "Oncology",
+      "role": "Oncologist",
+      "hospitals": [
+        {"name": "BluePearl Pet Hospital – Grand Rapids", "doctors": "Dr. Christine Swanson", "address": "2500 E Paris Ave SE, Grand Rapids, MI", "phone": "(616) 284-5300"},
+        {"name": "Animal Cancer and Imaging Center", "doctors": "Dr. Joyce Obradovich, Dr. Jennifer Dec", "address": "8560 North Canton Center Road, Canton, MI", "phone": "(734) 459-6040"},
+        {"name": "Emergency Veterinary Hospital & Specialty Services – Ann Arbor", "doctors": "Dr. McDaniels", "address": "5245 Jackson Road, Suite E, Ann Arbor, MI", "phone": "(734) 369-6446"},
+        {"name": "Michigan State University College of Veterinary Medicine", "doctors": "Dr. Kelly Hume, Dr. Alison Masyr", "address": "736 Wilson Road, East Lansing, MI", "phone": "(517) 353-5420"},
+        {"name": "Oakland Veterinary Referral Services", "doctors": "Dr. Erin Bannink, Dr. Jessica Ottnod, Dr. Michele Sauerbrey", "address": "1400 S Telegraph Rd, Bloomfield Hills, MI", "phone": "(248) 334-6877"}
+      ]
+    },
+    {
+      "name": "Cardiology",
+      "role": "Cardiologist",
+      "hospitals": [
+        {"name": "Animal Emergency and Specialty Hospital – Byron Center", "doctors": "Dr. Mark Harmon", "address": "6820 Edgeview Ave SW, Byron Center, MI", "phone": "(616) 537-1402"},
+        {"name": "Mid-Michigan Veterinary Cardiology", "doctors": "Dr. Christian Weder", "address": "1290 W Grand River Ave, Williamston, MI", "phone": "(517) 708-2538"},
+        {"name": "Veterinary Cardiology Consultants", "doctors": "Dr. William Brown, Dr. Joanne DeSana", "address": "24360 Novi Road, Suite B, Novi, MI", "phone": "(248) 946-4322", "address2": "278 East Auburn Rd, Rochester Hills, MI", "phone2": "(248) 402-4322"},
+        {"name": "Michigan State University College of Veterinary Medicine – Small Animal Clinic", "doctors": "Dr. Tamilselvan Gunasekaran and others", "address": "736 Wilson Road, East Lansing, MI", "phone": "(517) 353-5420"},
+        {"name": "Oakland Veterinary Referral Services", "doctors": "Dr. Timothy Becker", "address": "1400 S Telegraph Rd, Bloomfield Hills, MI", "phone": "(248) 334-6877"},
+        {"name": "Purdue University College of Veterinary Medicine – Small Animal Hospital", "doctors": "Cardiology service", "address": "625 Harrison Street, West Lafayette, IN", "phone": "(765) 494-1107"},
+        {"name": "Northeast Indiana Veterinary Emergency & Specialty Hospital", "doctors": "Dr. Eryn Leffers", "address": "5818 Maplecrest Rd, Fort Wayne, IN", "phone": "(260) 426-1062"}
+      ]
+    },
+    {
+      "name": "Dermatology",
+      "role": "Dermatologist",
+      "hospitals": [
+        {"name": "Michigan State University College of Veterinary Medicine – Small Animal Clinic", "doctors": "Dr. Bailey Brame, Dr. Annette Petersen", "address": "736 Wilson Road, East Lansing, MI", "phone": "(517) 353-5420"},
+        {"name": "Allergy, Skin and Ear Clinic for Pets", "doctors": "Dr. Paul Bloom, Dr. Tatiana Matos Ponce de Leon", "address": "31205 Five Mile Service Dr, Livonia, MI", "phone": "(734) 339-2237"},
+        {"name": "Oakland Veterinary Referral Services", "doctors": "Dr. Ann Mattise, Dr. Annette Petersen", "address": "1400 S Telegraph Rd, Bloomfield Hills, MI", "phone": "(248) 334-6877"},
+        {"name": "Purdue University College of Veterinary Medicine – Small Animal Hospital", "doctors": "Dr. Paulo Gomes", "address": "625 Harrison Street, West Lafayette, IN", "phone": "(765) 494-1107"}
+      ]
+    },
+    {
+      "name": "Ophthalmology",
+      "role": "Ophthalmologist",
+      "hospitals": [
+        {"name": "Michigan State University College of Veterinary Medicine – Small Animal Clinic", "doctors": "Dr. Simon Petersen-Jones, Dr. András Komáromy, and others", "address": "736 Wilson Road, East Lansing, MI", "phone": "(517) 353-5420"},
+        {"name": "Animal Emergency and Specialty Hospital – Byron Center", "doctors": "Dr. Katelin Quantz", "address": "6820 Edgeview Ave SW, Byron Center, MI", "phone": "(616) 537-1402"},
+        {"name": "Oakland Veterinary Referral Services", "doctors": "Dr. Alex Schenk", "address": "1400 S Telegraph Rd, Bloomfield Hills, MI", "phone": "(248) 334-6877"},
+        {"name": "Purdue University College of Veterinary Medicine – Small Animal Hospital", "doctors": "Dr. Morgan Johnson, Dr. Shin Ae Park, Dr. Wendy Townsend", "address": "625 Harrison Street, West Lafayette, IN", "phone": "(765) 494-1107"},
+        {"name": "BluePearl Pet Hospital – Grand Rapids", "doctors": "Dr. Gwen Sila", "address": "2500 E Paris Ave SE, Grand Rapids, MI", "phone": "(616) 284-5300"}
+      ]
+    }
+  ]
+}

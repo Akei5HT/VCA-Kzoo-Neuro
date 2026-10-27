@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neuro Pathway Tracer</title>
+<style>
+  :root {
+    --bg: #f7f5f2; --panel: #ffffff; --ink: #1f2328; --muted: #6b7280; --line: #d9d4cc;
+    --brain: #efe7e1; --brain-edge: #cdbfb4; --stem: #e6dcd3; --cord: #e3d8ce; --grey: #cbbcae;
+    --node: #8a7f76; --accent: #2563eb; --good: #15803d; --bad: #b91c1c; --warn: #b45309;
+    --good-bg: #dcfce7; --bad-bg: #fee2e2; --warn-bg: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16181c; --panel: #1f2227; --ink: #e8e6e3; --muted: #9aa0a6; --line: #343840;
+      --brain: #2a2624; --brain-edge: #4a413b; --stem: #302a27; --cord: #2f2925; --grey: #4b423c;
+      --node: #9c928a; --accent: #60a5fa; --good: #4ade80; --bad: #f87171; --warn: #fbbf24;
+      --good-bg: #14532d; --bad-bg: #7f1d1d; --warn-bg: #713f12;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181c; --panel: #1f2227; --ink: #e8e6e3; --muted: #9aa0a6; --line: #343840;
+    --brain: #2a2624; --brain-edge: #4a413b; --stem: #302a27; --cord: #2f2925; --grey: #4b423c;
+    --node: #9c928a; --accent: #60a5fa; --good: #4ade80; --bad: #f87171; --warn: #fbbf24;
+    --good-bg: #14532d; --bad-bg: #7f1d1d; --warn-bg: #713f12;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 650; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  nav button { border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 6px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px; }
+  nav button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  nav button[hidden] { display: none; }
+  .spacer { flex: 1; }
+  main { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr); gap: 16px; padding: 16px; max-width: 1500px; margin: 0 auto; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .mapwrap { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px; position: relative; overflow: hidden; }
+  svg#map { width: 100%; height: calc(100vh - 120px); min-height: 420px; display: block; touch-action: none; cursor: grab; }
+  svg#map.dragging { cursor: grabbing; }
+  .maptools { position: absolute; top: 10px; left: 10px; display: flex; gap: 4px; }
+  .maptools button { font: inherit; font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; opacity: .9; }
+  .side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  #inset { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+  #inset svg { width: 210px; flex: none; }
+  #inset .cap { text-align: left; font-size: 13px; }
+  #inset[hidden] { display: none; }
+  #inset .cap { color: var(--muted); min-height: 1.3em; }
+  #inset .sec { cursor: default; }
+  #inset.ask .sec { cursor: pointer; }
+  #inset.ask { outline: 3px solid var(--accent); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow: auto; max-height: calc(100vh - 110px); flex: 1; }
+  #inset:not([hidden]) + .panel { max-height: calc(100vh - 290px); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  select, button.btn { font: inherit; font-size: 14px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; max-width: 100%; }
+  button.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  h2 { font-size: 16px; margin: 4px 0 8px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  ol.steps { padding-left: 24px; margin: 8px 0; }
+  ol.steps li { padding: 5px 8px; border-radius: 8px; margin: 2px 0; cursor: pointer; border-left: 4px solid transparent; }
+  ol.steps li.cur { background: var(--bg); border-left-color: var(--accent); }
+  ol.steps li.future { opacity: .45; }
+  .stepname { font-weight: 600; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); }
+  .sw { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+  table.find { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
+  table.find th, table.find td { border-bottom: 1px solid var(--line); padding: 6px 6px; text-align: left; }
+  td.g { background: var(--good-bg); } td.b { background: var(--bad-bg); } td.w { background: var(--warn-bg); }
+  .callout { border-left: 4px solid var(--accent); background: var(--bg); padding: 8px 10px; border-radius: 6px; margin: 10px 0; font-size: 14px; }
+  .callout.ok { border-color: var(--good); } .callout.no { border-color: var(--bad); }
+  .chk { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 14px; }
+  .layers { display: grid; gap: 4px; }
+  .layer { padding: 7px 10px; border-radius: 6px; border: 1px solid var(--line); cursor: pointer; background: var(--bg); }
+  .layer.done { background: var(--good-bg); cursor: default; }
+  .layer.wrong { animation: shake .3s; background: var(--bad-bg); }
+  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  a { color: var(--accent); }
+  .score { font-weight: 650; }
+  svg text { font-family: inherit; }
+  #map { --lbl: 22px; }
+  .lbl { font-size: var(--lbl); fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: calc(var(--lbl) * 0.28); stroke-linejoin: round; }
+  .rlbl { font-size: calc(var(--lbl) * 0.8); fill: var(--muted); letter-spacing: .04em; }
+  .hit { cursor: pointer; }
+  .flash-bad { animation: flash .5s; }
+  @keyframes flash { 50% { fill: var(--bad); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Neuro Pathway Tracer <span class="muted">· canine, dorsal view</span></h1>
+  <select id="groupSel" title="Pathway group"></select>
+  <nav id="tabs">
+    <button data-tab="learn" class="on">Learn</button>
+    <button data-tab="compare">Compare</button>
+    <button data-tab="trace">Trace quiz</button>
+    <button data-tab="lesion">Lesion</button>
+    <button data-tab="retina">Retina</button>
+    <button data-tab="foramina" hidden>Foramina</button>
+  </nav>
+  <span class="spacer"></span>
+  <label class="chk"><input type="checkbox" id="allLabels"> all labels</label>
+  <button class="btn" id="fontDown" title="Smaller map text">A−</button>
+  <button class="btn" id="fontUp" title="Bigger map text">A+</button>
+  <button class="btn" id="themeBtn" title="Toggle light/dark">◐</button>
+</header>
+<main>
+  <div class="mapwrap">
+    <svg id="map" role="img" aria-label="Schematic dorsal view of the canine brain and spinal cord"></svg>
+    <div class="maptools"><button id="fitPath" title="Zoom to the current pathway">⤢ pathway</button><button id="fitAll" title="Show the whole map">⤢ whole map</button><span class="muted" style="align-self:center">scroll = zoom · drag = pan</span></div>
+  </div>
+  <div class="side">
+    <div id="inset" hidden><svg viewBox="0 0 200 150" id="insetSvg"></svg><div><b>Spinal cord cross-section</b><div class="muted">viewed from caudal · dorsal up</div><div class="cap" id="insetCap"></div></div></div>
+    <div class="panel" id="panel"></div>
+  </div>
+</main>
+<script src="tracer_core.js"></script>
+<script>
+"use strict";
+const T = window.TracerCore;
+const SVGNS = "http://www.w3.org/2000/svg";
+const NEURON_COLORS = ["#2563eb", "#16a34a", "#ea580c", "#9333ea", "#db2777", "#0891b2", "#ca8a04", "#dc2626"];
+const PATH_COLORS = ["#2563eb", "#dc2626", "#16a34a", "#9333ea", "#ea580c", "#0891b2", "#db2777"];
+const svg = document.getElementById("map");
+const panel = document.getElementById("panel");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("npt_" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("npt_" + k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } },
+};
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const h = (html) => { const d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; };
+const baseId = (id) => id.replace(/_(L|R)$/, "");
+const sideOf = (id) => (T.NODES[id] ? T.NODES[id].side : null);
+const nodeName = (id) => T.NODES[id].label + (T.NODES[id].side ? ` (${T.SIDE_NAME[T.NODES[id].side]})` : "");
+
+// ---------------------------------------------------------------- view box: zoom / pan / fit
+const FULL = { x: 110, y: 0, w: 780, h: 1610 };
+let vb = { ...FULL };
+const applyVB = () => svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+function fitTo(points, pad = 70) {
+  if (!points.length) { vb = { ...FULL }; applyVB(); return; }
+  const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
+  // wider side padding: labels run sideways from their dots
+  let x0 = Math.min(...xs) - pad - 60, x1 = Math.max(...xs) + pad + 60, y0 = Math.min(...ys) - pad, y1 = Math.max(...ys) + pad;
+  const minW = 440; if (x1 - x0 < minW) { const c = (x0 + x1) / 2; x0 = c - minW / 2; x1 = c + minW / 2; }
+  const minH = 360; if (y1 - y0 < minH) { const c = (y0 + y1) / 2; y0 = c - minH / 2; y1 = c + minH / 2; }
+  vb = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }; applyVB();
+}
+let drag = null, dragged = false;
+svg.addEventListener("wheel", (ev) => {
+  ev.preventDefault();
+  const r = svg.getBoundingClientRect(), k = ev.deltaY > 0 ? 1.12 : 1 / 1.12;
+  const scale = Math.max(vb.w / r.width, vb.h / r.height);
+  const cx = vb.x + (ev.clientX - r.left - (r.width - vb.w / scale) / 2) * scale;
+  const cy = vb.y + (ev.clientY - r.top - (r.height - vb.h / scale) / 2) * scale;
+  vb = { x: cx - (cx - vb.x) * k, y: cy - (cy - vb.y) * k, w: vb.w * k, h: vb.h * k }; applyVB();
+}, { passive: false });
+svg.addEventListener("pointerdown", (ev) => { drag = { x: ev.clientX, y: ev.clientY, vb: { ...vb } }; dragged = false; });
+window.addEventListener("pointermove", (ev) => {
+  if (!drag) return;
+  const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+  if (Math.abs(dx) + Math.abs(dy) > 5) { dragged = true; svg.classList.add("dragging"); }
+  if (!dragged) return;
+  const r = svg.getBoundingClientRect(), scale = Math.max(drag.vb.w / r.width, drag.vb.h / r.height);
+  vb = { ...drag.vb, x: drag.vb.x - dx * scale, y: drag.vb.y - dy * scale }; applyVB();
+});
+window.addEventListener("pointerup", () => { drag = null; svg.classList.remove("dragging"); setTimeout(() => (dragged = false), 0); });
+document.getElementById("fitAll").onclick = () => fitTo(groupPoints());
+document.getElementById("fitPath").onclick = () => fitTo(state.focus || groupPoints());
+
+// ---------------------------------------------------------------- static anatomy
+const gAnat = el("g", {}, svg), gPath = el("g", {}, svg), gNodes = el("g", {}, svg), gTop = el("g", {}, svg);
+function drawAnatomy() {
+  const a = { fill: "var(--brain)", stroke: "var(--brain-edge)", "stroke-width": 2 };
+  el("ellipse", { cx: 395, cy: 430, rx: 150, ry: 330, ...a }, gAnat);
+  el("ellipse", { cx: 605, cy: 430, rx: 150, ry: 330, ...a }, gAnat);
+  el("ellipse", { cx: 470, cy: 118, rx: 26, ry: 40, ...a }, gAnat);
+  el("ellipse", { cx: 530, cy: 118, rx: 26, ry: 40, ...a }, gAnat);
+  el("ellipse", { cx: 500, cy: 805, rx: 150, ry: 78, fill: "var(--stem)", stroke: "var(--brain-edge)", "stroke-width": 2 }, gAnat);
+  el("rect", { x: 445, y: 375, width: 110, height: 590, rx: 44, fill: "var(--stem)", stroke: "var(--brain-edge)", "stroke-width": 2 }, gAnat);
+  const C = T.CORD;
+  el("rect", { x: C.left, y: C.top, width: C.right - C.left, height: C.bottom - C.top, rx: 40, fill: "var(--cord)", stroke: "var(--brain-edge)", "stroke-width": 2 }, gAnat);
+  for (const s of ["L", "R"]) for (const [fun, x] of Object.entries(T.LANE_X)) {
+    const X = s === "L" ? x : 1000 - x;
+    el("line", { x1: X, y1: C.top + 20, x2: X, y2: C.bottom - 20, stroke: "var(--brain-edge)", "stroke-width": 1.5, "stroke-dasharray": fun === "vf" ? "6 6" : "", opacity: 0.7 }, gAnat);
+  }
+  for (const [cx, cy] of [[200, 1105], [200, 1462], [800, 1105], [800, 1462]]) {
+    el("rect", { x: cx > 500 ? cx - 40 : cx - 70, y: cy - 34, width: 110, height: 68, rx: 30, fill: "none", stroke: "var(--brain-edge)", "stroke-width": 2, "stroke-dasharray": "4 4" }, gAnat);
+  }
+  for (const [x, cx] of [[370, 370], [630, 630]]) {
+    el("circle", { cx, cy: 70, r: 34, fill: "var(--panel)", stroke: "var(--brain-edge)", "stroke-width": 2 }, gAnat);
+    el("circle", { cx: x, cy: 58, r: 11, fill: "none", stroke: "var(--node)", "stroke-width": 2 }, gAnat);
+  }
+  el("line", { x1: 500, y1: 150, x2: 500, y2: C.bottom, stroke: "var(--brain-edge)", "stroke-dasharray": "6 8" }, gAnat);
+  const rl = (x, y, t, anchor = "middle") => { const e = el("text", { x, y, class: "rlbl", "text-anchor": anchor }, gAnat); e.textContent = t; };
+  rl(150, 30, "LEFT", "start"); rl(850, 30, "RIGHT", "end"); rl(500, 20, "▲ rostral");
+  rl(870, 330, "forebrain", "end"); rl(870, 540, "midbrain", "end"); rl(870, 660, "pons", "end");
+  rl(870, 820, "cerebellum", "end"); rl(870, 905, "medulla", "end"); rl(870, 1040, "cervical", "end");
+  rl(870, 1290, "thoracic", "end"); rl(870, 1470, "lumbosacral", "end");
+  for (const [lv, y] of Object.entries(T.LEVEL_Y)) {
+    el("line", { x1: C.right, y1: y, x2: C.right + 12, y2: y, stroke: "var(--brain-edge)", "stroke-width": 2 }, gAnat);
+    const e = el("text", { x: C.right + 16, y: y + 6, class: "rlbl", style: "font-size:calc(var(--lbl)*0.65)" }, gAnat); e.textContent = lv;
+  }
+  const lanesTxt = el("text", { x: 500, y: C.bottom + 26, class: "rlbl", "text-anchor": "middle", style: "font-size:calc(var(--lbl)*0.6)" }, gAnat);
+  lanesTxt.textContent = "lanes: LF · VF (dashed, deep) · DF | DF · VF · LF";
+}
+
+// ---------------------------------------------------------------- nodes + labels
+const nodeEls = {};
+const FORAMEN_IDS = new Set(T.FORAMINA.map(([id]) => id));
+// label placement for nodes that sit in horizontal rows (default: outward from the midline)
+const LABEL_POS = { pl_rec: "below", tl_rec: "below", neck_rec: "below", drg_l: "above", drg_c: "above", drg_n: "above",
+  dh_l: "below", dh_c: "below", ccn: "below", lcn: "above", mastm: "above", cn5mand: "below",
+  tl_mus: "above", pl_mus: "below", vroot_c: "above", vroot_l: "above", vh_l: "below", scin: "below", femn: "above",
+  tr_rec: "below", drg_t: "above", dh_t: "below", ct_mus: "below", ltn: "above" };
+// per-group overrides ("in" = toward the midline); CN positions found by an overlap search over every CN pathway
+const GROUP_LABEL_POS = { gva: { pirif: "in", cn7: "below", taste: "in", nst: "in", visc: "in", spn: "in", dh_s: "in", detr: "in", drg_t: "in", gut: "in", ctx_ss: "above", vpl: "in", t13: "above", dh_ct: "below", drg_ct: "in", symt: "in", lung: "above", heart: "below" }, aud: { stap: "above", cervvf: "in", actx: "in", dnt: "in", iam: "below", cn8c: "in", cochlea: "below", ossic: "above" }, ans: { psn10: "in", t13: "in", root: "below", symt: "above", lung: "below", jug: "below", cn10: "below", gut: "in", nst: "above", cbody: "in", iml_t: "in", splan: "above", drg_t: "in", detr: "in", pelvn: "above", dh_s: "in", iml_l: "in", neck: "in", pudm: "in", pudnv: "below", eus: "above", spn: "in", mctx: "in" }, vc: { olx: "below", cbn: "in", cbl: "below", mctx: "in", vlt: "in", vermis: "in", ccp: "below", eom6: "in", eom3: "above", mlfx: "above", mvn: "below", lvn: "in", cn8: "above", vg: "above", labyr: "below" }, cn: { orbf: "above", eom3: "in", cn4x: "below", eom6: "in", cn5: "below", tg: "in", facn: "above", cn7: "in", fcan: "below", smf: "above", lid: "in", cn5max: "below", rotf: "in", vpm: "in", ctx_ss: "above", motv: "in", ovf: "in", mctx: "in", cnx: "below", facemus: "in", ptg: "in", phx: "below", jug: "below", nst: "in", hgc: "in", namb: "in", oes: "in", visc: "in", fm: "below", neckm: "in", cn12n: "in" } };
+function placeLabel(nd, t) {
+  const pos = state.tab === "foramina" ? null : (GROUP_LABEL_POS[state.group] || {})[baseId(nd.id)] || LABEL_POS[baseId(nd.id)];
+  let anchor = nd.side === "L" ? "end" : nd.side === "R" ? "start" : "middle";
+  let dx = nd.side === "L" ? -11 : nd.side === "R" ? 11 : 0, dy = nd.side ? 7 : 26;
+  if (pos === "in" && nd.side) { anchor = nd.side === "L" ? "start" : "end"; dx = -dx; }
+  if (pos === "above") { anchor = "middle"; dx = 0; dy = -14; }
+  if (pos === "below") { anchor = "middle"; dx = 0; dy = 30; }
+  t.setAttribute("x", nd.x + dx); t.setAttribute("y", nd.y + dy); t.setAttribute("text-anchor", anchor);
+}
+const placeAllLabels = () => { for (const [id, e] of Object.entries(nodeEls)) placeLabel(T.NODES[id], e.text); };
+function drawNodes() {
+  for (const nd of Object.values(T.NODES)) {
+    const g = el("g", { "data-node": nd.id }, gNodes);
+    const dot = FORAMEN_IDS.has(baseId(nd.id))
+      ? el("rect", { x: nd.x - 7, y: nd.y - 7, width: 14, height: 14, rx: 2, fill: "var(--panel)", stroke: "var(--node)", "stroke-width": 3, class: "dot" }, g)
+      : el("circle", { cx: nd.x, cy: nd.y, r: 5, fill: "var(--node)", class: "dot" }, g);
+    const t = el("text", { class: "lbl", visibility: "hidden" }, g);
+    t.textContent = nd.label;
+    placeLabel(nd, t);
+    if (nd.via) { dot.setAttribute("r", 0); nodeEls[nd.id] = { g, dot, text: t, via: true }; continue; }
+    const hit = el("circle", { cx: nd.x, cy: nd.y, r: 14, fill: "transparent", class: "hit" }, g);
+    hit.addEventListener("mouseenter", () => t.setAttribute("visibility", "visible"));
+    hit.addEventListener("mouseleave", () => { if (!labelShown(nd.id)) t.setAttribute("visibility", "hidden"); });
+    hit.addEventListener("click", () => { if (!dragged) onNodeClick(nd.id); });
+    nodeEls[nd.id] = { g, dot, text: t };
+  }
+}
+const state = { tab: "learn", group: store.get("group", "visual"), labelSet: new Set(), focus: null };
+const labelShown = (id) => (!nodeEls[id].via && document.getElementById("allLabels").checked) || state.labelSet.has(id);
+function refreshLabels() {
+  for (const [id, e] of Object.entries(nodeEls)) e.text.setAttribute("visibility", labelShown(id) && !e.via ? "visible" : "hidden");
+  // only show dots that belong to the current group's pathways
+  const used = state.tab === "foramina" ? new Set(T.GROUPS.cn.extraNodes) : groupNodeSet();
+  for (const [id, e] of Object.entries(nodeEls)) e.g.style.display = used.has(id) ? "" : "none";
+}
+document.getElementById("allLabels").addEventListener("change", refreshLabels);
+let lblSize = store.get("lbl", 22);
+const applyFont = () => { svg.style.setProperty("--lbl", lblSize + "px"); store.set("lbl", lblSize); };
+document.getElementById("fontUp").onclick = () => { lblSize = Math.min(40, lblSize + 3); applyFont(); };
+document.getElementById("fontDown").onclick = () => { lblSize = Math.max(12, lblSize - 3); applyFont(); };
+
+// ---------------------------------------------------------------- group helpers
+const groupPathways = () => T.GROUPS[state.group].pathways.map((id) => [id, T.PATHWAYS[id]]);
+let _gset = {};
+function groupNodeSet() {
+  if (_gset[state.group]) return _gset[state.group];
+  const s = new Set();
+  for (const [, p] of groupPathways()) for (const side of ["L", "R"]) for (const st of p.steps(side)) s.add(st.node);
+  for (const id of T.GROUPS[state.group].extraNodes || []) s.add(id);
+  return (_gset[state.group] = s);
+}
+function groupPoints() {
+  const pts = [...groupNodeSet()].map((id) => [T.NODES[id].x, T.NODES[id].y]);
+  for (const l of T.GROUPS[state.group].lesions) pts.push([l.marker.x, l.marker.y]);
+  return pts;
+}
+const stepsPoints = (steps) => steps.map((s) => [T.NODES[s.node].x, T.NODES[s.node].y]);
+
+// ---------------------------------------------------------------- path geometry (Catmull-Rom -> cubic Bezier)
+function segments(pts) {
+  const segs = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    segs.push(`M${p1[0]},${p1[1]} C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}`);
+  }
+  return segs;
+}
+function drawRoute(steps, opts = {}) {
+  const g = el("g", {}, gPath);
+  segments(stepsPoints(steps)).forEach((d, i) => {
+    const st = steps[i + 1];
+    const col = opts.color || NEURON_COLORS[(st.neuron - 1) % NEURON_COLORS.length];
+    const visible = opts.upto === undefined || i < opts.upto;
+    el("path", { d, fill: "none", stroke: col, "stroke-width": opts.width || 6, "stroke-linecap": "round",
+      opacity: visible ? (opts.opacity || 1) : 0.13, "stroke-dasharray": st.fun === "vf" ? "12 8" : "" }, g);
+  });
+  steps.forEach((st, i) => {
+    const nd = T.NODES[st.node];
+    if (opts.upto !== undefined && i > opts.upto) return;
+    const col = opts.color || NEURON_COLORS[(st.neuron - 1) % 8];
+    if (st.synapse) el("circle", { cx: nd.x, cy: nd.y, r: 9, fill: "var(--panel)", stroke: col, "stroke-width": 3.5 }, g);
+    if (st.cross) { const t = el("text", { x: nd.x, y: nd.y + 8, "text-anchor": "middle", style: "font-size:24px;font-weight:700", fill: "var(--bad)" }, g); t.textContent = "✕"; }
+  });
+  return g;
+}
+function clearPaths() { gPath.innerHTML = ""; gTop.innerHTML = ""; }
+let animHandle = null;
+function animateSegment(steps, i, done) {
+  cancelAnimationFrame(animHandle);
+  const segs = segments(stepsPoints(steps));
+  if (i < 0 || i >= segs.length) { done && done(); return; }
+  const p = el("path", { d: segs[i], fill: "none", stroke: "none" }, gTop);
+  const len = p.getTotalLength(), dot = el("circle", { r: 11, fill: "var(--accent)", opacity: 0.9 }, gTop);
+  const t0 = performance.now(), dur = Math.max(320, len * 2);
+  const tick = (now) => {
+    const k = Math.min(1, (now - t0) / dur), pt = p.getPointAtLength(len * k);
+    dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+    if (k < 1) animHandle = requestAnimationFrame(tick); else { dot.remove(); p.remove(); done && done(); }
+  };
+  animHandle = requestAnimationFrame(tick);
+}
+function pulse(id) {
+  const nd = T.NODES[id];
+  const c = el("circle", { cx: nd.x, cy: nd.y, r: 16, fill: "none", stroke: "var(--accent)", "stroke-width": 3.5 }, gTop);
+  el("animate", { attributeName: "r", values: "12;24;12", dur: "1.4s", repeatCount: "indefinite" }, c);
+}
+
+// ---------------------------------------------------------------- cord cross-section inset (viewed from caudal: left on the left)
+const inset = document.getElementById("inset"), insetSvg = document.getElementById("insetSvg"), insetCap = document.getElementById("insetCap");
+const SECTORS = { df: [0, 32], lf: [32, 125], vf: [125, 180] };
+const secEls = {};
+let insetAsk = null;   // callback(fun, side) while a trace quiz waits for a funiculus answer
+(function drawInset() {
+  const cx = 100, cy = 72, rx = 92, ry = 64;
+  const pt = (deg, s) => { const a = (deg * Math.PI) / 180; return [cx + (s === "L" ? -1 : 1) * Math.sin(a) * rx, cy - Math.cos(a) * ry]; };
+  for (const s of ["L", "R"]) for (const [fun, [a0, a1]] of Object.entries(SECTORS)) {
+    const p0 = pt(a0, s), p1 = pt(a1, s);
+    const sweep = s === "L" ? 0 : 1;
+    const d = `M${cx},${cy} L${p0[0]},${p0[1]} A${rx},${ry} 0 0 ${sweep} ${p1[0]},${p1[1]} Z`;
+    const e = el("path", { d, fill: "var(--cord)", stroke: "var(--brain-edge)", "stroke-width": 1.2, class: "sec" }, insetSvg);
+    e.addEventListener("click", () => insetAsk && insetAsk(fun, s));
+    secEls[fun + s] = e;
+    const mid = pt((a0 + a1) / 2, s);
+    const t = el("text", { x: (mid[0] + cx) / 2 + (s === "L" ? -6 : 6), y: (mid[1] + cy) / 2 + 4, "text-anchor": "middle", style: "font-size:11px;pointer-events:none", fill: "var(--muted)" }, insetSvg);
+    t.textContent = fun.toUpperCase();
+  }
+  const gm = { fill: "var(--grey)", stroke: "none", style: "pointer-events:none" };
+  el("rect", { x: 88, y: 64, width: 24, height: 14, rx: 4, ...gm }, insetSvg);
+  for (const s of [-1, 1]) {
+    el("ellipse", { cx: 100 + s * 20, cy: 46, rx: 6, ry: 24, transform: `rotate(${s * 22} ${100 + s * 20} 46)`, ...gm }, insetSvg);
+    el("ellipse", { cx: 100 + s * 24, cy: 92, rx: 14, ry: 19, transform: `rotate(${-s * 20} ${100 + s * 24} 92)`, ...gm }, insetSvg);
+  }
+  for (const [x, t] of [[10, "L"], [190, "R"]]) { const e = el("text", { x, y: 146, "text-anchor": "middle", style: "font-size:12px;font-weight:600", fill: "var(--muted)" }, insetSvg); e.textContent = t; }
+  const d = el("text", { x: 100, y: 10, "text-anchor": "middle", style: "font-size:10px", fill: "var(--muted)" }, insetSvg); d.textContent = "dorsal";
+})();
+function setInset(marks, caption, ask) {
+  for (const e of Object.values(secEls)) { e.setAttribute("fill", "var(--cord)"); }
+  for (const [key, col] of marks) secEls[key] && secEls[key].setAttribute("fill", col);
+  insetCap.textContent = caption || "";
+  insetAsk = ask || null;
+  inset.classList.toggle("ask", !!ask);
+}
+const showInset = (on) => { inset.hidden = !on; };
+
+// ---------------------------------------------------------------- shared controls
+const pathwayOptions = (sel) => groupPathways().map(([id, p]) => `<option value="${id}" ${id === sel ? "selected" : ""}>${p.name}</option>`).join("");
+const noteLinks = (p) => [p.note, p.altNote].filter(Boolean).map((nm) => `<a href="${T.noteLink(nm)}">${nm}</a>`).join(" · ");
+const sideLabel = (p) => p.eyeLabel || "Eye";
+const neuronLegend = (steps) => {
+  const max = Math.max(...steps.map((s) => s.neuron));
+  return `<div class="legend">${Array.from({ length: max }, (_, i) => `<span><span class="sw" style="background:${NEURON_COLORS[i % 8]}"></span>neuron ${i + 1}</span>`).join("")}
+    <span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="2"/></svg> synapse</span>
+    <span style="color:var(--bad);font-weight:700">✕</span><span>crossing</span>
+    ${steps.some((s) => s.fun) ? `<span>dashed = ventral funiculus</span>` : ""}</div>`;
+};
+const firstPathway = () => groupPathways()[0][0];
+
+// ---------------------------------------------------------------- LEARN
+const learn = { pw: null, side: "L", step: 0, zoom: true };
+function renderLearn(refit) {
+  const sel = store.get(`learn_${state.group}`, {});
+  if (!learn.pw || T.PATHWAYS[learn.pw].group !== state.group) { learn.pw = sel.pw && T.PATHWAYS[sel.pw] ? sel.pw : firstPathway(); learn.side = sel.side || "L"; learn.step = 0; }
+  const p = T.PATHWAYS[learn.pw], steps = p.steps(learn.side);
+  learn.step = Math.min(learn.step, steps.length - 1);
+  panel.innerHTML = `
+    <div class="row"><select id="lpw">${pathwayOptions(learn.pw)}</select>
+      <select id="lside"><option value="L">${sideLabel(p)}: left</option><option value="R">${sideLabel(p)}: right</option></select></div>
+    <div class="row"><button class="btn" id="lprev">◀ Back</button><button class="btn primary" id="lnext">Next ▶</button>
+      <button class="btn" id="lplay">▶▶ Play all</button><button class="btn" id="lreset">Restart</button></div>
+    ${neuronLegend(steps)}
+    <ol class="steps">${steps.map((s, i) => `<li data-i="${i}" class="${i === learn.step ? "cur" : i > learn.step ? "future" : ""}">
+      <span class="stepname">${nodeName(s.node)}</span><div class="muted">${s.text}</div></li>`).join("")}</ol>
+    <p class="muted">Your note: ${noteLinks(p) || "— (added pathway)"}</p>`;
+  panel.querySelector("#lside").value = learn.side;
+  const save = () => store.set(`learn_${state.group}`, { pw: learn.pw, side: learn.side });
+  panel.querySelector("#lpw").onchange = (e) => { learn.pw = e.target.value; learn.step = 0; save(); renderLearn(true); };
+  panel.querySelector("#lside").onchange = (e) => { learn.side = e.target.value; learn.step = 0; save(); renderLearn(true); };
+  panel.querySelector("#lprev").onclick = () => { if (learn.step > 0) { learn.step--; renderLearn(); } };
+  panel.querySelector("#lnext").onclick = () => advance(steps);
+  panel.querySelector("#lreset").onclick = () => { learn.step = 0; renderLearn(); };
+  panel.querySelector("#lplay").onclick = () => { learn.step = 0; renderLearn(); const go = () => { if (learn.step < steps.length - 1) advance(steps, go); }; setTimeout(go, 200); };
+  panel.querySelectorAll("ol.steps li").forEach((li) => li.onclick = () => { learn.step = +li.dataset.i; renderLearn(); });
+  clearPaths();
+  drawRoute(steps, { upto: learn.step });
+  state.labelSet = new Set(steps.slice(0, learn.step + 1).map((s) => s.node));
+  refreshLabels();
+  pulse(steps[learn.step].node);
+  state.focus = stepsPoints(steps);
+  if (refit === true || !learn.fitted) { fitTo(state.focus); learn.fitted = true; }
+  const cur = steps[learn.step], used = steps.filter((s) => s.fun);
+  showInset(used.length > 0);
+  if (used.length) {
+    const marks = used.map((s) => [s.fun + sideOf(s.node), "var(--warn-bg)"]);
+    if (cur.fun) marks.push([cur.fun + sideOf(cur.node), NEURON_COLORS[(cur.neuron - 1) % 8]]);
+    setInset(marks, cur.fun ? `${T.FUN_NAME[cur.fun]} — ${T.SIDE_NAME[sideOf(cur.node)]}` : "funiculi used by this pathway");
+  }
+  panel.querySelector("li.cur")?.scrollIntoView({ block: "nearest" });
+}
+function advance(steps, then) {
+  if (learn.step >= steps.length - 1) return;
+  const i = learn.step;
+  animateSegment(steps, i, () => { learn.step = i + 1; renderLearn(); then && setTimeout(then, 420); });
+}
+
+// ---------------------------------------------------------------- COMPARE
+function renderCompare(refit) {
+  const key = `compare_${state.group}`;
+  const compare = store.get(key, null) || T.GROUPS[state.group].compareDefault.map(([pw, side]) => ({ pw, side }));
+  const save = () => store.set(key, compare);
+  panel.innerHTML = `<h2>Overlay pathways</h2>
+    <p class="muted">Shared stations show where pathways run together — and where they part company. ${T.GROUPS[state.group].compareHint}</p>
+    <div id="clist"></div><div class="row"><select id="cadd"><option value="">+ add pathway…</option>${pathwayOptions()}</select>
+    <button class="btn" id="creset">Reset</button></div><div id="cshared"></div>`;
+  const list = panel.querySelector("#clist");
+  compare.forEach((c, i) => {
+    const p = T.PATHWAYS[c.pw];
+    const row = h(`<div class="chk"><span class="sw" style="width:26px;height:6px;background:${PATH_COLORS[i % 7]}"></span>
+      <span style="flex:1">${p.name}</span>
+      <select><option value="L">left</option><option value="R">right</option></select>
+      <button class="btn" data-del="${i}">✕</button></div>`);
+    row.querySelector("select").value = c.side;
+    row.querySelector("select").onchange = (e) => { compare[i].side = e.target.value; save(); renderCompare(); };
+    row.querySelector("[data-del]").onclick = () => { compare.splice(i, 1); save(); renderCompare(); };
+    list.appendChild(row);
+  });
+  panel.querySelector("#cadd").onchange = (e) => { if (e.target.value) { compare.push({ pw: e.target.value, side: "L" }); save(); renderCompare(true); } };
+  panel.querySelector("#creset").onclick = () => { store.set(key, null); renderCompare(true); };
+  clearPaths();
+  const counts = {}, marks = [], pts = [];
+  compare.forEach((c, i) => {
+    const steps = T.PATHWAYS[c.pw].steps(c.side);
+    drawRoute(steps, { color: PATH_COLORS[i % 7], width: 7 - Math.min(i, 4), opacity: 0.85 });
+    new Set(steps.map((s) => s.node)).forEach((nd) => counts[nd] = (counts[nd] || 0) + 1);
+    steps.filter((s) => s.fun).forEach((s) => marks.push([s.fun + sideOf(s.node), PATH_COLORS[i % 7]]));
+    pts.push(...stepsPoints(steps));
+  });
+  const shared = Object.entries(counts).filter(([nd, k]) => k > 1 && compare.length > 1 && !T.NODES[nd].via);
+  state.labelSet = new Set(compare.flatMap((c) => T.PATHWAYS[c.pw].steps(c.side).map((s) => s.node)));
+  refreshLabels();
+  state.focus = pts;
+  if (refit !== false) fitTo(pts);
+  showInset(marks.length > 0);
+  if (marks.length) setInset(marks, "funiculi (colours = pathways)");
+  if (shared.length) panel.querySelector("#cshared").innerHTML = `<div class="callout"><b>Shared stations:</b> ${shared.map(([nd, k]) => `${nodeName(nd)} ×${k}`).join(", ")}</div>`;
+}
+
+// ---------------------------------------------------------------- TRACE QUIZ
+const trace = {};
+function startTrace(random) {
+  const pws = groupPathways();
+  if (random || !trace.pw || T.PATHWAYS[trace.pw].group !== state.group) {
+    trace.pw = random ? pws[Math.floor(Math.random() * pws.length)][0] : (trace.pw && T.PATHWAYS[trace.pw].group === state.group ? trace.pw : pws[0][0]);
+    if (random) trace.side = Math.random() < 0.5 ? "L" : "R";
+  }
+  trace.side = trace.side || "L";
+  const steps = T.PATHWAYS[trace.pw].steps(trace.side);
+  trace.steps = steps;
+  // quiz items: real stations, plus one "which funiculus?" question per run of cord lane steps
+  trace.seq = [];
+  steps.forEach((s, i) => {
+    if (s.fun) {
+      const prev = trace.seq[trace.seq.length - 1];
+      if (prev && prev.kind === "fun" && prev.fun === s.fun && prev.side === sideOf(s.node)) prev.last = i;
+      else trace.seq.push({ kind: "fun", fun: s.fun, side: sideOf(s.node), first: i, last: i });
+    } else if (!T.NODES[s.node].via) trace.seq.push({ kind: "node", idx: i, node: s.node });
+  });
+  trace.at = 1; trace.errors = 0; trace.miss = 0; trace.done = false;
+  renderTrace(null, true);
+}
+const lastIdx = (item) => (item.kind === "fun" ? item.last : item.idx);
+function renderTrace(msg, refit) {
+  const p = T.PATHWAYS[trace.pw];
+  const best = store.get("best", {});
+  const want = trace.seq[trace.at];
+  panel.innerHTML = `<h2>Trace it</h2>
+    <div class="row"><select id="tpw">${pathwayOptions(trace.pw)}</select>
+      <select id="tside"><option value="L">${sideLabel(p)}: left</option><option value="R">${sideLabel(p)}: right</option></select>
+      <button class="btn" id="tstart">Restart</button><button class="btn primary" id="trand">Random</button></div>
+    <p>Click each station of the <b>${p.name}</b> (${sideLabel(p).toLowerCase()}: <b>${T.SIDE_NAME[trace.side]}</b>) in order. Watch the side after every crossing.
+    ${want && want.kind === "fun" && !trace.done ? `<br><b>Now: which funiculus does it ascend in, and on which side? Click the cross-section (bottom right).</b>` : ""}</p>
+    <p class="muted">Start is given. Labels are hidden — hover a dot to peek. Progress: <span class="score">${Math.min(trace.at, trace.seq.length)}/${trace.seq.length}</span> · errors: <span class="score">${trace.errors}</span>${best[trace.pw] !== undefined ? ` · best: ${best[trace.pw]} errors` : ""}</p>
+    ${msg || ""}
+    <ol class="steps">${trace.seq.slice(0, trace.at).map((it) => it.kind === "fun"
+      ? `<li><span class="stepname">${T.FUN_NAME[it.fun]} — ${T.SIDE_NAME[it.side]}</span><div class="muted">${trace.steps[it.first].text}</div></li>`
+      : `<li><span class="stepname">${nodeName(it.node)}</span><div class="muted">${trace.steps[it.idx].text}</div></li>`).join("")}</ol>`;
+  panel.querySelector("#tside").value = trace.side;
+  panel.querySelector("#tpw").onchange = (e) => { trace.pw = e.target.value; startTrace(); };
+  panel.querySelector("#tside").onchange = (e) => { trace.side = e.target.value; startTrace(); };
+  panel.querySelector("#tstart").onclick = () => startTrace();
+  panel.querySelector("#trand").onclick = () => startTrace(true);
+  clearPaths();
+  const upto = lastIdx(trace.seq[Math.min(trace.at, trace.seq.length) - 1]);
+  drawRoute(trace.steps.slice(0, upto + 1));
+  state.labelSet = new Set(trace.seq.slice(0, trace.at).filter((it) => it.kind === "node").map((it) => it.node));
+  refreshLabels();
+  state.focus = stepsPoints(trace.steps);
+  if (refit) fitTo(state.focus);
+  const hasFun = trace.steps.some((s) => s.fun);
+  showInset(hasFun);
+  if (hasFun) {
+    const done = trace.seq.slice(0, trace.at).filter((it) => it.kind === "fun").map((it) => [it.fun + it.side, "var(--good-bg)"]);
+    const asking = want && want.kind === "fun" && !trace.done;
+    setInset(done, asking ? "click the funiculus" : "", asking ? (fun, side) => traceAnswer({ fun, side }) : null);
+  }
+  if (trace.miss >= 2 && !trace.done && want) {
+    if (want.kind === "node") pulse(want.node);
+    else setInset([[want.fun + want.side, "var(--accent)"]], "this one", (fun, side) => traceAnswer({ fun, side }));
+  }
+}
+function traceAnswer(ans) {
+  if (trace.done) return;
+  const want = trace.seq[trace.at];
+  const ok = want.kind === "node" ? ans.node === want.node : ans.fun === want.fun && ans.side === want.side;
+  if (ok) {
+    trace.at++; trace.miss = 0;
+    if (trace.at >= trace.seq.length) {
+      trace.done = true;
+      const best = store.get("best", {});
+      if (best[trace.pw] === undefined || trace.errors < best[trace.pw]) { best[trace.pw] = trace.errors; store.set("best", best); }
+      renderTrace(`<div class="callout ok"><b>Done!</b> ${trace.errors === 0 ? "Perfect trace." : trace.errors + " wrong clicks."} Try the other side, or hit Random.</div>`);
+      return;
+    }
+    renderTrace();
+    return;
+  }
+  trace.errors++; trace.miss++;
+  let why = "Not the next station.";
+  if (want.kind === "node" && ans.node) {
+    if (baseId(ans.node) === baseId(want.node)) why = "Right structure, <b>wrong side</b> — did the pathway cross?";
+    const dot = nodeEls[ans.node].dot; dot.classList.remove("flash-bad"); void dot.getBBox(); dot.classList.add("flash-bad");
+  } else if (want.kind === "fun" && ans.fun) {
+    why = ans.fun === want.fun ? "Right funiculus, <b>wrong side</b>." : ans.side === want.side ? "Right side, wrong funiculus." : "Wrong funiculus and side.";
+  } else if (want.kind === "fun") why = "The next step is in the cord — answer on the cross-section.";
+  renderTrace(`<div class="callout no">${why}${trace.miss >= 2 ? " The answer is highlighted." : ""}</div>`);
+}
+
+// ---------------------------------------------------------------- LESION
+const lesion = { mode: "explore", current: null, quiz: null, answered: false };
+const cls = (v) => v === "" ? "" : /^(normal|no|none)$/.test(v) ? "g" : /absent|severe|marked|mydriasis|yes|paralysis|fixed|dropped/.test(v) ? "b" : "w";
+function findingsTable(l) {
+  const t = T.GROUPS[l.group].table(T.findings(l.nodes, l.group));
+  return `<table class="find"><tr><th></th>${t.cols.map((c) => `<th>${c}</th>`).join("")}</tr>${t.rows.map(([nm, vals]) =>
+    `<tr><td>${nm}</td>${vals.map((v) => `<td class="${cls(v)}">${v}</td>`).join("")}</tr>`).join("")}</table>`;
+}
+function lesionInset(l) {
+  const marks = l ? l.nodes.filter((x) => T.funOf(x)).map((x) => [T.funOf(x) + sideOf(x), "var(--bad)"]) : [];
+  showInset(!["visual", "cn", "vc", "aud"].includes(state.group));
+  setInset(marks, l && marks.length ? "lesioned funiculi" : "");
+}
+function drawLesionMarkers(highlight) {
+  clearPaths();
+  for (const l of T.GROUPS[state.group].lesions) {
+    const { x, y } = l.marker, on = highlight && highlight.has(l.id);
+    const m = el("rect", { x: x - 9, y: y - 9, width: 18, height: 18, rx: 3, transform: `rotate(45 ${x} ${y})`,
+      fill: on ? "var(--bad)" : "var(--warn)", opacity: on ? 1 : 0.8, stroke: "var(--panel)", "stroke-width": 2.5, class: "hit" }, gTop);
+    el("title", {}, m).textContent = l.label;
+    m.addEventListener("click", () => { if (!dragged) lesionClick(l); });
+  }
+}
+function renderLesion(msg) {
+  const s = store.get(`lscore_${state.group}`, { right: 0, total: 0 });
+  panel.innerHTML = `<h2>Lesion localisation — ${T.GROUPS[state.group].name}</h2>
+    <div class="row"><button class="btn ${lesion.mode === "explore" ? "primary" : ""}" id="lmx">Explore</button>
+      <button class="btn ${lesion.mode === "quiz" ? "primary" : ""}" id="lmq">Quiz</button>
+      ${lesion.mode === "quiz" ? `<button class="btn" id="lnew">New case</button><span class="muted">score ${s.right}/${s.total}</span>` : ""}</div>
+    <div id="lbody"></div>`;
+  panel.querySelector("#lmx").onclick = () => { lesion.mode = "explore"; lesion.current = null; renderLesion(); };
+  panel.querySelector("#lmq").onclick = () => { lesion.mode = "quiz"; newCase(); };
+  const body = panel.querySelector("#lbody");
+  state.labelSet = new Set(); refreshLabels();
+  if (lesion.mode === "explore") {
+    const l = lesion.current && lesion.current.group === state.group ? lesion.current : null;
+    if (!l) {
+      body.innerHTML = `<p class="muted">Click an orange diamond on the map to place a lesion and see the expected findings. Hover a diamond for its name.</p>`;
+      drawLesionMarkers(); lesionInset(null);
+    } else {
+      const eq = T.equivalentLesions(l).filter((x) => x.id !== l.id);
+      body.innerHTML = `<h2>${l.label}</h2>${findingsTable(l)}<div class="callout">${l.signs}</div>
+        ${eq.length ? `<p class="muted">Same findings as: ${eq.map((x) => x.label).join("; ")} — tell these apart with the rest of the neuro exam.</p>` : ""}`;
+      drawLesionMarkers(new Set([l.id])); lesionInset(l);
+    }
+  } else {
+    panel.querySelector("#lnew").onclick = newCase;
+    const q = lesion.quiz;
+    body.innerHTML = `<p>Where is the lesion? Click the diamond that explains these findings.</p>${findingsTable(q)}${msg || ""}`;
+    drawLesionMarkers(lesion.answered ? new Set(T.equivalentLesions(q).map((x) => x.id)) : null);
+    lesionInset(lesion.answered ? q : null);
+  }
+}
+function newCase() { const ls = T.GROUPS[state.group].lesions; lesion.quiz = ls[Math.floor(Math.random() * ls.length)]; lesion.answered = false; renderLesion(); }
+function lesionClick(l) {
+  if (lesion.mode === "explore") { lesion.current = l; renderLesion(); return; }
+  if (lesion.answered) return;
+  const eq = T.equivalentLesions(lesion.quiz), ok = eq.some((x) => x.id === l.id);
+  lesion.answered = true;
+  const s = store.get(`lscore_${state.group}`, { right: 0, total: 0 });
+  s.total++; if (ok) s.right++; store.set(`lscore_${state.group}`, s);
+  renderLesion(`<div class="callout ${ok ? "ok" : "no"}"><b>${ok ? "Correct" : "Not quite"}.</b> Answer: ${eq.map((x) => x.label).join(" / ")}.<br>${lesion.quiz.signs}</div>`);
+}
+
+// ---------------------------------------------------------------- LAYERS (retina, cerebellar cortex): list + ordering quiz
+const retina = { mode: "learn", order: [], next: 0, errors: 0, group: null };
+function renderRetina() {
+  const Y = T.GROUPS[state.group].layers, L = Y.items;
+  if (retina.group !== state.group) { retina.group = state.group; retina.mode = "learn"; }
+  clearPaths(); state.labelSet = new Set(); refreshLabels(); showInset(false);
+  if (retina.mode === "learn") {
+    panel.innerHTML = `<h2>${Y.title}</h2><div class="row">${Y.noQuiz ? "" : `<button class="btn primary" id="rq">Quiz me</button>`}
+      ${[Y.note, Y.altNote].filter(Boolean).map((nm) => `<a href="${T.noteLink(nm)}">${nm}</a>`).join(" · ")}</div>
+      <p class="muted">${Y.intro}</p>
+      <div class="layers">${L.map(([nm, d], i) => `<div class="layer"><b>${Y.noQuiz ? "" : `${i + 1}. `}${nm}</b><div class="muted">${d}</div></div>`).join("")}</div>`;
+    if (!Y.noQuiz) panel.querySelector("#rq").onclick = () => { retina.mode = "quiz"; retina.order = [...L.keys()].sort(() => Math.random() - 0.5); retina.next = 0; retina.errors = 0; renderRetina(); };
+  } else {
+    panel.innerHTML = `<h2>Order the layers</h2><p>Click from <b>${Y.from}</b> to <b>${Y.to}</b>. Next: #${retina.next + 1} · errors: ${retina.errors}</p>
+      <div class="row"><button class="btn" id="rl">Back to list</button></div>
+      <div class="layers">${retina.order.map((i) => `<div class="layer ${i < retina.next ? "done" : ""}" data-i="${i}">${i < retina.next ? `<b>${i + 1}.</b> ` : ""}${L[i][0]}</div>`).join("")}</div>
+      ${retina.next >= L.length ? `<div class="callout ok">All ${L.length} in order${retina.errors ? ` with ${retina.errors} errors` : " — perfect"}.</div>` : ""}`;
+    panel.querySelector("#rl").onclick = () => { retina.mode = "learn"; renderRetina(); };
+    panel.querySelectorAll(".layer").forEach((d) => d.onclick = () => {
+      const i = +d.dataset.i;
+      if (i < retina.next) return;
+      if (i === retina.next) { retina.next++; renderRetina(); }
+      else { retina.errors++; d.classList.remove("wrong"); void d.offsetWidth; d.classList.add("wrong"); }
+    });
+  }
+}
+
+// ---------------------------------------------------------------- tabs + groups
+// ---------------------------------------------------------------- FORAMINA (cranial nerve group)
+const QUIZ_NERVES = [["CN I (olfactory)", "crib"], ["CN II (optic)", "optc"], ["CN III (oculomotor)", "orbf"], ["CN IV (trochlear)", "orbf"],
+  ["CN V1 (ophthalmic)", "orbf"], ["CN V2 (maxillary)", "rotf"], ["CN V3 (mandibular)", "ovf"], ["CN V before it divides", "tg"],
+  ["CN VI (abducent)", "orbf"], ["CN VII entering the petrous bone", "iam"], ["CN VII leaving the skull", "smf"], ["CN VIII (vestibulocochlear)", "iam"],
+  ["CN IX (glossopharyngeal)", "jug"], ["CN X (vagus)", "jug"], ["CN XI leaving the skull", "jug"], ["CN XI spinal root entering the skull", "fm"], ["CN XII (hypoglossal)", "hgc"]];
+const foramina = { mode: "learn", item: null, tries: 0, score: { right: 0, total: 0 } };
+function showForamina(highlight) {
+  clearPaths();
+  // alternate sides so neighbouring openings don't share a label row
+  const RIGHT = new Set(["optc", "rotf", "tg", "smf", "hgc", "fm"]);
+  state.labelSet = new Set(foramina.mode === "learn" ? T.FORAMINA.map(([id]) => id + (RIGHT.has(id) ? "_R" : "_L")) : []);
+  refreshLabels();
+  if (highlight) for (const s of ["L", "R"]) pulse(`${highlight}_${s}`);
+}
+function renderForamina(msg) {
+  showInset(false);
+  if (foramina.mode === "learn") {
+    panel.innerHTML = `<h2>Skull foramina</h2><div class="row"><button class="btn primary" id="fq">Quiz me</button>
+      <a href="${T.noteLink("Foramen")}">Foramen</a> · <a href="${T.noteLink("Foramen (MRI and CT)")}">Foramen (MRI and CT)</a> · <a href="${T.noteLink("Cranial nerve locations")}">Cranial nerve locations</a> · <a href="${T.noteLink("Cranial nuclei")}">Cranial nuclei</a></div>
+      <p class="muted">Squares on the map, rostral to caudal. Click a row to find it on the map.</p>
+      <div class="layers">${T.FORAMINA.map(([id, nm, nerves, note]) => `<div class="layer" data-id="${id}"><b>${nm}</b>: ${nerves}<div class="muted">${note}</div></div>`).join("")}</div>`;
+    panel.querySelector("#fq").onclick = () => { foramina.mode = "quiz"; nextForamen(); };
+    panel.querySelectorAll(".layer").forEach((d) => d.onclick = () => showForamina(d.dataset.id));
+    showForamina(null);
+  } else {
+    const [nerve] = foramina.item;
+    panel.innerHTML = `<h2>Which opening?</h2><p>Click the square on the map where <b>${nerve}</b> passes (either side). Labels are hidden.</p>
+      <div class="row"><button class="btn" id="fn">Next</button><button class="btn" id="fl">Back to list</button><span class="muted">score ${foramina.score.right}/${foramina.score.total}</span></div>${msg || ""}`;
+    panel.querySelector("#fn").onclick = nextForamen;
+    panel.querySelector("#fl").onclick = () => { foramina.mode = "learn"; renderForamina(); };
+  }
+}
+function nextForamen() { foramina.item = QUIZ_NERVES[Math.floor(Math.random() * QUIZ_NERVES.length)]; foramina.tries = 0; foramina.done = false; showForamina(null); renderForamina(); }
+function foramenAnswer(id) {
+  if (foramina.mode !== "quiz" || foramina.done) return;
+  const [nerve, want] = foramina.item, got = baseId(id), row = (x) => T.FORAMINA.find((f) => f[0] === x);
+  if (!row(got)) return;
+  const ok = got === want;
+  foramina.tries++;
+  if (ok || foramina.tries >= 2) {
+    foramina.done = true; foramina.score.total++; if (ok && foramina.tries === 1) foramina.score.right++;
+    showForamina(want);
+    const [, nm, nerves, note] = row(want);
+    renderForamina(`<div class="callout ${ok ? "ok" : "no"}"><b>${ok ? "Correct" : "Answer"}:</b> ${nerve} → ${nm} (${nerves}).<br>${note}</div>`);
+  } else {
+    renderForamina(`<div class="callout no">Not that one: that's the ${row(got)[1]}. One more try.</div>`);
+  }
+}
+
+function onNodeClick(id) { if (state.tab === "trace") traceAnswer({ node: id }); else if (state.tab === "foramina") foramenAnswer(id); }
+const RENDER = { learn: () => renderLearn(true), compare: () => renderCompare(true), trace: () => startTrace(), lesion: () => { fitTo(groupPoints()); renderLesion(); }, retina: renderRetina,
+  foramina: () => { fitTo(T.FORAMINA.flatMap(([id]) => [[T.NODES[id + "_L"].x, T.NODES[id + "_L"].y], [T.NODES[id + "_R"].x, T.NODES[id + "_R"].y]])); renderForamina(); } };
+function setTab(t) {
+  if ((t === "retina" && !T.GROUPS[state.group].layers) || (t === "foramina" && state.group !== "cn")) t = "learn";
+  state.tab = t; store.set("tab", t);
+  placeAllLabels();
+  document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
+  gNodes.style.display = t === "lesion" ? "none" : "";
+  insetAsk = null;
+  RENDER[t]();
+}
+function setGroup(g) {
+  state.group = g; store.set("group", g);
+  placeAllLabels();
+  const lt = document.querySelector('#tabs [data-tab="retina"]'), Y = T.GROUPS[g].layers;
+  lt.hidden = !Y; if (Y) lt.textContent = Y.tab;
+  document.querySelector('#tabs [data-tab="foramina"]').hidden = g !== "cn";
+  learn.fitted = false;
+  setTab(state.tab);
+}
+const groupSel = document.getElementById("groupSel");
+groupSel.innerHTML = Object.entries(T.GROUPS).map(([id, g]) => `<option value="${id}">${g.name} (${g.pathways.length})</option>`).join("");
+groupSel.value = state.group;
+groupSel.onchange = (e) => setGroup(e.target.value);
+document.querySelectorAll("#tabs button").forEach((b) => b.onclick = () => setTab(b.dataset.tab));
+document.getElementById("themeBtn").onclick = () => {
+  const root = document.documentElement, dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = root.dataset.theme || (dark ? "dark" : "light");
+  root.dataset.theme = cur === "dark" ? "light" : "dark"; store.set("theme", root.dataset.theme);
+};
+const savedTheme = store.get("theme", null); if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+
+applyFont(); applyVB(); drawAnatomy(); drawNodes();
+state.tab = store.get("tab", "learn");
+setGroup(state.group);
+</script>
+</body>
+</html>

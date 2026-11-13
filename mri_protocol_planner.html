@@ -167,7 +167,7 @@ ul.gate li b{color:var(--p);}
 
 <div class="grid2" style="margin-top:8px">
   <div class="card">
-    <div class="cardtitle">Positioning Aids &amp; Monitoring <span class="r"><span class="kit">3D kit</span> = printed MRI kit &middot; foam, noodles, rice bags</span></div>
+    <div class="cardtitle">Positioning Aids &amp; Monitoring <span class="r"><span class="kit">3D kit</span> = printed MRI kit &middot; foam wedges, noodles</span></div>
     <ul class="li" id="aids"></ul>
   </div>
   <div class="card">
@@ -378,7 +378,7 @@ function renderPos(o,r,w,cat,skull){
   else if(limb) pos.push('<b>Lateral, affected limb down</b>; joint in a neutral position (stifle: tibia 90° to femur), centred side-to-side in the coil.');
   else if(supine) pos.push('<b>Supine / dorsal recumbency</b>; whole body straight.');
   else if(r!=='abdomen') pos.push('Supine on the spine coil; region of interest over the coil elements.');
-  if(r==='brain'||r==='brainc') pos.push('<b>Level the head</b>: both eyes, both zygomatic arches and both lip commissures at the same height (fingertips or the level gauge on the zygomatic arches, legs ~6–10 cm apart); laser long line nose bridge → occipital protuberance → neck. Low side: lift it with a folded towel, rice bag or noodle wedge — never tilt the coil.');
+  if(r==='brain'||r==='brainc') pos.push('<b>Level the head</b>: both eyes, both zygomatic arches and both lip commissures at the same height (fingertips or the level gauge on the zygomatic arches, legs ~6–10 cm apart); laser long line nose bridge → occipital protuberance → neck. Low side: lift it with a folded towel or noodle wedge — never tilt the coil.');
   if(r==='brain'||r==='brainc') pos.push('Brain centred in the coil; head straight (not rotated). <b>Tumour / possible radiation therapy</b>: line the patient up physically with the lasers so slices are true transverse and sagittal.');
   if(r==='csp'||r==='brainc') pos.push('Entrance of the ear canal at the <b>5 cm mark</b> (start of spine element 1) ≈ cerebellum.');
   if(r==='tl') pos.push('<b>Last set of nipples / cranial pubis</b> at the 5 cm mark (start of element 1) ≈ caudal sacrum. Pelvis wanted too: slide the patient forward so the tail base / anus is at the 5 cm mark.');
@@ -411,14 +411,13 @@ function renderPos(o,r,w,cat,skull){
   if(supine&&r!=='brain'||r==='abdomen'){
     var deep=gel('deep').checked, sb;
     if(cat||w<5) sb='One standard noodle each side (or a half noodle cut lengthways, flat side down); short noodle piece each side of the hips.';
-    else if(w<=15) sb='Standard noodle each side, strapped to the mat; a 15–30° foam wedge behind it if the chest rolls; noodle or rice bag each side of the hips.';
-    else sb='Jumbo noodle or foam wedge each side of the chest; wedge or rice bag pressed in against each thigh.';
+    else if(w<=15) sb='Standard noodle each side, strapped to the mat; a 15–30° foam wedge behind it if the chest rolls; noodle or foam wedge each side of the hips.';
+    else sb='Jumbo noodle or foam wedge each side of the chest; foam wedge pressed in against each thigh.';
     aids.push('<b>Back-lying V</b> (foam wedges + pool noodles on a floor mat; printed troughs retired): '+sb+(deep?' <b>Deep-chested: wedge AND noodle each side, snug.</b>':'')+' Thin foam only under the spine (keeps it close to the spine coil).');
     if(r==='csp'||r==='brainc'||r==='bp') aids.push('<b>Neck roll</b>: noodle section (half noodle for cats) under the neck so the canal runs flat; never force flexion.');
     aids.push(kit('Hip level gauge')+': legs slid to the hip width and set to the same number, feet on the tuber coxae, then the greater tubercles.');
   }
-  if(lateral||r==='pelvis'||r==='hip'||r==='longbone') aids.push('Foam wedges / sandbags / rice bags'+(lateral?' to hold the lateral position':'')+'.');
-  aids.push('Rice-bag warmers (40–42 °C) <b>beside</b> the patient, never underneath.');
+  if(lateral||r==='pelvis'||r==='hip'||r==='longbone') aids.push('Foam wedges / sandbags'+(lateral?' to hold the lateral position':'')+'.');
   if(lateral) aids.push('Straps for both forelimbs; foam under the neck so the spine stays level.');
   if(limb) aids.push('Sandbag over the hock (stifle) or on the limb to stop small vibrations; foam blocks and Velcro straps inside the flex coil.');
   if(r==='abdomen') aids.push('Ventilator set up for breath holds; a second person in the scan room.');
